@@ -8,14 +8,14 @@
 #ifndef UTILSCONEXIONES_H_
 #define UTILSCONEXIONES_H_
 
-#include <stdio.h>
-#include <stdlib.h>
 #include<signal.h>
 #include<unistd.h>
 #include<sys/socket.h>
 #include<netdb.h>
 #include<string.h>
 #include<commons/log.h>
+
+
 
 typedef enum
 {
@@ -35,7 +35,7 @@ typedef struct
 	t_buffer* buffer;
 } t_paquete;
 
-int crear_conexion(char *ip, char* puerto);
+int crear_conexion(char* ip, char* puerto);
 void enviar_mensaje(char* mensaje, int socket_cliente);
 void* serializar_paquete(t_paquete* paquete, int bytes);
 void eliminar_paquete(t_paquete* paquete);

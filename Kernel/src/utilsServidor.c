@@ -1,5 +1,8 @@
 #include "utilsServidor.h"
 
+ t_log* loggerServidor;
+
+
 int iniciar_servidor(void)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
@@ -32,8 +35,9 @@ int iniciar_servidor(void)
 	listen(socket_servidor, SOMAXCONN);
 
 	freeaddrinfo(servinfo);
-	//log_trace(logger, "Listo para escuchar a mi cliente");
-	printf("Listo para escuchar un cliente");
+	log_trace(loggerServidor, "Listo para escuchar a mi cliente");
+
+	//printf("Listo para escuchar un cliente");
 
 	return socket_servidor;
 }
@@ -71,8 +75,8 @@ void recibir_mensaje(int socket_cliente)
 {
 	int size;
 	char* buffer = recibir_buffer(&size, socket_cliente);
-	//log_info(logger, "Me llego el mensaje : %s", buffer);
-	printf("Me llego el mensaje: %s", buffer);
+	log_info(loggerServidor, "Me llego el mensaje : %s", buffer);
+	//printf("Me llego el mensaje: %s", buffer);
 	free(buffer);
 }
 void* recibir_buffer(int* size, int socket_cliente)

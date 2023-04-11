@@ -11,16 +11,32 @@
 #include "Consola.h"
 
 int main(void) {
-	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
 
-	char* ip, puerto;
+	printf ("Hola soy consola y quiero conectarme con kernel \n ");
 
-	ip = "127.0.0.1";
-	puerto = "8000";
+	t_log* loggerConsola = log_create("./consola.log","Consola", 1, LOG_LEVEL_INFO);
+
+
+	char* ip = "127.0.0.1";
+
+	char* puerto = "8000";
 
 	int conexion = crear_conexion(ip, puerto);
+
+	if(conexion == -1){
+		log_warning(loggerConsola,"Error no se pudo establecer una conexion");
+	}
+	else {
+		log_info(loggerConsola, "Conexion exitosa ");
+	}
+
 	enviar_mensaje("hola kernel", conexion);
+
+    log_destroy(loggerConsola);
+
 	liberar_conexion(conexion);
+
+
 
 
 	return EXIT_SUCCESS;

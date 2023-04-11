@@ -14,7 +14,10 @@
 
 
 int main(void) {
+	loggerServidor = log_create("servidor.log", "Servidor", 1, LOG_LEVEL_DEBUG);
 	int server_fd = iniciar_servidor();
+	log_info(loggerServidor, "Servidor listo para recibir al cliente");
+
 	int cliente_fd = esperar_cliente(server_fd);
 	t_list* lista;
 		while (1) {

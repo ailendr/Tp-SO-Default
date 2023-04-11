@@ -11,13 +11,16 @@
 #include<commons/log.h>
 #include<commons/collections/list.h>
 
-#define PUERTO 8000
+
 
 typedef enum
 {
 	MENSAJE,
 	PAQUETE
 }op_code;
+
+extern t_log* loggerServidor;
+
 
 int iniciar_servidor(void);
 int esperar_cliente(int socket_servidor);
