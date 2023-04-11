@@ -19,6 +19,9 @@ int main(void) {
 	puerto = "8000";
 
 	int conexion = crear_conexion(ip, puerto);
+	enviar_mensaje("hola kernel", conexion);
+	liberar_conexion(conexion);
+
 
 	return EXIT_SUCCESS;
 }
