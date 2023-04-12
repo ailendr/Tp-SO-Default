@@ -1,6 +1,8 @@
 #include "utilsServidor.h"
 
- t_log* loggerServidor;
+ /*
+
+  t_log* loggerServidor;
 
 
 int iniciar_servidor(void)
@@ -27,8 +29,9 @@ int iniciar_servidor(void)
 			                 servinfo->ai_socktype,
 							 servinfo->ai_protocol);
 
-	// Asociamos el socket a un puerto
-	/* USAMOS BIND QUE ES EL PEGAMENTO A UN PUERTO*/
+	// Asociamos el socket a un puerto//
+	// USAMOS BIND QUE ES EL PEGAMENTO A UN PUERTO
+
 	bind(socket_servidor, servinfo-> ai_addr, servinfo->ai_addrlen);
 
 	// Escuchamos las conexiones entrantes
@@ -49,7 +52,7 @@ int esperar_cliente(int socket_servidor)
 	//assert(!"no implementado!");
 
 	// Aceptamos un nuevo cliente
-	/*Accept retorna un nuevo socket, q ya sabemos q es un entero porq es un FileDescriptor*/
+	//*Accept retorna un nuevo socket, q ya sabemos q es un entero porq es un FileDescriptor
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
 
 	//log_info(logger, "Se conecto un cliente!");
@@ -89,3 +92,6 @@ void* recibir_buffer(int* size, int socket_cliente)
 
 	return buffer;
 }
+*/
+
+
