@@ -17,6 +17,8 @@
 
 extern t_log* loggerServidor;
 
+int recibir_operacion(int socket_cliente);
+
 typedef enum
 {
 	MENSAJE,
@@ -27,9 +29,13 @@ typedef enum
 
 int iniciar_servidor(void);
 int esperar_cliente(int socket_servidor);
-int recibir_operacion(int socket_cliente);
+
 
 void recibir_mensaje(int socket_cliente);
 void* recibir_buffer(int* size, int socket_cliente);
+
+
+
+
 
 #endif /* SRC_SOCKETS_H_ */

@@ -10,7 +10,7 @@
 
 #include "Consola.h"
 //#include "../../shared/src/sockets.h" -> Esta forma es por si no toma el sockets.h
-#include <sockets.h>
+
 
 int main(void) {
 
