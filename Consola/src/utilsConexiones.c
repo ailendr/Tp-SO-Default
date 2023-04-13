@@ -7,7 +7,8 @@
 
 #include "utilsConexiones.h"
 
-int crear_conexion(char *ip, char* puerto)
+/*
+int crearConexionConect(char *ip, char* puerto)
 {
 	struct addrinfo hints;
 	struct addrinfo *server_info;
@@ -31,6 +32,7 @@ int crear_conexion(char *ip, char* puerto)
 
 	return socket_cliente;
 }
+
 
 void enviar_mensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en un paquee
 {
@@ -80,3 +82,4 @@ void liberar_conexion(int socket_cliente)
 	close(socket_cliente);
 
 }
+*/

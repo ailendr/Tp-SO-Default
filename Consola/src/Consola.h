@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "utilsConexiones.h"
+//#include "utilsConexiones.h"
+#include <sockets.h>
 
 #endif /* CONSOLA_H_ */

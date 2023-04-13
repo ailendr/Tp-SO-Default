@@ -11,7 +11,6 @@
 #include "Consola.h"
 //#include "../../shared/src/sockets.h" -> Esta forma es por si no toma el sockets.h
 
-
 int main(void) {
 
 	printf ("Hola soy consola y quiero conectarme con kernel \n ");
@@ -23,7 +22,7 @@ int main(void) {
 
 	char* puerto = "8000";
 
-	int conexion = crear_conexion(ip, puerto);
+	int conexion = iniciarCliente(ip, puerto);
 
 	if(conexion == -1){
 		log_warning(loggerConsola,"Error no se pudo establecer una conexion");
@@ -37,9 +36,6 @@ int main(void) {
     log_destroy(loggerConsola);
 
 	liberar_conexion(conexion);
-
-
-
 
 	return EXIT_SUCCESS;
 }
