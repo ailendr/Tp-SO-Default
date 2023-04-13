@@ -14,10 +14,12 @@
 #include<sys/socket.h>
 #include<netdb.h>
 #include<commons/log.h>
+#include <commons/collections/list.h>
 
 extern t_log* loggerServidor;
 
 int recibir_operacion(int socket_cliente);
+t_list* recibir_paquete(int socket_cliente);
 
 typedef enum
 {

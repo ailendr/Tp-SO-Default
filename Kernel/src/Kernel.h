@@ -4,4 +4,5 @@
 
 #include "utilsServidor.h"
 
+void iterator(char* value);
 #endif /* CONSOLA_H_ */

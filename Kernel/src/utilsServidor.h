@@ -13,6 +13,7 @@
 #include "sockets.h"
 
 
+void iterator(char* value);
 /*
 typedef enum
 {
