@@ -13,3 +13,13 @@
 [INFO] 01:53:05:389 Servidor/(115215:115215): Me llego el mensaje : hola kernel
 [INFO] 05:45:20:124 Servidor/(118825:118825): Servidor listo para recibir al cliente
 [INFO] 05:45:28:748 Servidor/(118825:118825): Me llego el mensaje : hola kernel
+[INFO] 13:40:15:513 Servidor/(2658:2658): Servidor listo para recibir al cliente
+[INFO] 13:44:03:049 Servidor/(2658:2658): Me llego el mensaje : hola kernel
+[INFO] 14:55:53:725 Servidor/(3921:3921): Servidor listo para recibir al cliente
+[INFO] 15:12:08:754 Servidor/(4260:4260): Servidor listo para recibir al cliente
+[ERROR] 15:12:24:429 Servidor/(4260:4260): el cliente se desconecto. Terminando servidor
+[INFO] 15:18:25:842 Servidor/(4440:4440): Servidor listo para recibir al cliente
+[INFO] 15:20:41:803 Servidor/(4491:4491): Servidor listo para recibir al cliente
+[INFO] 15:21:49:296 Servidor/(4552:4552): Servidor listo para recibir al cliente
+[INFO] 15:23:11:848 Servidor/(4591:4591): Servidor listo para recibir al cliente
+[ERROR] 15:23:30:614 Servidor/(4591:4591): el cliente se desconecto. Terminando servidor

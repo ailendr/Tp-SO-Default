@@ -12,5 +12,6 @@
 #include <stdlib.h>
 //#include "utilsConexiones.h"
 #include <sockets.h>
+#include "modulo.h"
 
 #endif /* CONSOLA_H_ */

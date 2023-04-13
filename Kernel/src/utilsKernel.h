@@ -8,7 +8,8 @@
 #ifndef UTILSKERNEL_H_
 #define UTILSKERNEL_H_
 
-#include "sockets.h"
+//#include "sockets.h"
+#include<commons/log.h>
 
 /*
  #ifndef t_log* loggerKernel;

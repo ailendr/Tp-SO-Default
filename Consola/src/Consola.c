@@ -31,11 +31,13 @@ int main(void) {
 		log_info(loggerConsola, "Conexion exitosa ");
 	}
 
-	enviar_mensaje("hola kernel", conexion);
+	enviar_mensaje("Hola kernel", conexion);
 
+	//estas funciones van hasta implementar terminarModulo
     log_destroy(loggerConsola);
 
-	liberar_conexion(conexion);
+	close (conexion);
+	//terminarModulo(conexion,loggerConsola, unconfig);
 
 	return EXIT_SUCCESS;
 }
