@@ -10,8 +10,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "FSConfig.h"
 
 int main(void) {
-	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
-	return EXIT_SUCCESS;
+	configFS = config_create("../FileSystem/filesystem.config");
 }

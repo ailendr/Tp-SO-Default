@@ -10,8 +10,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "memoriaConfig.h"
 
 int main(void) {
-	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
-	return EXIT_SUCCESS;
+	configMemoria = config_create("../Memoria/memoria.config");
 }

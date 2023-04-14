@@ -10,8 +10,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "cpuConfig.h"
 
 int main(void) {
-	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
-	return EXIT_SUCCESS;
+
+	configCPU = config_create("../CPU/cpu.config");
 }
