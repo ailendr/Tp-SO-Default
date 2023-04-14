@@ -23,3 +23,5 @@
 [INFO] 15:21:49:296 Servidor/(4552:4552): Servidor listo para recibir al cliente
 [INFO] 15:23:11:848 Servidor/(4591:4591): Servidor listo para recibir al cliente
 [ERROR] 15:23:30:614 Servidor/(4591:4591): el cliente se desconecto. Terminando servidor
+[INFO] 04:01:55:817 Servidor/(120975:120975): Servidor listo para recibir al cliente
+[ERROR] 04:02:04:336 Servidor/(120975:120975): el cliente se desconecto. Terminando servidor
