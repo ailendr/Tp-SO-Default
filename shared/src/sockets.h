@@ -40,7 +40,7 @@ int iniciarServidor(void);
 int iniciarCliente(char *ip, char* puerto);
 
 int esperar_cliente(int socket_servidor);
-void recibir_mensaje(int socket_cliente);
+char* recibir_mensaje(int socket_cliente);
 void* recibir_buffer(int* size, int socket_cliente);
 int recibir_operacion(int socket_cliente);
 t_list* recibir_paquete(int socket_cliente);

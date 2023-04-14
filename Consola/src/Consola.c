@@ -17,6 +17,9 @@ int main(void) {
 
 	t_log* loggerConsola = log_create("./consola.log","Consola", 1, LOG_LEVEL_INFO);
 
+	log_info(loggerConsola, "---------------------------------------------------------------------------");
+	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
+	log_info(loggerConsola, "Iniciando Consola...");
 
 	char* ip = "127.0.0.1";
 
@@ -26,18 +29,37 @@ int main(void) {
 
 	if(conexion == -1){
 		log_warning(loggerConsola,"Error no se pudo establecer una conexion");
+		//Esto hay que verificarlo, porque si el kernel no esta prendido o funcionando
+		//igual va por el camino del exito, lo cual es rarisimo
+		//lo consultaria con el profe
+		//TODO
+
+		//En kernel deje como podria tambien ser esta parte
 	}
 	else {
-		log_info(loggerConsola, "Conexion exitosa ");
+		log_info(loggerConsola, "Conexion exitosa");
+		log_info(loggerConsola, "Enviando mensaje");
+		enviar_mensaje("Hola kernel", conexion);
+		//Lo movi aca porque esto solo pasa si la conexion esta bien
+		//Si lo de arriba no funciona, directamente cierra y termina
 	}
 
-	enviar_mensaje("Hola kernel", conexion);
-
 	//estas funciones van hasta implementar terminarModulo
-    log_destroy(loggerConsola);
+	log_info(loggerConsola, "Finalizando Consola...\n");
 
-	close (conexion);
-	//terminarModulo(conexion,loggerConsola, unconfig);
+	terminarModulo(conexion,loggerConsola/*, unconfig*/);
+
+	printf ("Finalizo Consola correctamente\n ");
 
 	return EXIT_SUCCESS;
 }
+
+/*
+NOTAS:
+(Dany)
+-> Verificar la validacion de la conexion
+-> El enviar mensaje lo puse adentro del if para que solo se mande si es exitoso
+-> Agregue un par de logs info para ver bien si va todo bien en la terminal
+-> Agregue utilsConsola
+-> Comente lo de configs asi probamos de paso la nueva funcion, no olvidemos de comentar
+*/

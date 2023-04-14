@@ -25,3 +25,23 @@
 [ERROR] 15:23:30:614 Servidor/(4591:4591): el cliente se desconecto. Terminando servidor
 [INFO] 04:01:55:817 Servidor/(120975:120975): Servidor listo para recibir al cliente
 [ERROR] 04:02:04:336 Servidor/(120975:120975): el cliente se desconecto. Terminando servidor
+[INFO] 05:00:51:968 Servidor/(122499:122499): Servidor listo para recibir al cliente
+[ERROR] 05:01:10:649 Servidor/(122499:122499): el cliente se desconecto. Terminando servidor
+[INFO] 05:54:07:940 Servidor/(124484:124484): ---------------------------------------------------------------------------
+[INFO] 05:54:07:940 Servidor/(124484:124484): Iniciando Kernel...
+[INFO] 05:54:07:941 Servidor/(124484:124484): Servidor listo para recibir al cliente
+[ERROR] 05:54:23:876 Servidor/(124484:124484): el cliente se desconecto. Terminando servidor
+[INFO] 05:59:24:101 Servidor/(124965:124965): ---------------------------------------------------------------------------
+[INFO] 05:59:24:105 Servidor/(124965:124965): Iniciando Kernel...
+[INFO] 05:59:24:105 Servidor/(124965:124965): Servidor listo para recibir al cliente
+[INFO] 05:59:29:916 Servidor/(124965:124965): Se conecto un cliente
+[INFO] 05:59:29:917 Servidor/(124965:124965): 
+Me llego el mensaje: Hola kernel
+[ERROR] 05:59:29:917 Servidor/(124965:124965): el cliente se desconecto. Terminando servidor
+[INFO] 06:03:29:250 Servidor/(125126:125126): ---------------------------------------------------------------------------
+[INFO] 06:03:29:257 Servidor/(125126:125126): Iniciando Kernel...
+[INFO] 06:03:29:259 Servidor/(125126:125126): Servidor listo para recibir al cliente
+[INFO] 06:03:36:139 Servidor/(125126:125126): Se conecto un cliente
+[INFO] 06:03:36:140 Servidor/(125126:125126): 
+Me llego el mensaje: Hola kernel
+[ERROR] 06:03:36:142 Servidor/(125126:125126): el cliente se desconecto. Terminando servidor

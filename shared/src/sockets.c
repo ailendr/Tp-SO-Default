@@ -130,7 +130,7 @@ int esperar_cliente(int socket_servidor)
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
 
 	//log_info(logger, "Se conecto un cliente!");
-	printf("\n Se conecto un cliente");
+	printf("\nSe conecto un cliente");
 
 	return socket_cliente;
 }
@@ -147,13 +147,12 @@ int recibir_operacion(int socket_cliente)
 	}
 }
 
-void recibir_mensaje(int socket_cliente)
+char* recibir_mensaje(int socket_cliente)
 {
 	int size;
 	char* buffer = recibir_buffer(&size, socket_cliente);
-	//log_info(loggerServidor, "Me llego el mensaje : %s", buffer);
-	printf("\n Me llego el mensaje: %s", buffer);
-
+	//printf("\n Me llego el mensaje: %s", buffer);
+	return buffer;
 }
 
 void* recibir_buffer(int* size, int socket_cliente)
