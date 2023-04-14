@@ -1,0 +1,7 @@
+[INFO] 16:49:56:497 Kernel/(131803:131803): ---------------------------------------------------------------------------
+[INFO] 16:49:56:499 Kernel/(131803:131803): Iniciando Kernel...
+[INFO] 16:49:56:500 Kernel/(131803:131803): Servidor listo para recibir al cliente
+[INFO] 16:50:05:843 Kernel/(131803:131803): Se conecto un cliente
+[INFO] 16:50:05:844 Kernel/(131803:131803): 
+Me llego el mensaje: Hola kernel
+[ERROR] 16:50:05:844 Kernel/(131803:131803): el cliente se desconecto. Terminando servidor

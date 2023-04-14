@@ -45,3 +45,12 @@ Me llego el mensaje: Hola kernel
 [INFO] 06:03:36:140 Servidor/(125126:125126): 
 Me llego el mensaje: Hola kernel
 [ERROR] 06:03:36:142 Servidor/(125126:125126): el cliente se desconecto. Terminando servidor
+[INFO] 16:32:27:975 Servidor/(130885:130885): ---------------------------------------------------------------------------
+[INFO] 16:32:27:977 Servidor/(130885:130885): Iniciando Kernel...
+[INFO] 16:33:56:612 Servidor/(130944:130944): ---------------------------------------------------------------------------
+[INFO] 16:33:56:618 Servidor/(130944:130944): Iniciando Kernel...
+[INFO] 16:33:56:618 Servidor/(130944:130944): Servidor listo para recibir al cliente
+[INFO] 16:34:06:642 Servidor/(130944:130944): Se conecto un cliente
+[INFO] 16:34:06:643 Servidor/(130944:130944): 
+Me llego el mensaje: Hola kernel
+[ERROR] 16:34:06:643 Servidor/(130944:130944): el cliente se desconecto. Terminando servidor

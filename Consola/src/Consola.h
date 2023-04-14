@@ -14,6 +14,7 @@
 #include <sockets.h>
 #include "modulo.h"
 
+t_log* loggerConsola;
 t_config* configConsola;
 
 char* IpKernel();

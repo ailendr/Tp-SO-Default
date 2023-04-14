@@ -36,7 +36,7 @@ typedef struct
 	t_buffer* buffer;
 } t_paquete;
 
-int iniciarServidor(void);
+int iniciarServidor(char*  ip, char* puerto);
 int iniciarCliente(char *ip, char* puerto);
 
 int esperar_cliente(int socket_servidor);

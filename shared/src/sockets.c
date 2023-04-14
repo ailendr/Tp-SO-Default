@@ -82,17 +82,14 @@ void eliminar_paquete(t_paquete* paquete)
 
 ////------FUNCIONES DEL SERVIDOR-----////
 
-int iniciarServidor(void)
+int iniciarServidor(char*  ip, char* puerto)
 {
 	// Quitar esta línea cuando hayamos terminado de implementar la funcion
 	//assert(!"no implementado!");
 
 	int socket_servidor;
-	char*  ip= "127.0.0.1";
-	char* puerto="8000";
 
-
-	struct addrinfo hints, *servinfo, *p;
+	struct addrinfo hints, *servinfo;
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;

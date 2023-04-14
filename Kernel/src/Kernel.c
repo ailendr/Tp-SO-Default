@@ -12,19 +12,32 @@
 #include <stdlib.h>
 #include "Kernel.h"
 
-t_log* loggerKernel;
-
 int main(void) {
 
 	printf ("Hola soy kernel y estoy queriendo recibir mensajes\n ");
 
-	loggerKernel = log_create("servidor.log", "Servidor", 1, LOG_LEVEL_DEBUG);
+	loggerKernel = log_create("kernel.log", "Kernel", 1, LOG_LEVEL_DEBUG);
 
 	log_info(loggerKernel, "---------------------------------------------------------------------------");
 	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
 	log_info(loggerKernel, "Iniciando Kernel...");
 
-	int server_fd = iniciarServidor();
+	configKernel = config_create("../Kernel/kernel.config");
+
+	if (configKernel == NULL){
+		log_error(loggerKernel,"Error al recuperar el config");
+		log_destroy(loggerKernel);
+		config_destroy(configKernel);
+		return EXIT_FAILURE;
+	}
+
+	char* ip = Ip();
+	char* puerto = Puerto();
+
+	printf ("\nEl valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+
+
+	int server_fd = iniciarServidor(ip, puerto);
 
 	if(server_fd == -1){
 		log_error(loggerKernel,"Error al iniciar el servidor");
@@ -91,6 +104,56 @@ int main(void) {
 
 void iterator(char* value) {
 	log_info(loggerKernel,"%s", value);
+}
+
+char* IpMemoria(){
+	return config_get_string_value(configKernel, "IP_MEMORIA");
+}
+char* IpFile(){
+	return config_get_string_value(configKernel, "IP_FILESYSTEM");
+}
+char* IpCPU(){
+	return config_get_string_value(configKernel, "IP_CPU");
+}
+char* Ip(){
+	return config_get_string_value(configKernel, "IP_ESCUCHA");
+}
+
+char* PuertoMemoria(){
+	return config_get_string_value(configKernel, "PUERTO_MEMORIA");
+}
+char* PuertoFileSystem(){
+	return config_get_string_value(configKernel, "PUERTO_FILESYSTEM");
+}
+char* PuertoCPU(){
+	return config_get_string_value(configKernel, "PUERTO_CPU");
+}
+char* Puerto(){
+	return config_get_string_value(configKernel, "PUERTO_ESCUCHA");
+}
+
+char* Algoritmo(){
+	return config_get_string_value(configKernel, "ALGORITMO_PLANIFICACION");
+}
+
+int Estimacion(){
+	return config_get_int_value(configKernel, "ESTIMACION_INICIAL");
+}
+
+int Alfa(){
+	return config_get_double_value(configKernel, "HRRN_ALFA");
+}
+
+int Multiprogramacion(){
+	return config_get_int_value(configKernel, "GRADO_MAX_MULTIPROGRAMACION");
+}
+
+char** Recursos(){
+	return config_get_array_value(configKernel,"RECURSOS");
+}
+
+char** Instancias(){
+	return config_get_array_value(configKernel,"INSTANCIAS_RECURSOS");
 }
 
 /*

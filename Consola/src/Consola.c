@@ -15,7 +15,7 @@ int main(void) {
 
 	printf ("Hola soy consola y quiero conectarme con kernel \n ");
 
-	t_log* loggerConsola = log_create("./consola.log","Consola", 1, LOG_LEVEL_INFO);
+	loggerConsola = log_create("./consola.log","Consola", 1, LOG_LEVEL_INFO);
 
 	log_info(loggerConsola, "---------------------------------------------------------------------------");
 	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
