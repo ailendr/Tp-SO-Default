@@ -10,8 +10,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "utilsConsola.h"
+//#include "utilsConsola.h"
 #include <sockets.h>
 #include "modulo.h"
+
+t_config* configConsola;
+
+char* IpKernel();
+char* PuertoKernel();
 
 #endif /* CONSOLA_H_ */

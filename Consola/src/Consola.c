@@ -21,9 +21,19 @@ int main(void) {
 	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
 	log_info(loggerConsola, "Iniciando Consola...");
 
-	char* ip = "127.0.0.1";
+	configConsola = config_create("../Consola/consola.config");
 
-	char* puerto = "8000";
+	if (configConsola == NULL){
+		log_error(loggerConsola,"Error al recuperar el config");
+		log_destroy(loggerConsola);
+		config_destroy(configConsola);
+		return EXIT_FAILURE;
+	}
+
+	char* ip = IpKernel();
+	char* puerto = PuertoKernel();
+
+	printf ("\nEl valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
 	int conexion = iniciarCliente(ip, puerto);
 
@@ -48,10 +58,20 @@ int main(void) {
 	log_info(loggerConsola, "Finalizando Consola...\n");
 
 	terminarModulo(conexion,loggerConsola/*, unconfig*/);
+	config_destroy(configConsola);
+	//Lo deje aca xq Kernel aun no lo tiene
 
 	printf ("Finalizo Consola correctamente\n ");
 
 	return EXIT_SUCCESS;
+}
+
+char* IpKernel(){
+	return config_get_string_value(configConsola, "IP_KERNEL");
+}
+
+char* PuertoKernel(){
+	return config_get_string_value(configConsola, "PUERTO_KERNEL");
 }
 
 /*
