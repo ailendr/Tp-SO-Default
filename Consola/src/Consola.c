@@ -39,7 +39,7 @@ int main(void) {
 	conexion = iniciarCliente(ip, puerto);
 
 	if(conexion == -1){
-		log_warning(loggerConsola,"Error no se pudo establecer una conexion");
+		log_error(loggerConsola,"Error no se pudo establecer una conexion");
 		terminarModulo(conexion,loggerConsola, configConsola);
 		return EXIT_FAILURE;
 	}

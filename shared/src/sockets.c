@@ -30,12 +30,13 @@ int iniciarCliente(char *ip, char* puerto)
 			                     server_info->ai_socktype,
 								 server_info->ai_protocol);
 
+
 	// Ahora que tenemos el socket, vamos a conectarlo
-    connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
+    int conexion = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
 
-	freeaddrinfo(server_info);
+    freeaddrinfo(server_info);
 
-	return socket_cliente;
+	return ((conexion == -1) ? -1 : socket_cliente);
 }
 void enviar_mensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en un paquee
 {
