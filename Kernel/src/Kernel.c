@@ -41,7 +41,7 @@ int main(void) {
 
 	if(server_fd == -1){
 		log_error(loggerKernel,"Error al iniciar el servidor");
-		terminarModulo(server_fd,loggerKernel/*, config*/);
+		terminarModulo(server_fd,loggerKernel, configKernel);
 		return EXIT_FAILURE;
 		//Aca dejo tambien como podria ser el de consola
 		//El return lo obliga a terminar
@@ -53,7 +53,7 @@ int main(void) {
 
 	if(cliente_fd == -1){
 		log_error(loggerKernel,"Error al conectar con el cliente");
-		terminarModulo(server_fd,loggerKernel/*, config*/);
+		terminarModulo(server_fd,loggerKernel, configKernel);
 		return EXIT_FAILURE;
 	}
 
@@ -89,7 +89,7 @@ int main(void) {
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
 
-	terminarModulo(cliente_fd,loggerKernel/*, config*/);
+	terminarModulo(cliente_fd,loggerKernel, configKernel);
 
 	printf ("Finalizo Kernel correctamente\n ");
 
@@ -100,55 +100,6 @@ void iterator(char* value) {
 	log_info(loggerKernel,"%s", value);
 }
 
-char* IpMemoria(){
-	return config_get_string_value(configKernel, "IP_MEMORIA");
-}
-char* IpFile(){
-	return config_get_string_value(configKernel, "IP_FILESYSTEM");
-}
-char* IpCPU(){
-	return config_get_string_value(configKernel, "IP_CPU");
-}
-char* Ip(){
-	return config_get_string_value(configKernel, "IP_ESCUCHA");
-}
-
-char* PuertoMemoria(){
-	return config_get_string_value(configKernel, "PUERTO_MEMORIA");
-}
-char* PuertoFileSystem(){
-	return config_get_string_value(configKernel, "PUERTO_FILESYSTEM");
-}
-char* PuertoCPU(){
-	return config_get_string_value(configKernel, "PUERTO_CPU");
-}
-char* Puerto(){
-	return config_get_string_value(configKernel, "PUERTO_ESCUCHA");
-}
-
-char* Algoritmo(){
-	return config_get_string_value(configKernel, "ALGORITMO_PLANIFICACION");
-}
-
-int Estimacion(){
-	return config_get_int_value(configKernel, "ESTIMACION_INICIAL");
-}
-
-int Alfa(){
-	return config_get_double_value(configKernel, "HRRN_ALFA");
-}
-
-int Multiprogramacion(){
-	return config_get_int_value(configKernel, "GRADO_MAX_MULTIPROGRAMACION");
-}
-
-char** Recursos(){
-	return config_get_array_value(configKernel,"RECURSOS");
-}
-
-char** Instancias(){
-	return config_get_array_value(configKernel,"INSTANCIAS_RECURSOS");
-}
 
 /*
 NOTAS:

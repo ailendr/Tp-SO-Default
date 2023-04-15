@@ -5,7 +5,7 @@
 #include <commons/config.h>
 #include "sockets.h"
 
-void terminarModulo(int conexion,t_log* log /*, t_config* config*/);
+void terminarModulo(int conexion,t_log* log , t_config* config);
 
 
 #endif

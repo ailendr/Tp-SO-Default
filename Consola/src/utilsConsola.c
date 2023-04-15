@@ -6,7 +6,10 @@
  */
 
 #include "utilsConsola.h"
-/*
+
+t_log* loggerConsola;
+t_config* configConsola;
+
 char* IpKernel(){
 	return config_get_string_value(configConsola, "IP_KERNEL");
 }
@@ -14,4 +17,4 @@ char* IpKernel(){
 char* PuertoKernel(){
 	return config_get_string_value(configConsola, "PUERTO_KERNEL");
 }
-*/
+

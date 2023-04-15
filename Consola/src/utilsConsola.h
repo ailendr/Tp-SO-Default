@@ -9,10 +9,11 @@
 #define UTILSCONSOLA_H_
 
 #include "modulo.h"
-/*
-t_config* configConsola;
+
+extern t_config* configConsola;
+extern t_log* loggerConsola;
 
 char* IpKernel();
 char* PuertoKernel();
-*/
+
 #endif /* UTILSCONSOLA_H_ */
