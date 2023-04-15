@@ -77,14 +77,8 @@ int main(void) {
 					break;
 
 				case -1:
-					log_error(loggerKernel, "el cliente se desconecto. Terminando servidor");
-					//printf("el cliente se desconecto. Terminando servidor");
-					//Aca tengo una duda, porque que el cliente se desconecte lo tomamos como error?
-					//O sea si se que las commons dice que es un error porque se conecto
-					//Pero como podemos diferenciar las desconexiones por error que las desconexiones esperadas??
-					//Cuando terminamos toda la comunicacion con la consola, la consola finaliza, a esa me refiero
+					log_info(loggerKernel, "el cliente se desconecto.");
 
-					//Consultaria con el profe
 					return EXIT_FAILURE;
 
 				default:

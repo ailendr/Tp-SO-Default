@@ -10,9 +10,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "cpuConfig.h"
+#include "./cpuConfig.h"
 
 int main(void) {
 
 	configCPU = config_create("../CPU/cpu.config");
+
 }

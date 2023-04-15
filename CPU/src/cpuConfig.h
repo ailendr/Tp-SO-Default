@@ -7,12 +7,11 @@
 
 #ifndef CPUCONFIG_H_
 #define CPUCONFIG_H_
-
 #include <commons/log.h>
 #include <commons/config.h>
 
-t_log* loggerCPU;
-t_config* configCPU;
+extern t_log* loggerCPU;
+extern t_config* configCPU;
 
 char* IP_Memoria();
 int puertoMemoria();

@@ -7,6 +7,8 @@
 
 #include "cpuConfig.h"
 
+t_config* configCPU;
+
 char* IP_Memoria(){
 	return config_get_string_value(configCPU, "IP_MEMORIA");
 }
@@ -58,3 +60,5 @@ char** recursos(){
 char** instanciasRecursos(){
 	return config_get_array_value(configCPU, "INSTANCIAS_RECURSOS");
 }
+
+

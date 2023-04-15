@@ -5,3 +5,16 @@
 [INFO] 16:50:05:844 Kernel/(131803:131803): 
 Me llego el mensaje: Hola kernel
 [ERROR] 16:50:05:844 Kernel/(131803:131803): el cliente se desconecto. Terminando servidor
+[INFO] 01:50:07:379 Kernel/(4418:4418): ---------------------------------------------------------------------------
+[INFO] 01:50:07:386 Kernel/(4418:4418): Iniciando Kernel...
+[INFO] 01:50:07:387 Kernel/(4418:4418): Servidor listo para recibir al cliente
+[INFO] 01:54:31:044 Kernel/(4418:4418): Se conecto un cliente
+[INFO] 01:54:31:044 Kernel/(4418:4418): 
+Me llego el mensaje: Hola kernel
+[ERROR] 01:54:31:044 Kernel/(4418:4418): el cliente se desconecto. Terminando servidor
+[INFO] 14:52:20:233 Kernel/(2242:2242): ---------------------------------------------------------------------------
+[INFO] 14:52:20:239 Kernel/(2242:2242): Iniciando Kernel...
+[INFO] 14:52:20:240 Kernel/(2242:2242): Servidor listo para recibir al cliente
+[INFO] 14:54:56:488 Kernel/(2313:2313): ---------------------------------------------------------------------------
+[INFO] 14:54:56:493 Kernel/(2313:2313): Iniciando Kernel...
+[INFO] 14:54:56:493 Kernel/(2313:2313): Servidor listo para recibir al cliente
