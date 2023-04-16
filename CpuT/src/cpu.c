@@ -4,6 +4,6 @@
 
 int main(void) {
 
-	configCPU = config_create("../CPU/cpu.config");
+	configCPU = config_create("../CpuT/cpu.config");
 
 }

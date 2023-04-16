@@ -19,7 +19,7 @@ int main(void) {
 
 	int conexion = 0;
 
-	configConsola = config_create("../Consola/consola.config");
+	configConsola = config_create("../ConsolaT/consola.config");
 
 	if (configConsola == NULL){
 		log_error(loggerConsola,"Error al recuperar el config");

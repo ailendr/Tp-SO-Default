@@ -12,7 +12,7 @@ int main(void) {
 	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
 	log_info(loggerKernel, "Iniciando Kernel...");
 
-	configKernel = config_create("../Kernel/kernel.config");
+	configKernel = config_create("../KernelT/kernel.config");
 
 	if (configKernel == NULL){
 		log_error(loggerKernel,"Error al recuperar el config");
