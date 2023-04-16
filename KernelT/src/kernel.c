@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "kernel.h"
 
+
 int main(void) {
 
 	printf ("Hola soy kernel y estoy queriendo recibir mensajes\n ");
@@ -14,10 +15,11 @@ int main(void) {
 
 	configKernel = config_create("../KernelT/kernel.config");
 
+
 	if (configKernel == NULL){
 		log_error(loggerKernel,"Error al recuperar el config");
 		log_destroy(loggerKernel);
-		config_destroy(configKernel);
+		config_destroy(configKernel);/// se hace un destroy aunq te haya devuelto un null?
 		return EXIT_FAILURE;
 	}
 
