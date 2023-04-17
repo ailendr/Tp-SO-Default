@@ -10,11 +10,12 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include <utils/modulo.h>
 
 extern t_log* loggerMemoria;
 extern t_config* configMemoria;
 
-int puertoEscucha();
+char* puertoEscucha();
 int tam_memoria();
 int cantSegmentos();
 int retardoMemoria();

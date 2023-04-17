@@ -10,7 +10,7 @@ int main(void) {
 	loggerKernel = log_create("kernel.log", "Kernel", 1, LOG_LEVEL_DEBUG);
 
 	log_info(loggerKernel, "---------------------------------------------------------------------------");
-	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
+
 	log_info(loggerKernel, "Iniciando Kernel...");
 
 	configKernel = config_create("../KernelT/kernel.config");
@@ -19,7 +19,7 @@ int main(void) {
 	if (configKernel == NULL){
 		log_error(loggerKernel,"Error al recuperar el config");
 		log_destroy(loggerKernel);
-		config_destroy(configKernel);/// se hace un destroy aunq te haya devuelto un null?
+		config_destroy(configKernel);
 		return EXIT_FAILURE;
 	}
 
@@ -28,16 +28,17 @@ int main(void) {
 
 	printf ("\nEl valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-
 	int server_fd = iniciarServidor(ip, puerto);
 
+	if(verificarServidor (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+
+	/*
 	if(server_fd == -1){
 		log_error(loggerKernel,"Error al iniciar el servidor");
 		terminarModulo(server_fd,loggerKernel, configKernel);
 		return EXIT_FAILURE;
-		//Aca dejo tambien como podria ser el de consola
-		//El return lo obliga a terminar
 	}
+	*/
 
 	log_info(loggerKernel, "Servidor listo para recibir al cliente");
 

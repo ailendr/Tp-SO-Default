@@ -37,6 +37,7 @@ int iniciarCliente(char *ip, char* puerto)
 
 	return ((conexion == -1) ? -1 : socket_cliente);
 }
+
 void enviar_mensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en un paquee
 {
 	t_paquete* paquete = malloc(sizeof(t_paquete));
@@ -78,7 +79,6 @@ void eliminar_paquete(t_paquete* paquete)
 	free(paquete->buffer);
 	free(paquete);
 }
-
 
 ////------FUNCIONES DEL SERVIDOR-----////
 

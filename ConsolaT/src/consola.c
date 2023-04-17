@@ -34,11 +34,7 @@ int main(void) {
 
 	conexion = iniciarCliente(ip, puerto);
 
-	if(conexion == -1){
-		log_error(loggerConsola,"Error no se pudo establecer una conexion");
-		terminarModulo(conexion,loggerConsola, configConsola);
-		return EXIT_FAILURE;
-	}
+	if(verificarServidor (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerConsola, "Conexion exitosa");
 	log_info(loggerConsola, "Enviando mensaje");

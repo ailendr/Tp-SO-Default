@@ -3,8 +3,8 @@
 t_log* loggerMemoria;
 t_config* configMemoria;
 
-int puertoEscucha(){
-	return config_get_int_value(configMemoria, "PUERTO_ESCUCHA");
+char* puertoEscucha(){
+	return config_get_string_value(configMemoria, "PUERTO_ESCUCHA");
 }
 
 int tam_memoria(){
