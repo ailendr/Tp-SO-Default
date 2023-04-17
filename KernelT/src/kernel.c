@@ -30,7 +30,7 @@ int main(void) {
 
 	int server_fd = iniciarServidor(ip, puerto);
 
-	if(verificarServidor (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
 	/*
 	if(server_fd == -1){

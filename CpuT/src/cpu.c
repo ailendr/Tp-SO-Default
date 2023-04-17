@@ -4,8 +4,6 @@ int main(void) {
 
 	printf ("Hola soy cpu y estoy queriendo recibir mensajes\n ");
 
-
-
 	loggerKernel = log_create("cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
 
 	log_info(loggerKernel, "---------------------------------------------------------------------------");
@@ -29,11 +27,7 @@ int main(void) {
 
 	int server_fd = iniciarServidor(ip, puerto);
 
-	if(server_fd == -1){
-		log_error(loggerKernel,"Error al iniciar el servidor");
-		terminarModulo(server_fd,loggerKernel, configKernel);
-		return EXIT_FAILURE;
-	}
+	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerKernel, "Servidor listo para recibir al cliente");
 

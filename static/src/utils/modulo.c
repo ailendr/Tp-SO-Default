@@ -7,7 +7,7 @@
 
 #include "modulo.h"
 
-int verificarServidor (int socket, t_log* logger, t_config* config){
+int verificarSocket (int socket, t_log* logger, t_config* config){
 
 	if(socket == -1){
 		log_error(logger,"Error al iniciar el servidor");

@@ -34,7 +34,7 @@ int main(void) {
 
 	conexion = iniciarCliente(ip, puerto);
 
-	if(verificarServidor (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
+	if(verificarSocket (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerConsola, "Conexion exitosa");
 	log_info(loggerConsola, "Enviando mensaje");

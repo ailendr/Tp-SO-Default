@@ -26,7 +26,7 @@ int main(void) {
 
 	int servidorMemoria = iniciarServidor(NULL, puerto);
 
-	if(verificarServidor (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
+	if(verificarSocket (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerMemoria, "Servidor listo para recibir al cliente");
 
