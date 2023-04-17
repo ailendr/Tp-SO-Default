@@ -119,8 +119,6 @@ int iniciarServidor(char*  ip, char* puerto)
 
 int esperar_cliente(int socket_servidor)
 {
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	//assert(!"no implementado!");
 
 	// Aceptamos un nuevo cliente
 	/*Accept retorna un nuevo socket, q ya sabemos q es un entero porq es un FileDescriptor*/
