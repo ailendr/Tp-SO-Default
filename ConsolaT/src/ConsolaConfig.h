@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef SRC_UTILSCONSOLA_H_
-#define SRC_UTILSCONSOLA_H_
+#ifndef SRC_CONSOLACONFIG_H_
+#define SRC_CONSOLACONFIG_H_
 
 #include <utils/modulo.h>
 
@@ -16,4 +16,4 @@ extern t_log* loggerConsola;
 char* IpKernel();
 char* PuertoKernel();
 
-#endif /* SRC_UTILSCONSOLA_H_ */
+#endif /* SRC_CONSOLACONFIG_H_ */

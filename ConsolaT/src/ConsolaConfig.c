@@ -6,7 +6,7 @@
  */
 
 
-#include "utilsConsola.h"
+#include "ConsolaConfig.h"
 
 t_log* loggerConsola;
 t_config* configConsola;

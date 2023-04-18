@@ -6,14 +6,14 @@ int main(void) {
 
 	printf("Hola soy FileSystem y soy servidor de Kernel y me conecto a Memoria \n ");
 
-	loggerFS = log_create("memoria.log", "Memoria",1,LOG_LEVEL_DEBUG);
+	loggerFS = log_create("FileSystem.log", "FS",1,LOG_LEVEL_DEBUG);
 
 	log_info(loggerFS, "---------------------------------------------------------------------------");
 	log_info(loggerFS, "Iniciando FileSystem...");
 
 	int servidorFS = 0;
 
-	configFS = config_create("../FileSystem/filesystem.config");
+	configFS = config_create("../FileSystemT/filesystem.config");
 	if(verificarConfig (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
 	char* puerto = puertoEscucha();
@@ -34,43 +34,55 @@ int main(void) {
 	}
 	log_info(loggerFS, "Se conecto un cliente");
 
-		/*
-		t_list* lista;
+	t_list* lista;
 
-				while (1) {
-					int cod_op = recibir_operacion(cliente_fd);
+	while (1) {
+		int cod_op = recibir_operacion(cliente);
 
-					switch (cod_op) {
-						case MENSAJE:
-							log_info(loggerKernel, "\nMe llego el mensaje: %s", recibir_mensaje(cliente_fd));
-							//Lo pase a un log porque a la larga necesitamos recuperarlo
-							break;
+		switch (cod_op) {
+			case MENSAJE:
+				log_info(loggerFS, "\nMe llego el mensaje: %s", recibir_mensaje(cliente));
+				break;
 
-						case PAQUETE:
-							lista = recibir_paquete(cliente_fd);
-							log_info(loggerKernel, "Me llegaron los siguientes valores:\n");
-							list_iterate(lista, (void*) iterator);
-							break;
+			/*
+			case PAQUETE:
+				lista = recibir_paquete(cliente);
+				log_info(loggerFS, "Me llegaron los siguientes valores:\n");
+				list_iterate(lista, (void*) iterator);
+				break;
+			*/
 
-						case -1:
-							log_info(loggerKernel, "el cliente se desconecto.");
+			case -1:
+				log_info(loggerFS, "el cliente se desconecto.");
+				break;
 
-							return EXIT_FAILURE;
+			default:
+				log_warning(loggerFS,"Operacion desconocida. No quieras meter la pata");
+				break;
+		}
 
-						default:
-							log_warning(loggerKernel,"Operacion desconocida. No quieras meter la pata");
-							break;
-					}
-				}
-	*/
+		if ( cod_op == -1 ) break;
+	}
 
+	log_info(loggerFS, "Iniciando conexion con FS ... \n");
 
-	log_info(loggerFS, "Finalizando Memoria...\n");
+	char* ipM = IP_Memoria();
+	char* puertoM = puertoMemoria();
+
+	int socketMemoria = iniciarCliente(ipM, puertoM);
+	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
+
+	log_info(loggerFS, "Conexion exitosa");
+	log_info(loggerFS, "Enviando mensaje");
+	enviar_mensaje("Hola Memoria", socketMemoria);
+
+	log_info(loggerFS, "Finalizando File System...\n");
 
 	terminarModulo(cliente, loggerFS, configFS);
+	close (socketMemoria);
 	close (servidorFS);
 
-	printf ("Finalizo Memoria  correctamente\n ");
+	printf ("Finalizo File System correctamente\n ");
 
 	return EXIT_SUCCESS;
 }

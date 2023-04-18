@@ -56,19 +56,34 @@ int main(void) {
 
 				case -1:
 					log_info(loggerKernel, "el cliente se desconecto.");
-
-					return EXIT_FAILURE;
+					break;
 
 				default:
 					log_warning(loggerKernel,"Operacion desconocida. No quieras meter la pata");
 					break;
 			}
+
+			if ( cod_op == -1 ) break;
 		}
+
+	log_info(loggerKernel, "Iniciando conexion con FS ... \n");
+
+	char* ipFs = IpFile();
+	char* puertoFs = PuertoFileSystem();
+
+	int socketFs = iniciarCliente(ipFs, puertoFs);
+	if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+
+	log_info(loggerKernel, "Conexion exitosa");
+	log_info(loggerKernel, "Enviando mensaje");
+	enviar_mensaje("Hola FS", socketFs);
+
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
 
 	terminarModulo(cliente_fd,loggerKernel, configKernel);
 	close (server_fd);
+	close (socketFs);
 
 	printf ("Finalizo Kernel correctamente\n ");
 

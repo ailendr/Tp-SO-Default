@@ -34,35 +34,34 @@ int main(void) {
 	}
 	log_info(loggerMemoria, "Se conecto un cliente");
 
-	/*
 	t_list* lista;
 
-			while (1) {
-				int cod_op = recibir_operacion(cliente_fd);
+	while (1) {
+		int cod_op = recibir_operacion(cliente);
 
-				switch (cod_op) {
-					case MENSAJE:
-						log_info(loggerKernel, "\nMe llego el mensaje: %s", recibir_mensaje(cliente_fd));
-						//Lo pase a un log porque a la larga necesitamos recuperarlo
-						break;
+		switch (cod_op) {
+			case MENSAJE:
+				log_info(loggerMemoria, "\nMe llego el mensaje: %s", recibir_mensaje(cliente));
+				break;
+			/*
+			case PAQUETE:
+				lista = recibir_paquete(cliente);
+				log_info(loggerMemoria, "Me llegaron los siguientes valores:\n");
+				list_iterate(lista, (void*) iterator);
+				break;
+			*/
+			case -1:
+				log_info(loggerMemoria, "el cliente se desconecto.");
+				break;
 
-					case PAQUETE:
-						lista = recibir_paquete(cliente_fd);
-						log_info(loggerKernel, "Me llegaron los siguientes valores:\n");
-						list_iterate(lista, (void*) iterator);
-						break;
+			default:
+				log_warning(loggerMemoria,"Operacion desconocida. No quieras meter la pata");
+				break;
+		}
 
-					case -1:
-						log_info(loggerKernel, "el cliente se desconecto.");
+		if ( cod_op == -1 ) break;
 
-						return EXIT_FAILURE;
-
-					default:
-						log_warning(loggerKernel,"Operacion desconocida. No quieras meter la pata");
-						break;
-				}
-			}
-*/
+	}
 
 
 	log_info(loggerMemoria, "Finalizando Memoria...\n");

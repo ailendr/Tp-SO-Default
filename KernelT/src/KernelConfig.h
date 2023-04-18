@@ -15,7 +15,6 @@ extern t_log* loggerKernel;
 extern t_config* configKernel;
 
 
-
 char* IpMemoria();
 char* IpFile();
 char* IpCPU();
