@@ -18,25 +18,20 @@ int main(void) {
 	log_info(loggerConsola, "Iniciando Consola...");
 
 	int conexion = 0;
-	printf ("BUENAS SO");
+
 	configConsola = config_create("../ConsolaT/consola.config");
 
-	if (configConsola == NULL){
-		log_error(loggerConsola,"Error al recuperar el config");
-		terminarModulo(conexion,loggerConsola, configConsola);
-		return EXIT_FAILURE;
-	}
+	if( verificarConfig (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
 	char* ip = IpKernel();
 	char* puerto = PuertoKernel();
 
-	printf ("\nEl valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
+	log_info(loggerConsola, "Iniciando Cliente ... \n");
 	conexion = iniciarCliente(ip, puerto);
-
 	if( verificarSocket (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
-	//TODO Arreglar el error de detectar el error
 	log_info(loggerConsola, "Conexion exitosa");
 	log_info(loggerConsola, "Enviando mensaje");
 	enviar_mensaje("Hola kernel", conexion);

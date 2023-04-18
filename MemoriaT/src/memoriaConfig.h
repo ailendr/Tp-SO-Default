@@ -16,6 +16,7 @@ extern t_log* loggerMemoria;
 extern t_config* configMemoria;
 
 char* puertoEscucha();
+char* ipEscucha();
 int tam_memoria();
 int cantSegmentos();
 int retardoMemoria();

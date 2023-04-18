@@ -13,43 +13,28 @@ int main(void) {
 
 	log_info(loggerKernel, "Iniciando Kernel...");
 
+	int server_fd = 0;
+
 	configKernel = config_create("../KernelT/kernel.config");
 
-
-	if (configKernel == NULL){
-		log_error(loggerKernel,"Error al recuperar el config");
-		log_destroy(loggerKernel);
-		config_destroy(configKernel);
-		return EXIT_FAILURE;
-	}
+	if(verificarConfig (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
 	char* ip = Ip();
 	char* puerto = Puerto();
 
-	printf ("\nEl valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	int server_fd = iniciarServidor(ip, puerto);
-
+	log_info(loggerKernel, "Iniciando Servidor ... \n");
+	server_fd = iniciarServidor(ip, puerto);
 	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
-
-	/*
-	if(server_fd == -1){
-		log_error(loggerKernel,"Error al iniciar el servidor");
-		terminarModulo(server_fd,loggerKernel, configKernel);
-		return EXIT_FAILURE;
-	}
-	*/
-
 	log_info(loggerKernel, "Servidor listo para recibir al cliente");
 
+	log_info(loggerKernel, "Iniciando Cliente ... \n");
 	int cliente_fd = esperar_cliente(server_fd);
-
-	if(cliente_fd == -1){
-		log_error(loggerKernel,"Error al conectar con el cliente");
-		terminarModulo(server_fd,loggerKernel, configKernel);
-		return EXIT_FAILURE;
+	if( verificarSocket (cliente_fd, loggerKernel, configKernel) == 1 ){
+			close(server_fd);
+			return EXIT_FAILURE;
 	}
-
 	log_info(loggerKernel, "Se conecto un cliente");
 
 	t_list* lista;
@@ -83,6 +68,7 @@ int main(void) {
 	log_info(loggerKernel, "Finalizando Kernel...\n");
 
 	terminarModulo(cliente_fd,loggerKernel, configKernel);
+	close (server_fd);
 
 	printf ("Finalizo Kernel correctamente\n ");
 

@@ -7,6 +7,10 @@ char* puertoEscucha(){
 	return config_get_string_value(configMemoria, "PUERTO_ESCUCHA");
 }
 
+char* ipEscucha(){
+	return config_get_string_value(configMemoria, "IP_ESCUCHA");
+}
+
 int tam_memoria(){
 	return config_get_int_value(configMemoria, "TAM_MEMORIA");
 }

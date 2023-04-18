@@ -7,12 +7,16 @@ char* IP_Memoria(){
 	return config_get_string_value(configFS, "IP_MEMORIA");
 }
 
-int puertoMemoria(){
-	return config_get_int_value(configFS, "PUERTO_MEMORIA");
+char* IP_Escucha(){
+	return config_get_string_value(configFS, "IP_ESCUCHA");
 }
 
-int puertoEscucha(){
-	return config_get_int_value(configFS, "PUERTO_ESCUCHA");
+char* puertoMemoria(){
+	return config_get_string_value(configFS, "PUERTO_MEMORIA");
+}
+
+char* puertoEscucha(){
+	return config_get_string_value(configFS, "PUERTO_ESCUCHA");
 }
 
 char* pathSuperbloque(){

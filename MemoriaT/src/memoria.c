@@ -11,33 +11,27 @@ int main(void) {
 	log_info(loggerMemoria, "---------------------------------------------------------------------------");
 	log_info(loggerMemoria, "Iniciando Memoria...");
 
-	configMemoria = config_create("../MemoriaT/memoria.config");
+	int servidorMemoria = 0;
 
-	if (configMemoria == NULL){
-		log_error(loggerMemoria,"Error al recuperar el config");
-		log_destroy(loggerMemoria);
-		config_destroy(configMemoria);
-		return EXIT_FAILURE;
-	}
+	configMemoria = config_create("../MemoriaT/memoria.config");
+	if(verificarConfig (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 
 	char* puerto = puertoEscucha();
+	char* ip = ipEscucha();
 
-	printf ("\n El valor recuperado del puerto es %s ", puerto);
+	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	int servidorMemoria = iniciarServidor(NULL, puerto);
-
-	if(verificarSocket (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
-
+	log_info(loggerMemoria, "Iniciando Servidor ... \n");
+	servidorMemoria = iniciarServidor(ip, puerto);
+	if( verificarSocket (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 	log_info(loggerMemoria, "Servidor listo para recibir al cliente");
 
+	log_info(loggerMemoria, "Iniciando Cliente ... \n");
 	int cliente = esperar_cliente(servidorMemoria);
-
-	if(cliente ==-1){
-		log_error(loggerMemoria, "Error al conectar con el cliente");
-		terminarModulo(servidorMemoria, loggerMemoria, configMemoria);
-        return EXIT_FAILURE;
+	if( verificarSocket (cliente, loggerMemoria, configMemoria) == 1 ){
+		close(servidorMemoria);
+		return EXIT_FAILURE;
 	}
-
 	log_info(loggerMemoria, "Se conecto un cliente");
 
 	/*
@@ -74,6 +68,7 @@ int main(void) {
 	log_info(loggerMemoria, "Finalizando Memoria...\n");
 
 	terminarModulo(cliente, loggerMemoria, configMemoria);
+	close (servidorMemoria);
 
 	printf ("Finalizo Memoria  correctamente\n ");
 
