@@ -83,7 +83,7 @@ int main(void) {
 
 
 
-		/*>>>>>>CONEXION CON FILE SYSTEM(PROXIMO HILO)<<<<<<<<<*/
+	 /*>>>>>>CONEXION CON FILE SYSTEM(PROXIMO HILO)<<<<<<<<<*/
 /* DEJO COMENTADO ESTO PORQUE PROBE LA CONEXION CON CPU
  *
 	log_info(loggerKernel, "Iniciando conexion con FS ... \n");
@@ -98,12 +98,29 @@ int main(void) {
 	log_info(loggerKernel, "Enviando mensaje");
 	enviar_mensaje("Hola FS soy Kernel", socketFs);
 */
+      /*>>>>>>CONEXION CON MEMORIA (PROXIMO HILO)<<<<<<<<<
+
+
+		log_info(loggerKernel, "Iniciando conexion con MEMORIA ... \n");
+
+		char* ipMemoria =IpMemoria ();
+		char* puertoMemoria = PuertoMemoria();
+
+		int socketMemoria = iniciarCliente(ipMemoria, puertoMemoria);
+		if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+
+		log_info(loggerKernel, "Conexion exitosa");
+		log_info(loggerKernel, "Enviando mensaje");
+		enviar_mensaje("Hola Memoria soy Kernel", socketMemoria);
+		*/
+
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
 
 	terminarModulo(cliente_fd,loggerKernel, configKernel);
 	close (server_fd);
 	//close (socketFs);
+	//close (socketMemoria);
 	close (socketCPU);
 
 	printf ("Finalizo Kernel correctamente\n ");

@@ -34,7 +34,7 @@ int main(void) {
 	}
 	log_info(loggerMemoria, "Se conecto un cliente");
 
-	t_list* lista;
+	//t_list* lista;Dejo comentado esto porq me molesta el warning cuando se construye el proyec
 
 	while (1) {
 		int cod_op = recibir_operacion(cliente);
