@@ -7,66 +7,81 @@ int main(void) {
 	loggerCPU = log_create("cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
 
 	log_info(loggerCPU, "---------------------------------------------------------------------------");
-	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
+
 	log_info(loggerCPU, "Iniciando CPU...");
 
-	int server_fd = 0;
+	int servidorCpu = 0;
 
 	configCPU = config_create("../CpuT/cpu.config");
-	if(verificarConfig (server_fd, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+	if(verificarConfig (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
 
 	char* ip = IP_Escucha();
 	char* puerto = puertoEscucha();
 
 	printf ("\nEl valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	server_fd = iniciarServidor(ip, puerto);
+	log_info(loggerCPU, "Iniciando Servidor ... \n");
+    servidorCpu = iniciarServidor(ip, puerto);
+    if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+    log_info(loggerCPU, "Servidor listo para recibir al cliente");
 
-	if(verificarSocket (server_fd, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+	log_info(loggerCPU ,"Iniciando Cliente ... \n");
+    int cliente = esperar_cliente(servidorCpu);
+    if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
+    		close(servidorCpu);
+    		return EXIT_FAILURE;
+    	}
+    	log_info(loggerCPU, "Se conecto un cliente");
 
-	log_info(loggerCPU, "Servidor listo para recibir al cliente");
 
-	int cliente_fd = esperar_cliente(server_fd);
 
-	if(cliente_fd == -1){
-		log_error(loggerCPU,"Error al conectar con el cliente");
-		terminarModulo(server_fd,loggerCPU, configCPU);
-		return EXIT_FAILURE;
-	}
-
-	log_info(loggerCPU, "Se conecto un cliente");
-
-	/*
-	t_list* lista;
+	//t_list* lista;
 
 	while (1) {
-		int cod_op = recibir_operacion(cliente_fd);
+		int cod_op = recibir_operacion(cliente);
 
 		switch (cod_op) {
 			case MENSAJE:
-				log_info(loggerCPU, "\nMe llego el mensaje: %s", recibir_mensaje(cliente_fd));
+				log_info(loggerCPU, "\nMe llego el mensaje: %s", recibir_mensaje(cliente));
 				break;
 
-			case PAQUETE:
+			/*case PAQUETE:
 				lista = recibir_paquete(cliente_fd);
 				log_info(loggerCPU, "Me llegaron los siguientes valores:\n");
 				list_iterate(lista, (void*) iterator);
-				break;
+				break;*/
 
 			case -1:
 				log_info(loggerCPU, "el cliente se desconecto.");
-				return EXIT_FAILURE;
+				break;
 
 			default:
 				log_warning(loggerCPU,"Operacion desconocida. No quieras meter la pata");
 				break;
 		}
-	}*/
+
+		if ( cod_op == -1 ) break;
+      }
+
+
+	log_info(loggerCPU, "Iniciando conexion con Memoria ... \n");
+
+	char* ipM = IP_Memoria();
+	char* puertoM = puertoMemoria();
+
+	int socketMemoria = iniciarCliente(ipM, puertoM);
+	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+
+	log_info(loggerCPU, "Conexion exitosa");
+	log_info(loggerCPU, "Enviando mensaje");
+	enviar_mensaje("Hola Memoria soy CPU", socketMemoria);
+
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
+    terminarModulo(cliente,loggerCPU, configCPU);
+    close(socketMemoria);
+	close (servidorCpu);
 
-	terminarModulo(cliente_fd,loggerCPU, configCPU);
-	close (server_fd);
 
 	printf ("Finalizo CPU correctamente\n ");
 

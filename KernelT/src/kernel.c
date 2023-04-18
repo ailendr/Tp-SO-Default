@@ -66,6 +66,26 @@ int main(void) {
 			if ( cod_op == -1 ) break;
 		}
 
+		/*>>>>>>CONEXION CON CPU (PROXIMO HILO<<<<<<<<<*/
+		log_info(loggerKernel, "Iniciando conexion con CPU ... \n");
+
+			char* ipCPU = IpCPU();
+			char* puertoCPU = PuertoCPU();
+
+			int socketCPU = iniciarCliente(ipCPU, puertoCPU);
+			if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+
+			log_info(loggerKernel, "Conexion exitosa");
+			log_info(loggerKernel, "Enviando mensaje");
+			enviar_mensaje("Hola CPU soy Kernel", socketCPU);
+
+			log_info(loggerKernel, "Finalizando conexion con CPU");
+
+
+
+		/*>>>>>>CONEXION CON FILE SYSTEM(PROXIMO HILO)<<<<<<<<<*/
+/* DEJO COMENTADO ESTO PORQUE PROBE LA CONEXION CON CPU
+ *
 	log_info(loggerKernel, "Iniciando conexion con FS ... \n");
 
 	char* ipFs = IpFile();
@@ -76,14 +96,15 @@ int main(void) {
 
 	log_info(loggerKernel, "Conexion exitosa");
 	log_info(loggerKernel, "Enviando mensaje");
-	enviar_mensaje("Hola FS", socketFs);
-
+	enviar_mensaje("Hola FS soy Kernel", socketFs);
+*/
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
 
 	terminarModulo(cliente_fd,loggerKernel, configKernel);
 	close (server_fd);
-	close (socketFs);
+	//close (socketFs);
+	close (socketCPU);
 
 	printf ("Finalizo Kernel correctamente\n ");
 

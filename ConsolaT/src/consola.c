@@ -34,7 +34,7 @@ int main(void) {
 
 	log_info(loggerConsola, "Conexion exitosa");
 	log_info(loggerConsola, "Enviando mensaje");
-	enviar_mensaje("Hola kernel", conexion);
+	enviar_mensaje("Hola kernel soy Consola", conexion);
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 

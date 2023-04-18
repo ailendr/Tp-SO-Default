@@ -64,7 +64,7 @@ int main(void) {
 		if ( cod_op == -1 ) break;
 	}
 
-	log_info(loggerFS, "Iniciando conexion con FS ... \n");
+	log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
 
 	char* ipM = IP_Memoria();
 	char* puertoM = puertoMemoria();
@@ -74,7 +74,7 @@ int main(void) {
 
 	log_info(loggerFS, "Conexion exitosa");
 	log_info(loggerFS, "Enviando mensaje");
-	enviar_mensaje("Hola Memoria", socketMemoria);
+	enviar_mensaje("Hola Memoria soy FS", socketMemoria);
 
 	log_info(loggerFS, "Finalizando File System...\n");
 
