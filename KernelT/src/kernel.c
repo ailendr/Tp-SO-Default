@@ -13,7 +13,7 @@ int main(void) {
 
 	log_info(loggerKernel, "Iniciando Kernel...");
 
-	configKernel = config_create("../kernel.config");
+	configKernel = config_create("../KernelT/kernel.config");
 
 
 	if (configKernel == NULL){
