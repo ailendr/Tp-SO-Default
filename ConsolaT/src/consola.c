@@ -18,7 +18,7 @@ int main(void) {
 	log_info(loggerConsola, "Iniciando Consola...");
 
 	int conexion = 0;
-
+	printf ("BUENAS SO");
 	configConsola = config_create("../ConsolaT/consola.config");
 
 	if (configConsola == NULL){
@@ -34,15 +34,16 @@ int main(void) {
 
 	conexion = iniciarCliente(ip, puerto);
 
-	if(verificarSocket (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
+	if( verificarSocket (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
+	//TODO Arreglar el error de detectar el error
 	log_info(loggerConsola, "Conexion exitosa");
 	log_info(loggerConsola, "Enviando mensaje");
 	enviar_mensaje("Hola kernel", conexion);
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 
-	terminarModulo(conexion,loggerConsola, configConsola);
+	terminarModulo(conexion, loggerConsola, configConsola);
 
 	printf ("Finalizo Consola correctamente\n ");
 
