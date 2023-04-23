@@ -62,6 +62,7 @@ void atenderConsolas(int socket_servidor){
 
 		   int *socket_cliente = malloc(sizeof(int));
 		   *socket_cliente = esperar_cliente(socket_servidor, loggerKernel);
+		   if(verificarSocket(*socket_cliente, loggerKernel, configKernel) == 1) exit(1);
 
 		   pthread_create(&hiloServidor,
 		                    NULL,
