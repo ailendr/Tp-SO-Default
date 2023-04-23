@@ -11,8 +11,7 @@
 
 
 ///------FUNCIONES DEL CLIENTE------///
-
-int iniciarCliente(char *ip, char* puerto)
+int iniciarCliente(char *ip, char* puerto, t_log* logger)
 {
 	struct addrinfo hints;
 	struct addrinfo *server_info;
@@ -28,14 +27,32 @@ int iniciarCliente(char *ip, char* puerto)
 	int socket_cliente = socket(server_info->ai_family,
 			                     server_info->ai_socktype,
 								 server_info->ai_protocol);
+	
+	 if(socket_cliente == -1) {
+	        log_error(logger, "Error al crear el socket");
+	        return -1;
+	    }
+	    else{
+	    	log_info(logger, "Socket creado con exito en la ip %s y puerto %s ", ip, puerto);
+	    }
 
 
 	// Ahora que tenemos el socket, vamos a conectarlo
     int conexion = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
+      if(conexion  == -1){
+        	log_info(logger, "Error : fallo la conexion");
+            
+        	freeaddrinfo(server_info);
+        	return -1;
+        }
+
+      else {
+        	log_info(logger, "La conexion es exitosa");
+        }
 
     freeaddrinfo(server_info);
-
-	return ((conexion == -1) ? -1 : socket_cliente);
+    return socket_cliente;
+    
 }
 
 void enviar_mensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en un paquee
