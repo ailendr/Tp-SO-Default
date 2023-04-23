@@ -11,5 +11,8 @@
 
 
 void iniciarConexionesDeKernel();
+void recibirProtocolo(int* socket_cliente);
+void atenderConsolas(int server_fd);
+
 
 #endif /* SRC_KERNELCONEXIONES_H_ */

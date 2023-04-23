@@ -97,6 +97,31 @@ void eliminar_paquete(t_paquete* paquete)
 	free(paquete);
 }
 
+///Mensaje de protocolo//
+void enviarProtocolo(int conexion, t_log* logger){
+	uint32_t handshake = 1;
+	uint32_t resultado ;
+	int returnSend = send(conexion, &handshake, sizeof(uint32_t), 0);
+
+	if(returnSend == -1){
+		log_info(logger, "Error al enviar el mensaje de protocolo");
+		close(conexion);
+	}
+	else{ log_info(logger, "He podido enviar un mensaje de protocolo");
+	}
+
+	recv(conexion, &resultado, sizeof(uint32_t), MSG_WAITALL);
+
+	if(resultado == -1){
+		log_info(logger,"No cumple el protocolo");
+	}
+	else{
+		log_info(logger, "Cumple con el protocolo");
+	}
+
+}
+
+
 ////------FUNCIONES DEL SERVIDOR-----////
 
 int iniciarServidor(char*  ip, char* puerto)
@@ -134,18 +159,22 @@ int iniciarServidor(char*  ip, char* puerto)
 
 
 
-int esperar_cliente(int socket_servidor)
+int esperar_cliente(int socket_servidor, t_log* logger)
 {
 
 	// Aceptamos un nuevo cliente
 	/*Accept retorna un nuevo socket, q ya sabemos q es un entero porq es un FileDescriptor*/
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
 
-	//log_info(logger, "Se conecto un cliente!");
-	printf("\nSe conecto un cliente");
+    if(socket_cliente < 0){
+    	log_error(logger, "No se ha podido conectar el cliente");
+    }else{
+    	log_info(logger, "Se ha conectado un cliente nuevo");
+    }
 
-	return socket_cliente;
+    return socket_cliente;
 }
+
 
 int recibir_operacion(int socket_cliente)
 {
@@ -199,7 +228,41 @@ t_list* recibir_paquete(int socket_cliente)
 	free(buffer);
 	return valores;
 }
+//Mensaje de protocolo: no tiene el log por parametro porq habria que pasarselo por el hilo y no sé si puede pasarse multiples parametros//
 
+void recibirProtocolo (int* socket_cliente){
+	int conexionNueva = *socket_cliente;
+	printf("Accion en el hilo : esperando mensaje del socket con file descriptor %d", conexionNueva);
+
+	uint32_t handshake;
+	uint32_t resultado_ok = 0;
+	uint32_t resultado_error = - 1;
+
+	int returnRecv = recv(conexionNueva, &handshake, sizeof(uint32_t), MSG_WAITALL);
+
+
+	if(returnRecv >0)
+		printf("He recibido el mensaje con exito");
+	else if(returnRecv == 0)
+		printf("Conexion cerrada \n");
+
+	else{
+		printf("Error: no recibi nada");
+
+		close (conexionNueva);
+	}
+
+
+	if(handshake == 1)
+	   send(conexionNueva, &resultado_ok, sizeof(uint32_t), 0);
+	else
+	   send(conexionNueva, &resultado_error, sizeof(uint32_t), 0);
+
+	printf("Hasta aca llega la accion de este hilo");
+
+	close(conexionNueva);
+	free(socket_cliente);
+}
 
 
 

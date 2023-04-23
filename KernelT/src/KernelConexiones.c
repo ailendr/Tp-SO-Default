@@ -8,6 +8,8 @@
 #include "KernelConexiones.h"
 #include <utils/sockets.h>
 #include "KernelConfig.h"
+#include <pthread.h>
+
 //GLOBALES//
 int socketCPU;
 int socketFs;
@@ -52,5 +54,24 @@ void iniciarConexionesDeKernel(){
 			  	log_info(loggerKernel, "Enviando mensaje");
 			  	enviar_mensaje("Hola Memoria soy Kernel", socketMemoria);
 		}
+
+
+void atenderConsolas(int socket_servidor){
+	while (1) {
+		  pthread_t hiloServidor;
+
+		   int *socket_cliente = malloc(sizeof(int));
+		   *socket_cliente = esperar_cliente(socket_servidor, loggerKernel);
+
+		   pthread_create(&hiloServidor,
+		                    NULL,
+		                   (void*) recibirProtocolo,
+		                   (void*)socket_cliente);
+
+		   pthread_detach(hiloServidor);
+
+   }
+}
+
 
 

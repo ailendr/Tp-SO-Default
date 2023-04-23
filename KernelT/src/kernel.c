@@ -24,57 +24,65 @@ int main(void) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	log_info(loggerKernel, "Iniciando Servidor ... \n");
-	server_fd = iniciarServidor(ip, puerto);
-	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
-	log_info(loggerKernel, "Servidor listo para recibir al cliente");
-
-	log_info(loggerKernel, "Iniciando conexion con un Cliente ... \n");
-	int cliente_fd = esperar_cliente(server_fd);
-	if( verificarSocket (cliente_fd, loggerKernel, configKernel) == 1 ){
-			close(server_fd);
-			return EXIT_FAILURE;
-	}
-	log_info(loggerKernel, "Se conecto un cliente");
-
-	t_list* lista;
-
-		while (1) {
-			int cod_op = recibir_operacion(cliente_fd);
-
-			switch (cod_op) {
-				case MENSAJE:
-					log_info(loggerKernel, "\nMe llego el mensaje: %s", recibir_mensaje(cliente_fd));
-					//Lo pase a un log porque a la larga necesitamos recuperarlo
-					break;
-
-				case PAQUETE:
-					lista = recibir_paquete(cliente_fd);
-					log_info(loggerKernel, "Me llegaron los siguientes valores:\n");
-					list_iterate(lista, (void*) iterator);
-					break;
-
-				case -1:
-					log_info(loggerKernel, "el cliente se desconecto.");
-					break;
-
-				default:
-					log_warning(loggerKernel,"Operacion desconocida. No quieras meter la pata");
-					break;
-			}
-
-			if ( cod_op == -1 ) break;
-		}
+	///--------Kernel como Cliente-------///
 
 	///Funcion para inicializar las conexiones con FS,CPU y MEMORIA//
 		//Por el momento deje las funciones enviarMensaje adentro pero no deberian//
     iniciarConexionesDeKernel();
 
 
+
+    ///------Kernel como Servidor------//
+
+    log_info(loggerKernel, "Iniciando Servidor ... \n");
+    	server_fd = iniciarServidor(ip, puerto);
+    	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+    	log_info(loggerKernel, "Servidor listo para recibir al cliente");
+
+    	/*log_info(loggerKernel, "Iniciando conexion con un Cliente ... \n");
+    	int cliente_fd = esperar_cliente(server_fd);
+    	if( verificarSocket (cliente_fd, loggerKernel, configKernel) == 1 ){
+    			close(server_fd);
+    			return EXIT_FAILURE;
+    	}
+    	log_info(loggerKernel, "Se conecto un cliente");
+
+    	t_list* lista;
+
+    		while (1) {
+    			int cod_op = recibir_operacion(cliente_fd);
+
+    			switch (cod_op) {
+    				case MENSAJE:
+    					log_info(loggerKernel, "\nMe llego el mensaje: %s", recibir_mensaje(cliente_fd));
+    					//Lo pase a un log porque a la larga necesitamos recuperarlo
+    					break;
+
+    				case PAQUETE:
+    					lista = recibir_paquete(cliente_fd);
+    					log_info(loggerKernel, "Me llegaron los siguientes valores:\n");
+    					list_iterate(lista, (void*) iterator);
+    					break;
+
+    				case -1:
+    					log_info(loggerKernel, "el cliente se desconecto.");
+    					break;
+
+    				default:
+    					log_warning(loggerKernel,"Operacion desconocida. No quieras meter la pata");
+    					break;
+    			}
+
+    			if ( cod_op == -1 ) break;
+    		}
+    		*/
+    atenderConsolas(server_fd);
+
+
 	log_info(loggerKernel, "Finalizando Kernel...\n");
 
-	terminarModulo(cliente_fd,loggerKernel, configKernel);
-	close (server_fd);
+	terminarModulo(server_fd,loggerKernel, configKernel);
+	//close (server_fd);
 	close (socketFs);
 	close (socketMemoria);
 	close (socketCPU);
