@@ -26,8 +26,8 @@ int main(void) {
 	if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 	log_info(loggerFS, "Servidor listo para recibir al cliente");
 
-	log_info(loggerFS, "Iniciando Cliente ... \n");
-	int cliente = esperar_cliente(servidorFS);
+	log_info(loggerFS, "Esperando un Cliente ... \n");
+	int cliente = esperar_cliente(servidorFS, loggerFS);
 	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
 		close(servidorFS);
 		return EXIT_FAILURE;
@@ -69,7 +69,7 @@ int main(void) {
 	char* ipM = IP_Memoria();
 	char* puertoM = puertoMemoria();
 
-	int socketMemoria = iniciarCliente(ipM, puertoM);
+	int socketMemoria = iniciarCliente(ipM, puertoM, loggerFS);
 	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerFS, "Conexion exitosa");

@@ -26,8 +26,8 @@ int main(void) {
 	if( verificarSocket (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 	log_info(loggerMemoria, "Servidor listo para recibir al cliente");
 
-	log_info(loggerMemoria, "Iniciando Cliente ... \n");
-	int cliente = esperar_cliente(servidorMemoria);
+	log_info(loggerMemoria, "Esperando Cliente ... \n");
+	int cliente = esperar_cliente(servidorMemoria, loggerMemoria);
 	if( verificarSocket (cliente, loggerMemoria, configMemoria) == 1 ){
 		close(servidorMemoria);
 		return EXIT_FAILURE;

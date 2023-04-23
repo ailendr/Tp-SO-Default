@@ -169,7 +169,7 @@ int esperar_cliente(int socket_servidor, t_log* logger)
     if(socket_cliente < 0){
     	log_error(logger, "No se ha podido conectar el cliente");
     }else{
-    	log_info(logger, "Se ha conectado un cliente nuevo");
+    	log_info(logger, "Se ha aceptado un cliente nuevo");
     }
 
     return socket_cliente;
@@ -242,7 +242,7 @@ void recibirProtocolo (int* socket_cliente){
 
 
 	if(returnRecv >0)
-		printf("He recibido el mensaje con exito");
+		printf("He recibido el mensaje de protocolo con exito");
 	else if(returnRecv == 0)
 		printf("Conexion cerrada \n");
 

@@ -30,8 +30,10 @@ void iniciarConexionesDeKernel(){
 			  log_info(loggerKernel, "Enviando mensaje");
 			 enviar_mensaje("Hola CPU soy Kernel", socketCPU);
                log_info(loggerKernel, "Finalizando conexion con CPU");
+               close (socketCPU);
 
-               /*>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<*/
+               /*
+               //>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<
 
 
 			  log_info(loggerKernel, "Iniciando conexion con FS ... \n");
@@ -42,7 +44,7 @@ void iniciarConexionesDeKernel(){
 
 
 
-			   /*>>>>>>CONEXION CON MEMORIA <<<<<<<<<*/
+			   //>>>>>>CONEXION CON MEMORIA <<<<<<<<<
 
 
 			  log_info(loggerKernel, "Iniciando conexion con MEMORIA ... \n");
@@ -52,8 +54,11 @@ void iniciarConexionesDeKernel(){
 			  	if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) exit(1);
 
 			  	log_info(loggerKernel, "Enviando mensaje");
+
 			  	enviar_mensaje("Hola Memoria soy Kernel", socketMemoria);
+			  	*/
 		}
+
 
 
 void atenderConsolas(int socket_servidor){

@@ -32,6 +32,7 @@ int main(void) {
 
 
 
+
     ///------Kernel como Servidor------//
 
     log_info(loggerKernel, "Iniciando Servidor ... \n");
@@ -83,9 +84,9 @@ int main(void) {
 
 	terminarModulo(server_fd,loggerKernel, configKernel);
 	//close (server_fd);
-	close (socketFs);
-	close (socketMemoria);
-	close (socketCPU);
+	//((close (socketFs);
+	//close (socketMemoria);
+	//close (socketCPU);
 
 	printf ("Finalizo Kernel correctamente\n ");
 

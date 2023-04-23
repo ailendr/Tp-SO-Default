@@ -14,7 +14,7 @@ int main(void) {
 	loggerConsola = log_create("./consola.log","Consola", 1, LOG_LEVEL_INFO);
 
 	log_info(loggerConsola, "---------------------------------------------------------------------------");
-	//Esto es capricho perdooon, asi queda visualmente mas facil de identificar las ejecuciones
+
 	log_info(loggerConsola, "Iniciando Consola...");
 
 	int conexion = 0;
@@ -28,13 +28,13 @@ int main(void) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	log_info(loggerConsola, "Iniciando Cliente ... \n");
-	conexion = iniciarCliente(ip, puerto);
+	log_info(loggerConsola, "Iniciando como Cliente ... \n");
+	conexion = iniciarCliente(ip, puerto, loggerConsola);
 	if( verificarSocket (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
-	log_info(loggerConsola, "Conexion exitosa");
 	log_info(loggerConsola, "Enviando mensaje");
-	enviar_mensaje("Hola kernel soy Consola", conexion);
+
+	enviarProtocolo(conexion, loggerConsola);
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 

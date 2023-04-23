@@ -25,13 +25,12 @@ int main(void) {
     if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
     log_info(loggerCPU, "Servidor listo para recibir al cliente");
 
-	log_info(loggerCPU ,"Iniciando Cliente ... \n");
-    int cliente = esperar_cliente(servidorCpu);
+	log_info(loggerCPU ,"Esperando un Cliente ... \n");
+    int cliente = esperar_cliente(servidorCpu, loggerCPU);
     if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
     		close(servidorCpu);
     		return EXIT_FAILURE;
     	}
-    	log_info(loggerCPU, "Se conecto un cliente");
 
 
 
@@ -64,15 +63,15 @@ int main(void) {
       }
 
 
+
 	log_info(loggerCPU, "Iniciando conexion con Memoria ... \n");
 
 	char* ipM = IP_Memoria();
 	char* puertoM = puertoMemoria();
 
-	int socketMemoria = iniciarCliente(ipM, puertoM);
+	int socketMemoria = iniciarCliente(ipM, puertoM, loggerCPU);
 	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
 
-	log_info(loggerCPU, "Conexion exitosa");
 	log_info(loggerCPU, "Enviando mensaje");
 	enviar_mensaje("Hola Memoria soy CPU", socketMemoria);
 
