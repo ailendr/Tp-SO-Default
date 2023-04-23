@@ -66,53 +66,46 @@ int main(void) {
 			if ( cod_op == -1 ) break;
 		}
 
-		/*>>>>>>CONEXION CON CPU (PROXIMO HILO<<<<<<<<<*/
-		log_info(loggerKernel, "Iniciando conexion con CPU ... \n");
-
+		
+void iniciarConexionesDeKernel(){
+			
 			char* ipCPU = IpCPU();
 			char* puertoCPU = PuertoCPU();
-
-			int socketCPU = iniciarCliente(ipCPU, puertoCPU);
-			if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
-
-			log_info(loggerKernel, "Conexion exitosa");
-			log_info(loggerKernel, "Enviando mensaje");
-			enviar_mensaje("Hola CPU soy Kernel", socketCPU);
-
-			log_info(loggerKernel, "Finalizando conexion con CPU");
-
-
-
-	 /*>>>>>>CONEXION CON FILE SYSTEM(PROXIMO HILO)<<<<<<<<<*/
-/* DEJO COMENTADO ESTO PORQUE PROBE LA CONEXION CON CPU
- *
-	log_info(loggerKernel, "Iniciando conexion con FS ... \n");
-
-	char* ipFs = IpFile();
-	char* puertoFs = PuertoFileSystem();
-
-	int socketFs = iniciarCliente(ipFs, puertoFs);
-	if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
-
-	log_info(loggerKernel, "Conexion exitosa");
-	log_info(loggerKernel, "Enviando mensaje");
-	enviar_mensaje("Hola FS soy Kernel", socketFs);
-*/
-      /*>>>>>>CONEXION CON MEMORIA (PROXIMO HILO)<<<<<<<<<
+			char* ipFs = IpFile();
+			char* puertoFs = PuertoFileSystem();
+			char* ipMemoria =IpMemoria ();
+			char* puertoMemoria = PuertoMemoria();
+			
+			log_info(loggerKernel, "Iniciando conexion con CPU ... \n");
+            int socketCPU = iniciarCliente(ipCPU, puertoCPU, loggerKernel);
+			  if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) exit(1);
+			  log_info(loggerKernel, "Enviando mensaje");
+			 enviar_mensaje("Hola CPU soy Kernel", socketCPU);
+               log_info(loggerKernel, "Finalizando conexion con CPU");
+			  			 
+               /*>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<*/
 
 
-		log_info(loggerKernel, "Iniciando conexion con MEMORIA ... \n");
+			  log_info(loggerKernel, "Iniciando conexion con FS ... \n");
+              int socketFs = iniciarCliente(ipFs, puertoFs,loggerKernel);
+			   if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) exit(1);
+			     log_info(loggerKernel, "Enviando mensaje");
+			  		enviar_mensaje("Hola FS soy Kernel", socketFs);
+			  				
+	
 
-		char* ipMemoria =IpMemoria ();
-		char* puertoMemoria = PuertoMemoria();
+			   /*>>>>>>CONEXION CON MEMORIA <<<<<<<<<*/
 
-		int socketMemoria = iniciarCliente(ipMemoria, puertoMemoria);
-		if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
-		log_info(loggerKernel, "Conexion exitosa");
-		log_info(loggerKernel, "Enviando mensaje");
-		enviar_mensaje("Hola Memoria soy Kernel", socketMemoria);
-		*/
+			  log_info(loggerKernel, "Iniciando conexion con MEMORIA ... \n");
+
+			  						
+			  int socketMemoria = iniciarCliente(ipMemoria, puertoMemoria, loggerKernel);
+			  	if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) exit(1);
+
+			  	log_info(loggerKernel, "Enviando mensaje");
+			  	enviar_mensaje("Hola Memoria soy Kernel", socketMemoria);
+		}
 
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
@@ -121,7 +114,7 @@ int main(void) {
 	close (server_fd);
 	//close (socketFs);
 	//close (socketMemoria);
-	close (socketCPU);
+	//close (socketCPU);
 
 	printf ("Finalizo Kernel correctamente\n ");
 
