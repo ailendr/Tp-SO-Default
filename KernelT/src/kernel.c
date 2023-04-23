@@ -29,7 +29,7 @@ int main(void) {
 	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 	log_info(loggerKernel, "Servidor listo para recibir al cliente");
 
-	log_info(loggerKernel, "Iniciando Cliente ... \n");
+	log_info(loggerKernel, "Iniciando conexion con un Cliente ... \n");
 	int cliente_fd = esperar_cliente(server_fd);
 	if( verificarSocket (cliente_fd, loggerKernel, configKernel) == 1 ){
 			close(server_fd);
@@ -66,55 +66,18 @@ int main(void) {
 			if ( cod_op == -1 ) break;
 		}
 
-		
-void iniciarConexionesDeKernel(){
-			
-			char* ipCPU = IpCPU();
-			char* puertoCPU = PuertoCPU();
-			char* ipFs = IpFile();
-			char* puertoFs = PuertoFileSystem();
-			char* ipMemoria =IpMemoria ();
-			char* puertoMemoria = PuertoMemoria();
-			
-			log_info(loggerKernel, "Iniciando conexion con CPU ... \n");
-            int socketCPU = iniciarCliente(ipCPU, puertoCPU, loggerKernel);
-			  if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) exit(1);
-			  log_info(loggerKernel, "Enviando mensaje");
-			 enviar_mensaje("Hola CPU soy Kernel", socketCPU);
-               log_info(loggerKernel, "Finalizando conexion con CPU");
-			  			 
-               /*>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<*/
-
-
-			  log_info(loggerKernel, "Iniciando conexion con FS ... \n");
-              int socketFs = iniciarCliente(ipFs, puertoFs,loggerKernel);
-			   if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) exit(1);
-			     log_info(loggerKernel, "Enviando mensaje");
-			  		enviar_mensaje("Hola FS soy Kernel", socketFs);
-			  				
-	
-
-			   /*>>>>>>CONEXION CON MEMORIA <<<<<<<<<*/
-
-
-			  log_info(loggerKernel, "Iniciando conexion con MEMORIA ... \n");
-
-			  						
-			  int socketMemoria = iniciarCliente(ipMemoria, puertoMemoria, loggerKernel);
-			  	if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) exit(1);
-
-			  	log_info(loggerKernel, "Enviando mensaje");
-			  	enviar_mensaje("Hola Memoria soy Kernel", socketMemoria);
-		}
+	///Funcion para inicializar las conexiones con FS,CPU y MEMORIA//
+		//Por el momento deje las funciones enviarMensaje adentro pero no deberian//
+    iniciarConexionesDeKernel();
 
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
 
 	terminarModulo(cliente_fd,loggerKernel, configKernel);
 	close (server_fd);
-	//close (socketFs);
-	//close (socketMemoria);
-	//close (socketCPU);
+	close (socketFs);
+	close (socketMemoria);
+	close (socketCPU);
 
 	printf ("Finalizo Kernel correctamente\n ");
 
