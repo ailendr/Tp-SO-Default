@@ -30,9 +30,6 @@ int main(void) {
 		//Por el momento deje las funciones enviarMensaje adentro pero no deberian//
     iniciarConexionesDeKernel();
 
-
-
-
     ///------Kernel como Servidor------//
 
     log_info(loggerKernel, "Iniciando Servidor ... \n");
@@ -43,14 +40,13 @@ int main(void) {
 
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
+    terminarModulo(server_fd,loggerKernel, configKernel);
+	close (server_fd);
+	close (socketFs);
+	close (socketMemoria);
+	close (socketCPU);
 
-	terminarModulo(server_fd,loggerKernel, configKernel);
-	//close (server_fd);
-	//((close (socketFs);
-	//close (socketMemoria);
-	//close (socketCPU);
-
-	printf ("Finalizo Kernel correctamente\n ");
+	printf ("\n Finalizo Kernel correctamente\n ");
 
 	return EXIT_SUCCESS;
 }

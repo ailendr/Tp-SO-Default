@@ -29,25 +29,25 @@ int iniciarCliente(char *ip, char* puerto, t_log* logger)
 								 server_info->ai_protocol);
 	
 	 if(socket_cliente == -1) {
-	        log_error(logger, "Error al crear el socket");
+	        log_error(logger, "Error al crear el socket \n ");
 	        return -1;
 	    }
 	    else{
-	    	log_info(logger, "Socket creado con exito en la ip %s y puerto %s ", ip, puerto);
+	    	log_info(logger, "\n Socket creado con exito en la ip %s y puerto %s ", ip, puerto);
 	    }
 
 
 	// Ahora que tenemos el socket, vamos a conectarlo
     int conexion = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
       if(conexion  == -1){
-        	log_info(logger, "Error : fallo la conexion");
+        	log_info(logger, "\n Error : fallo la conexion");
             
         	freeaddrinfo(server_info);
         	return -1;
         }
 
       else {
-        	log_info(logger, "La conexion es exitosa");
+        	log_info(logger, "\n La conexion es exitosa");
         }
 
     freeaddrinfo(server_info);
@@ -100,7 +100,7 @@ void eliminar_paquete(t_paquete* paquete)
 ///Mensaje de protocolo//
 void enviarProtocolo(int conexion, t_log* logger){
 	uint32_t handshake = 1;
-	uint32_t resultado ;
+	uint32_t resultado = 2 ;//Lo inicialice asi para verificar que funcione el recv en los hilos
 	int returnSend = send(conexion, &handshake, sizeof(uint32_t), 0);
 
 	if(returnSend == -1){
@@ -229,44 +229,28 @@ t_list* recibir_paquete(int socket_cliente)
 	free(buffer);
 	return valores;
 }
-//Mensaje de protocolo: no tiene el log por parametro porq habria que pasarselo por el hilo y no sé si puede pasarse multiples parametros//
+//Mensaje de protocolo: no tiene el log por parametro porq habria que pasarselo por el hilo y no puede pasarse multiples parametros al menos que sea un puntero a un struct pero paja//
 
 void recibirProtocolo (int* socket_cliente){
 	int conexionNueva = *socket_cliente;
-	printf("Hilo en curso: Esperando mensaje del socket con file descriptor %d", conexionNueva);
+	//printf("Hilo en curso: Esperando mensaje del socket con file descriptor %d", conexionNueva);
 
 	uint32_t handshake;
 	uint32_t resultado_ok = 0;
 	uint32_t resultado_error = - 1;
 
-	int returnRecv = recv(conexionNueva, &handshake, sizeof(uint32_t), MSG_WAITALL);
-
-
-	if(returnRecv >0)
-		printf("He recibido el mensaje de protocolo con exito");
-	else if(returnRecv == 0)
-		printf("Conexion cerrada \n");
-
-	else{
-		printf("Error: no recibi nada");
-
-		close (conexionNueva);
-	}
-
-
-	if(handshake == 1)
+	recv(conexionNueva, &handshake, sizeof(uint32_t), MSG_WAITALL);
+     if(handshake == 1)
 	   send(conexionNueva, &resultado_ok, sizeof(uint32_t), 0);
-	else
+	 else
 	   send(conexionNueva, &resultado_error, sizeof(uint32_t), 0);
-
-	printf("Hasta aca llega la accion de este hilo");
 
 	close(conexionNueva);
 	free(socket_cliente);
 }
 
 void recibirHandshake(int socket_cliente){
-	printf("Esperando mensaje del socket con file descriptor %d", socket_cliente);
+	printf("\n Esperando mensaje del socket con file descriptor %d", socket_cliente);
 
 		uint32_t handshake;
 		uint32_t resultado_ok = 0;

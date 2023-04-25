@@ -24,7 +24,7 @@ int main(void) {
 	log_info(loggerFS, "Iniciando Servidor ... \n");
 	servidorFS = iniciarServidor(ip, puerto);
 	if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
-	log_info(loggerFS, "Servidor listo para recibir al cliente");
+	log_info(loggerFS, "Servidor listo para recibir al cliente \n" );
 
 	log_info(loggerFS, "Esperando un Cliente ... \n");
 	int cliente = esperar_cliente(servidorFS, loggerFS);
@@ -33,6 +33,7 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 	recibirHandshake(cliente);
+	log_info(loggerFS, "---------------------------------------------------------------------------");
 
 	log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
 
@@ -42,16 +43,16 @@ int main(void) {
 	int socketMemoria = iniciarCliente(ipM, puertoM, loggerFS);
 	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
-	log_info(loggerFS, "Conexion exitosa");
-	log_info(loggerFS, "Enviando mensaje");
+	log_info(loggerFS, "Enviando mensaje \n");
     enviarProtocolo(socketMemoria, loggerFS);
+
 	log_info(loggerFS, "Finalizando File System...\n");
 
 	terminarModulo(cliente, loggerFS, configFS);
 	close (socketMemoria);
 	close (servidorFS);
 
-	printf ("Finalizo File System correctamente\n ");
+	printf ("\n Finalizo File System correctamente\n ");
 
 	return EXIT_SUCCESS;
 }

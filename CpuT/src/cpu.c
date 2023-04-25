@@ -18,7 +18,7 @@ int main(void) {
 	char* ip = IP_Escucha();
 	char* puerto = puertoEscucha();
 
-	printf ("\nEl valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+	printf ("\n El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
 	log_info(loggerCPU, "Iniciando Servidor ... \n");
     servidorCpu = iniciarServidor(ip, puerto);
@@ -32,8 +32,7 @@ int main(void) {
     		return EXIT_FAILURE;
     	}
 	recibirHandshake(cliente);
-
-
+	log_info(loggerCPU, "---------------------------------------------------------------------------");
 
 	log_info(loggerCPU, "Iniciando conexion con Memoria ... \n");
 
@@ -43,7 +42,7 @@ int main(void) {
 	int socketMemoria = iniciarCliente(ipM, puertoM, loggerCPU);
 	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
 
-	log_info(loggerCPU, "Enviando mensaje");
+	log_info(loggerCPU, "Enviando mensaje \n");
     enviarProtocolo(socketMemoria, loggerCPU);
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
@@ -52,7 +51,7 @@ int main(void) {
 	close (servidorCpu);
 
 
-	printf ("Finalizo CPU correctamente\n ");
+	printf ("\n Finalizo CPU correctamente \n ");
 
 	return EXIT_SUCCESS;
 

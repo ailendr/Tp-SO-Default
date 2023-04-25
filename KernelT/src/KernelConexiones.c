@@ -10,7 +10,7 @@
 #include "KernelConfig.h"
 #include <pthread.h>
 
-//GLOBALES//
+//GLOBALES: Los puse asi para poder liberarlos desde el main//
 int socketCPU;
 int socketFs;
 int socketMemoria;
@@ -27,10 +27,9 @@ void iniciarConexionesDeKernel(){
 			log_info(loggerKernel, "Iniciando conexion con CPU ... \n");
             socketCPU = iniciarCliente(ipCPU, puertoCPU, loggerKernel);
 			  if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) exit(1);
-			  log_info(loggerKernel, "Enviando mensaje");
+			  log_info(loggerKernel, "Enviando mensaje \n");
 			  enviarProtocolo(socketCPU, loggerKernel);
 			  log_info(loggerKernel, "Finalizando conexion con CPU");
-               close (socketCPU);
 
 
                //>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<
@@ -39,22 +38,19 @@ void iniciarConexionesDeKernel(){
 			  log_info(loggerKernel, "Iniciando conexion con FS ... \n");
               socketFs = iniciarCliente(ipFs, puertoFs,loggerKernel);
 			   if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) exit(1);
-			     log_info(loggerKernel, "Enviando mensaje");
 
-			     enviarProtocolo(socketFs,loggerKernel);
+			   log_info(loggerKernel, "Enviando mensaje \n");
+                enviarProtocolo(socketFs,loggerKernel);
 
 
 			   //>>>>>>CONEXION CON MEMORIA <<<<<<<<<
 
 
 			  log_info(loggerKernel, "Iniciando conexion con MEMORIA ... \n");
-
-
 			  socketMemoria = iniciarCliente(ipMemoria, puertoMemoria, loggerKernel);
 			  	if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) exit(1);
 
-			  	log_info(loggerKernel, "Enviando mensaje");
-
+			  	log_info(loggerKernel, "Enviando mensaje \n");
 			  	enviarProtocolo(socketMemoria, loggerKernel);
 
 		}
