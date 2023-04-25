@@ -113,10 +113,11 @@ void enviarProtocolo(int conexion, t_log* logger){
 	recv(conexion, &resultado, sizeof(uint32_t), MSG_WAITALL);
 
 	if(resultado == -1){
-		log_info(logger,"No cumple el protocolo");
+		log_info(logger,"No cumple el protocolo.Terminando la conexion");
+		close(conexion);
 	}
-	else{
-		log_info(logger, "Cumple con el protocolo");
+	else if(resultado == 0){
+		log_info(logger, "El valor devuelto cumple con el protocolo");
 	}
 
 }
@@ -232,7 +233,7 @@ t_list* recibir_paquete(int socket_cliente)
 
 void recibirProtocolo (int* socket_cliente){
 	int conexionNueva = *socket_cliente;
-	printf("Accion en el hilo : esperando mensaje del socket con file descriptor %d", conexionNueva);
+	printf("Hilo en curso: Esperando mensaje del socket con file descriptor %d", conexionNueva);
 
 	uint32_t handshake;
 	uint32_t resultado_ok = 0;
@@ -264,5 +265,18 @@ void recibirProtocolo (int* socket_cliente){
 	free(socket_cliente);
 }
 
+void recibirHandshake(int socket_cliente){
+	printf("Esperando mensaje del socket con file descriptor %d", socket_cliente);
+
+		uint32_t handshake;
+		uint32_t resultado_ok = 0;
+		uint32_t resultado_error = - 1;
+
+     recv(socket_cliente, &handshake, sizeof(uint32_t), MSG_WAITALL);
+		if(handshake == 1)
+			   send(socket_cliente, &resultado_ok, sizeof(uint32_t), 0);
+			else
+			   send(socket_cliente, &resultado_error, sizeof(uint32_t), 0);
+}
 
 

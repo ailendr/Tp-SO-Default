@@ -47,6 +47,7 @@ void* recibir_buffer(int* size, int socket_cliente);
 int recibir_operacion(int socket_cliente);
 t_list* recibir_paquete(int socket_cliente);
 void recibirProtocolo (int* socket_cliente);
+void recibirHandshake(int socket_cliente);
 
 
 void enviar_mensaje(char* mensaje, int socket_cliente);

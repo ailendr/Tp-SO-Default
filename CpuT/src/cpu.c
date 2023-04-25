@@ -31,36 +31,7 @@ int main(void) {
     		close(servidorCpu);
     		return EXIT_FAILURE;
     	}
-
-
-
-	//t_list* lista;
-
-	while (1) {
-		int cod_op = recibir_operacion(cliente);
-
-		switch (cod_op) {
-			case MENSAJE:
-				log_info(loggerCPU, "\nMe llego el mensaje: %s", recibir_mensaje(cliente));
-				break;
-
-			/*case PAQUETE:
-				lista = recibir_paquete(cliente_fd);
-				log_info(loggerCPU, "Me llegaron los siguientes valores:\n");
-				list_iterate(lista, (void*) iterator);
-				break;*/
-
-			case -1:
-				log_info(loggerCPU, "el cliente se desconecto.");
-				break;
-
-			default:
-				log_warning(loggerCPU,"Operacion desconocida. No quieras meter la pata");
-				break;
-		}
-
-		if ( cod_op == -1 ) break;
-      }
+	recibirHandshake(cliente);
 
 
 
@@ -73,8 +44,7 @@ int main(void) {
 	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerCPU, "Enviando mensaje");
-	enviar_mensaje("Hola Memoria soy CPU", socketMemoria);
-
+    enviarProtocolo(socketMemoria, loggerCPU);
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);

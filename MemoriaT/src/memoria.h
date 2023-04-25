@@ -10,6 +10,7 @@
 
 #include "memoriaConfig.h"
 #include <utils/sockets.h>
+#include "memoriaConexiones.h"
 
 
 

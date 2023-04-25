@@ -32,37 +32,7 @@ int main(void) {
 		close(servidorFS);
 		return EXIT_FAILURE;
 	}
-	log_info(loggerFS, "Se conecto un cliente");
-
-	//t_list* lista; Dejo comentado esto porq me molesta el warning cuando se construye el proyec
-
-	while (1) {
-		int cod_op = recibir_operacion(cliente);
-
-		switch (cod_op) {
-			case MENSAJE:
-				log_info(loggerFS, "\nMe llego el mensaje: %s", recibir_mensaje(cliente));
-				break;
-
-			/*
-			case PAQUETE:
-				lista = recibir_paquete(cliente);
-				log_info(loggerFS, "Me llegaron los siguientes valores:\n");
-				list_iterate(lista, (void*) iterator);
-				break;
-			*/
-
-			case -1:
-				log_info(loggerFS, "el cliente se desconecto.");
-				break;
-
-			default:
-				log_warning(loggerFS,"Operacion desconocida. No quieras meter la pata");
-				break;
-		}
-
-		if ( cod_op == -1 ) break;
-	}
+	recibirHandshake(cliente);
 
 	log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
 
@@ -74,8 +44,7 @@ int main(void) {
 
 	log_info(loggerFS, "Conexion exitosa");
 	log_info(loggerFS, "Enviando mensaje");
-	enviar_mensaje("Hola Memoria soy FS", socketMemoria);
-
+    enviarProtocolo(socketMemoria, loggerFS);
 	log_info(loggerFS, "Finalizando File System...\n");
 
 	terminarModulo(cliente, loggerFS, configFS);

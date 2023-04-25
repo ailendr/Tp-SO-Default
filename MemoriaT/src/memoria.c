@@ -27,46 +27,15 @@ int main(void) {
 	log_info(loggerMemoria, "Servidor listo para recibir al cliente");
 
 	log_info(loggerMemoria, "Esperando Cliente ... \n");
-	int cliente = esperar_cliente(servidorMemoria, loggerMemoria);
-	if( verificarSocket (cliente, loggerMemoria, configMemoria) == 1 ){
-		close(servidorMemoria);
-		return EXIT_FAILURE;
-	}
-	log_info(loggerMemoria, "Se conecto un cliente");
 
-	//t_list* lista;Dejo comentado esto porq me molesta el warning cuando se construye el proyec
-
-	while (1) {
-		int cod_op = recibir_operacion(cliente);
-
-		switch (cod_op) {
-			case MENSAJE:
-				log_info(loggerMemoria, "\nMe llego el mensaje: %s", recibir_mensaje(cliente));
-				break;
-			/*
-			case PAQUETE:
-				lista = recibir_paquete(cliente);
-				log_info(loggerMemoria, "Me llegaron los siguientes valores:\n");
-				list_iterate(lista, (void*) iterator);
-				break;
-			*/
-			case -1:
-				log_info(loggerMemoria, "el cliente se desconecto.");
-				break;
-
-			default:
-				log_warning(loggerMemoria,"Operacion desconocida. No quieras meter la pata");
-				break;
-		}
-
-		if ( cod_op == -1 ) break;
-
-	}
+	atenderModulos(servidorMemoria);
 
 
 	log_info(loggerMemoria, "Finalizando Memoria...\n");
 
-	terminarModulo(cliente, loggerMemoria, configMemoria);
+	//terminarModulo(cliente, loggerMemoria, configMemoria); No lo vamos a usar porq la funcion del hilo ya cierra las conexion del cliente ahi
+	log_destroy(loggerMemoria);
+	config_destroy(configMemoria);
 	close (servidorMemoria);
 
 	printf ("Finalizo Memoria  correctamente\n ");

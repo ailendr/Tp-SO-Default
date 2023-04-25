@@ -28,11 +28,11 @@ void iniciarConexionesDeKernel(){
             socketCPU = iniciarCliente(ipCPU, puertoCPU, loggerKernel);
 			  if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) exit(1);
 			  log_info(loggerKernel, "Enviando mensaje");
-			 enviar_mensaje("Hola CPU soy Kernel", socketCPU);
-               log_info(loggerKernel, "Finalizando conexion con CPU");
+			  enviarProtocolo(socketCPU, loggerKernel);
+			  log_info(loggerKernel, "Finalizando conexion con CPU");
                close (socketCPU);
 
-               /*
+
                //>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<
 
 
@@ -40,8 +40,8 @@ void iniciarConexionesDeKernel(){
               socketFs = iniciarCliente(ipFs, puertoFs,loggerKernel);
 			   if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) exit(1);
 			     log_info(loggerKernel, "Enviando mensaje");
-			  		enviar_mensaje("Hola FS soy Kernel", socketFs);
 
+			     enviarProtocolo(socketFs,loggerKernel);
 
 
 			   //>>>>>>CONEXION CON MEMORIA <<<<<<<<<
@@ -55,8 +55,8 @@ void iniciarConexionesDeKernel(){
 
 			  	log_info(loggerKernel, "Enviando mensaje");
 
-			  	enviar_mensaje("Hola Memoria soy Kernel", socketMemoria);
-			  	*/
+			  	enviarProtocolo(socketMemoria, loggerKernel);
+
 		}
 
 
@@ -67,7 +67,11 @@ void atenderConsolas(int socket_servidor){
 
 		   int *socket_cliente = malloc(sizeof(int));
 		   *socket_cliente = esperar_cliente(socket_servidor, loggerKernel);
-		   if(verificarSocket(*socket_cliente, loggerKernel, configKernel) == 1) exit(1);
+		   if(verificarSocket(*socket_cliente, loggerKernel, configKernel) == 1) {
+			  free(socket_cliente);
+			  close(socket_servidor);
+			  exit(1);
+		   }
 
 		   pthread_create(&hiloServidor,
 		                    NULL,
