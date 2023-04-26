@@ -11,6 +11,7 @@
 #include <utils/modulo.h>
 
 
+
 extern t_log* loggerKernel;
 extern t_config* configKernel;
 

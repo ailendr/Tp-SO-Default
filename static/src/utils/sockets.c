@@ -11,8 +11,7 @@
 
 
 ///------FUNCIONES DEL CLIENTE------///
-
-int iniciarCliente(char *ip, char* puerto)
+int iniciarCliente(char *ip, char* puerto, t_log* logger)
 {
 	struct addrinfo hints;
 	struct addrinfo *server_info;
@@ -28,14 +27,32 @@ int iniciarCliente(char *ip, char* puerto)
 	int socket_cliente = socket(server_info->ai_family,
 			                     server_info->ai_socktype,
 								 server_info->ai_protocol);
+	
+	 if(socket_cliente == -1) {
+	        log_error(logger, "Error al crear el socket \n ");
+	        return -1;
+	    }
+	    else{
+	    	log_info(logger, "\n Socket creado con exito en la ip %s y puerto %s ", ip, puerto);
+	    }
 
 
 	// Ahora que tenemos el socket, vamos a conectarlo
     int conexion = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
+      if(conexion  == -1){
+        	log_info(logger, "\n Error : fallo la conexion");
+            
+        	freeaddrinfo(server_info);
+        	return -1;
+        }
+
+      else {
+        	log_info(logger, "\n La conexion es exitosa");
+        }
 
     freeaddrinfo(server_info);
-
-	return ((conexion == -1) ? -1 : socket_cliente);
+    return socket_cliente;
+    
 }
 
 void enviar_mensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en un paquee
@@ -80,6 +97,32 @@ void eliminar_paquete(t_paquete* paquete)
 	free(paquete);
 }
 
+///Mensaje de protocolo//
+void enviarProtocolo(int conexion, t_log* logger){
+	uint32_t handshake = 1;
+	uint32_t resultado = 2 ;//Lo inicialice asi para verificar que funcione el recv en los hilos
+	int returnSend = send(conexion, &handshake, sizeof(uint32_t), 0);
+
+	if(returnSend == -1){
+		log_info(logger, "Error al enviar el mensaje de protocolo");
+		close(conexion);
+	}
+	else{ log_info(logger, "He podido enviar un mensaje de protocolo");
+	}
+
+	recv(conexion, &resultado, sizeof(uint32_t), MSG_WAITALL);
+
+	if(resultado == -1){
+		log_info(logger,"No cumple el protocolo.Terminando la conexion");
+		close(conexion);
+	}
+	else if(resultado == 0){
+		log_info(logger, "El valor devuelto cumple con el protocolo");
+	}
+
+}
+
+
 ////------FUNCIONES DEL SERVIDOR-----////
 
 int iniciarServidor(char*  ip, char* puerto)
@@ -117,18 +160,22 @@ int iniciarServidor(char*  ip, char* puerto)
 
 
 
-int esperar_cliente(int socket_servidor)
+int esperar_cliente(int socket_servidor, t_log* logger)
 {
 
 	// Aceptamos un nuevo cliente
 	/*Accept retorna un nuevo socket, q ya sabemos q es un entero porq es un FileDescriptor*/
 	int socket_cliente = accept(socket_servidor, NULL, NULL);
 
-	//log_info(logger, "Se conecto un cliente!");
-	printf("\nSe conecto un cliente");
+    if(socket_cliente < 0){
+    	log_error(logger, "No se ha podido conectar el cliente");
+    }else{
+    	log_info(logger, "Se ha aceptado un cliente nuevo");
+    }
 
-	return socket_cliente;
+    return socket_cliente;
 }
+
 
 int recibir_operacion(int socket_cliente)
 {
@@ -182,7 +229,38 @@ t_list* recibir_paquete(int socket_cliente)
 	free(buffer);
 	return valores;
 }
+//Mensaje de protocolo: no tiene el log por parametro porq habria que pasarselo por el hilo y no puede pasarse multiples parametros al menos que sea un puntero a un struct pero paja//
 
+void recibirProtocolo (int* socket_cliente){
+	int conexionNueva = *socket_cliente;
+	//printf("Hilo en curso: Esperando mensaje del socket con file descriptor %d", conexionNueva);
 
+	uint32_t handshake;
+	uint32_t resultado_ok = 0;
+	uint32_t resultado_error = - 1;
+
+	recv(conexionNueva, &handshake, sizeof(uint32_t), MSG_WAITALL);
+     if(handshake == 1)
+	   send(conexionNueva, &resultado_ok, sizeof(uint32_t), 0);
+	 else
+	   send(conexionNueva, &resultado_error, sizeof(uint32_t), 0);
+
+	close(conexionNueva);
+	free(socket_cliente);
+}
+
+void recibirHandshake(int socket_cliente){
+	printf("\n Esperando mensaje del socket con file descriptor %d", socket_cliente);
+
+		uint32_t handshake;
+		uint32_t resultado_ok = 0;
+		uint32_t resultado_error = - 1;
+
+     recv(socket_cliente, &handshake, sizeof(uint32_t), MSG_WAITALL);
+		if(handshake == 1)
+			   send(socket_cliente, &resultado_ok, sizeof(uint32_t), 0);
+			else
+			   send(socket_cliente, &resultado_error, sizeof(uint32_t), 0);
+}
 
 

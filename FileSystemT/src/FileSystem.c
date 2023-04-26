@@ -24,57 +24,27 @@ int main(void) {
 	log_info(loggerFS, "Iniciando Servidor ... \n");
 	servidorFS = iniciarServidor(ip, puerto);
 	if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
-	log_info(loggerFS, "Servidor listo para recibir al cliente");
+	log_info(loggerFS, "Servidor listo para recibir al cliente \n" );
 
-	log_info(loggerFS, "Iniciando Cliente ... \n");
-	int cliente = esperar_cliente(servidorFS);
+	log_info(loggerFS, "Esperando un Cliente ... \n");
+	int cliente = esperar_cliente(servidorFS, loggerFS);
 	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
 		close(servidorFS);
 		return EXIT_FAILURE;
 	}
-	log_info(loggerFS, "Se conecto un cliente");
-
-	//t_list* lista; Dejo comentado esto porq me molesta el warning cuando se construye el proyec
-
-	while (1) {
-		int cod_op = recibir_operacion(cliente);
-
-		switch (cod_op) {
-			case MENSAJE:
-				log_info(loggerFS, "\nMe llego el mensaje: %s", recibir_mensaje(cliente));
-				break;
-
-			/*
-			case PAQUETE:
-				lista = recibir_paquete(cliente);
-				log_info(loggerFS, "Me llegaron los siguientes valores:\n");
-				list_iterate(lista, (void*) iterator);
-				break;
-			*/
-
-			case -1:
-				log_info(loggerFS, "el cliente se desconecto.");
-				break;
-
-			default:
-				log_warning(loggerFS,"Operacion desconocida. No quieras meter la pata");
-				break;
-		}
-
-		if ( cod_op == -1 ) break;
-	}
+	recibirHandshake(cliente);
+	log_info(loggerFS, "---------------------------------------------------------------------------");
 
 	log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
 
 	char* ipM = IP_Memoria();
 	char* puertoM = puertoMemoria();
 
-	int socketMemoria = iniciarCliente(ipM, puertoM);
+	int socketMemoria = iniciarCliente(ipM, puertoM, loggerFS);
 	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
-	log_info(loggerFS, "Conexion exitosa");
-	log_info(loggerFS, "Enviando mensaje");
-	enviar_mensaje("Hola Memoria soy FS", socketMemoria);
+	log_info(loggerFS, "Enviando mensaje \n");
+    enviarProtocolo(socketMemoria, loggerFS);
 
 	log_info(loggerFS, "Finalizando File System...\n");
 
@@ -82,7 +52,7 @@ int main(void) {
 	close (socketMemoria);
 	close (servidorFS);
 
-	printf ("Finalizo File System correctamente\n ");
+	printf ("\n Finalizo File System correctamente\n ");
 
 	return EXIT_SUCCESS;
 }
