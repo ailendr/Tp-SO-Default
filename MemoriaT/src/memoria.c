@@ -26,7 +26,7 @@ int main(void) {
 	if( verificarSocket (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 	log_info(loggerMemoria, "Servidor listo para recibir al cliente");
 
-	log_info(loggerMemoria, "Esperando Cliente ... \n");
+	log_info(loggerMemoria, "Esperando Clientes ... \n");
 
 	atenderModulos(servidorMemoria);
 
