@@ -20,20 +20,6 @@ int main(void) {
 
 	printf ("\n El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	log_info(loggerCPU, "Iniciando Servidor ... \n");
-    servidorCpu = iniciarServidor(ip, puerto);
-    if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
-    log_info(loggerCPU, "Servidor listo para recibir al cliente");
-
-	log_info(loggerCPU ,"Esperando un Cliente ... \n");
-    int cliente = esperar_cliente(servidorCpu, loggerCPU);
-    if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
-    		close(servidorCpu);
-    		return EXIT_FAILURE;
-    	}
-	recibirHandshake(cliente);
-	log_info(loggerCPU, "---------------------------------------------------------------------------");
-
 	log_info(loggerCPU, "Iniciando conexion con Memoria ... \n");
 
 	char* ipM = IP_Memoria();
@@ -44,6 +30,19 @@ int main(void) {
 
 	log_info(loggerCPU, "Enviando mensaje \n");
     enviarProtocolo(socketMemoria, loggerCPU);
+	log_info(loggerCPU, "---------------------------------------------------------------------------");
+
+    log_info(loggerCPU, "Iniciando Servidor ... \n");
+        servidorCpu = iniciarServidor(ip, puerto);
+        if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+        log_info(loggerCPU, "Servidor listo para recibir al cliente");
+    	log_info(loggerCPU ,"Esperando un Cliente ... \n");
+        int cliente = esperar_cliente(servidorCpu, loggerCPU);
+        if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
+        		close(servidorCpu);
+        		return EXIT_FAILURE;
+        	}
+    	recibirHandshake(cliente);
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);
