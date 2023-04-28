@@ -11,7 +11,7 @@ int main(void) {
 	log_info(loggerFS, "---------------------------------------------------------------------------");
 	log_info(loggerFS, "Iniciando FileSystem...");
 
-	int servidorFS = 0;
+    int servidorFS = 0;
 
 	configFS = config_create("../FileSystemT/filesystem.config");
 	if(verificarConfig (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
@@ -21,22 +21,7 @@ int main(void) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	log_info(loggerFS, "Iniciando Servidor ... \n");
-	servidorFS = iniciarServidor(ip, puerto);
-	if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
-	log_info(loggerFS, "Servidor listo para recibir al cliente \n" );
-
-	log_info(loggerFS, "Esperando un Cliente ... \n");
-	int cliente = esperar_cliente(servidorFS, loggerFS);
-	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
-		close(servidorFS);
-		return EXIT_FAILURE;
-	}
-	recibirHandshake(cliente);
-	log_info(loggerFS, "---------------------------------------------------------------------------");
-
 	log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
-
 	char* ipM = IP_Memoria();
 	char* puertoM = puertoMemoria();
 
@@ -45,6 +30,19 @@ int main(void) {
 
 	log_info(loggerFS, "Enviando mensaje \n");
     enviarProtocolo(socketMemoria, loggerFS);
+	log_info(loggerFS, "---------------------------------------------------------------------------");
+
+    log_info(loggerFS, "Iniciando Servidor ... \n");
+        servidorFS = iniciarServidor(ip, puerto);
+    	if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
+    	log_info(loggerFS, "Servidor listo para recibir al cliente \n" );
+    	log_info(loggerFS, "Esperando un Cliente ... \n");
+    	int cliente = esperar_cliente(servidorFS, loggerFS);
+    	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
+    		close(servidorFS);
+    		return EXIT_FAILURE;
+    	}
+    	recibirHandshake(cliente);
 
 	log_info(loggerFS, "Finalizando File System...\n");
 
