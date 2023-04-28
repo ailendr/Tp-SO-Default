@@ -6,9 +6,7 @@
  */
 
 #include "KernelConexiones.h"
-#include <utils/sockets.h>
-#include "KernelConfig.h"
-#include <pthread.h>
+
 
 //GLOBALES: Los puse asi para poder liberarlos desde el main//
 int socketCPU;
