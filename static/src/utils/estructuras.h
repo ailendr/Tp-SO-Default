@@ -7,8 +7,9 @@
 
 #ifndef SRC_UTILS_ESTRUCTURAS_H_
 #define SRC_UTILS_ESTRUCTURAS_H_
-
+#include <stdlib.h>
 #include <stdint.h>
+#include <commons/collections/list.h>
 
 typedef struct{
 	t_list* instrucciones;
@@ -25,16 +26,22 @@ typedef struct{
 	    char RBX[16];
 	    char RCX[16];
 	    char RDX[16];
-}contextoEjec;
+}t_contextoEjec;
+
+typedef enum{
+	NEW,
+	READY
+	} estadoPcb;
 
 typedef struct{
 	uint32_t PID;
-	contextoEjec contexto;
+	t_contextoEjec contexto;
+	uint32_t estadoPcb;
 	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
 	uint32_t estimadoReady;
 	uint32_t llegadaARedy;
 	t_list* archAbiertos;
-}pcb;
+}t_pcb;
 
 
 /*
@@ -45,5 +52,7 @@ typedef struct{
 	char* dirBase;
 }segemento;
  * */
+t_pcb* crearPcb(uint32_t pid, uint32_t estado);
 
+t_contextoEjec* crearContexto(); //TODO
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

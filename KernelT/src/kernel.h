@@ -12,7 +12,7 @@
 #include "KernelConfig.h"
 #include "KernelGlobales.h"
 #include "KernelConexiones.h"
-
+#include "planificacion.h"
 
 
 void iterator(char* value);
