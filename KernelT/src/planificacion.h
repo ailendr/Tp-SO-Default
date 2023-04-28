@@ -10,19 +10,20 @@
 #include <commons/collections/queue.h>
 #include <utils/estructuras.h>
 #include "KernelConexiones.h"
-#include <string.h>
 
 extern t_queue* colaNew;
-extern t_queue* colaReady;
+extern t_list* colaReady;
 
-void crearColas();
-void agregarAColaNew(t_pcb* procesoNuevo);
-void agregarAColaReady(t_pcb* procesoListo);
-t_pcb* extraerDeCola(t_queue* cola);
+void crearEstados();
+void agregarAEstadoNew(t_pcb* procesoNuevo);
+void agregarAEstadoReady(t_pcb* procesoListo);
+t_pcb* extraerDeNew();
+t_pcb* extraerDeReady();
+
 void largoPlazo();
 void cortoPlazo();
 void algoritmoFIFO();
-void procesoAEjecutar(t_pcb* procesoAEjecutar);
+void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 
 
 #endif /* SRC_PLANIFICACION_H_ */

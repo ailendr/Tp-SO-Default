@@ -7,7 +7,7 @@
 
 #ifndef SRC_UTILS_ESTRUCTURAS_H_
 #define SRC_UTILS_ESTRUCTURAS_H_
-#include <stdlib.h>
+
 #include <stdint.h>
 #include <commons/collections/list.h>
 
@@ -35,7 +35,7 @@ typedef enum{
 
 typedef struct{
 	uint32_t PID;
-	t_contextoEjec contexto;
+	t_contextoEjec* contexto;
 	uint32_t estadoPcb;
 	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
 	uint32_t estimadoReady;
