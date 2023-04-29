@@ -30,7 +30,8 @@ typedef struct{
 
 typedef enum{
 	NEW,
-	READY
+	READY,
+	BLOCK
 	} estadoPcb;
 
 typedef struct{
@@ -38,8 +39,8 @@ typedef struct{
 	t_contextoEjec* contexto;
 	uint32_t estadoPcb;
 	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
-	uint32_t estimadoReady;
-	uint32_t llegadaARedy;
+	uint32_t estimadoReady;//estimadorafaga
+	uint32_t llegadaARedy;//timestamp
 	t_list* archAbiertos;
 }t_pcb;
 

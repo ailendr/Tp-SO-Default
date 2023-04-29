@@ -42,7 +42,7 @@ void crearEstados(){
  int cantProcesosEnMemoria(){
 	 int cantidad=0;
 	 int procesosEnReady = list_size(colaReady);
-	 int procesosEnNew = queue_size(colaNew);
+	 //int procesosEnNew = queue_size(colaNew);
 	 cantidad = procesosEnReady + procesosEnNew;
 	 return cantidad;
  }
