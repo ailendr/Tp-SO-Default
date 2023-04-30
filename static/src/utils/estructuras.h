@@ -25,6 +25,7 @@ typedef struct{
 	    char RBX[16];
 	    char RCX[16];
 	    char RDX[16];
+	uint32_t proxInstruccion;
 }contextoEjec;
 
 typedef struct{
