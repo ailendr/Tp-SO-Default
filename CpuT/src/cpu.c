@@ -15,40 +15,53 @@ int main(void) {
 	configCPU = config_create("../CpuT/cpu.config");
 	if(verificarConfig (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
 
-	char* ip = IP_Escucha();
-	char* puerto = puertoEscucha();
-
-	printf ("\n El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+	printf ("\n El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
 	log_info(loggerCPU, "Iniciando conexion con Memoria ... \n");
 
-	char* ipM = IP_Memoria();
-	char* puertoM = puertoMemoria();
-
-	int socketMemoria = iniciarCliente(ipM, puertoM, loggerCPU);
+	int socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerCPU);
 	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
 
-	log_info(loggerCPU, "Enviando mensaje \n");
-    enviarProtocolo(socketMemoria, loggerCPU);
-	log_info(loggerCPU, "---------------------------------------------------------------------------");
+	log_info(loggerCPU, "Enviando mensaje a Memoria para corroborar conexion \n");
+    if(enviarProtocolo(socketMemoria, loggerCPU) == -1){
+    	terminarModulo(socketMemoria,loggerCPU, configCPU);
+    	return EXIT_FAILURE;
+    }
 
-    log_info(loggerCPU, "Iniciando Servidor ... \n");
-        servidorCpu = iniciarServidor(ip, puerto);
-        if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
-        log_info(loggerCPU, "Servidor listo para recibir al cliente");
-    	log_info(loggerCPU ,"Esperando un Cliente ... \n");
-        int cliente = esperar_cliente(servidorCpu, loggerCPU);
-        if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
-        		close(servidorCpu);
-        		return EXIT_FAILURE;
-        	}
-    	recibirHandshake(cliente);
+    log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel... \n");
+    servidorCpu = iniciarServidor(IP_Escucha(), puertoEscucha());
+    if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ){
+    	close(socketMemoria);
+    	return EXIT_FAILURE;
+    }
+    log_info(loggerCPU, "Servidor listo para recibir al Kernel");
+
+ 	log_info(loggerCPU ,"Esperando un Cliente ... \n");
+    int cliente = esperar_cliente(servidorCpu, loggerCPU);
+    if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
+    	close(servidorCpu);
+    	close(socketMemoria);
+        return EXIT_FAILURE;
+    }
+    recibirHandshake(cliente);
+
+    /*
+     ----------------------------------------------------
+     TODO
+     fetch()
+     Decode()
+     Execute()
+
+     Traducir direcciones logicas a fisicas
+
+     Actualizando el contexto de ejecucion
+     ----------------------------------------------------
+     */
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);
     close(socketMemoria);
 	close (servidorCpu);
-
 
 	printf ("\n Finalizo CPU correctamente \n ");
 

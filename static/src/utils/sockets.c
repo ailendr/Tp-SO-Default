@@ -98,27 +98,30 @@ void eliminar_paquete(t_paquete* paquete)
 }
 
 ///Mensaje de protocolo//
-void enviarProtocolo(int conexion, t_log* logger){
+int enviarProtocolo(int conexion, t_log* logger){
 	uint32_t handshake = 1;
 	uint32_t resultado = 2 ;//Lo inicialice asi para verificar que funcione el recv en los hilos
 	int returnSend = send(conexion, &handshake, sizeof(uint32_t), 0);
 
 	if(returnSend == -1){
 		log_info(logger, "Error al enviar el mensaje de protocolo");
-		close(conexion);
+		return -1;
 	}
-	else{ log_info(logger, "He podido enviar un mensaje de protocolo");
+	else{
+		log_info(logger, "He podido enviar un mensaje de protocolo");
 	}
 
 	recv(conexion, &resultado, sizeof(uint32_t), MSG_WAITALL);
 
 	if(resultado == -1){
 		log_info(logger,"No cumple el protocolo.Terminando la conexion");
-		close(conexion);
+		return -1;
 	}
 	else if(resultado == 0){
 		log_info(logger, "El valor devuelto cumple con el protocolo");
 	}
+
+	return 0;
 
 }
 

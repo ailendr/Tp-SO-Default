@@ -53,7 +53,7 @@ void recibirHandshake(int socket_cliente);
 void enviar_mensaje(char* mensaje, int socket_cliente);
 void* serializar_paquete(t_paquete* paquete, int bytes);
 void eliminar_paquete(t_paquete* paquete);
-void enviarProtocolo(int conexion, t_log* logger);
+int enviarProtocolo(int conexion, t_log* logger);
 
 
 void liberar_conexion(int socket);

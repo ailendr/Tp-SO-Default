@@ -29,20 +29,22 @@ int main(void) {
 	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerFS, "Enviando mensaje \n");
-    enviarProtocolo(socketMemoria, loggerFS);
-	log_info(loggerFS, "---------------------------------------------------------------------------");
+    if(enviarProtocolo(socketMemoria, loggerFS) == -1){
+        terminarModulo(socketMemoria,loggerFS, configFS);
+        return EXIT_FAILURE;
+    }
 
     log_info(loggerFS, "Iniciando Servidor ... \n");
-        servidorFS = iniciarServidor(ip, puerto);
-    	if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
-    	log_info(loggerFS, "Servidor listo para recibir al cliente \n" );
-    	log_info(loggerFS, "Esperando un Cliente ... \n");
-    	int cliente = esperar_cliente(servidorFS, loggerFS);
-    	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
-    		close(servidorFS);
-    		return EXIT_FAILURE;
-    	}
-    	recibirHandshake(cliente);
+    servidorFS = iniciarServidor(ip, puerto);
+    if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
+    log_info(loggerFS, "Servidor listo para recibir al cliente \n" );
+    log_info(loggerFS, "Esperando un Cliente ... \n");
+    int cliente = esperar_cliente(servidorFS, loggerFS);
+    if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
+    	close(servidorFS);
+    	return EXIT_FAILURE;
+    }
+    recibirHandshake(cliente);
 
 	log_info(loggerFS, "Finalizando File System...\n");
 
