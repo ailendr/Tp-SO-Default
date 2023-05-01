@@ -37,10 +37,10 @@ typedef enum{
 typedef struct{
 	uint32_t PID;
 	t_contextoEjec* contexto;
-	uint32_t estadoPcb;
+	estadoPcb estadoPcb;
 	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
 	uint32_t estimadoReady;//estimadorafaga
-	uint32_t llegadaARedy;//timestamp
+	uint32_t llegadaAReady;//timestamp
 	t_list* archAbiertos;
 }t_pcb;
 
@@ -51,9 +51,9 @@ typedef struct{
 	uint32_t ID;
 	uint32_t tamSegmento;
 	char* dirBase;
-}segemento;
+}segmento;
  * */
-t_pcb* crearPcb(uint32_t pid, uint32_t estado);
+t_pcb* crearPcb(uint32_t pid, estadoPcb estado, t_list* instrucciones);
 
-t_contextoEjec* crearContexto(); //TODO
+t_contextoEjec* crearContexto(t_list* instrucciones); //TODO
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

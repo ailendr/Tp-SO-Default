@@ -11,5 +11,6 @@
 extern int socketCPU;
 extern int socketFs;
 extern int socketMemoria;
+extern uint32_t pid;
 
 #endif /* SRC_KERNELGLOBALES_H_ */

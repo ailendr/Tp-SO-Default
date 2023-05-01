@@ -13,6 +13,8 @@
 
 extern t_queue* colaNew;
 extern t_list* colaReady;
+extern int procesosActivos;
+
 
 void crearEstados();
 void agregarAEstadoNew(t_pcb* procesoNuevo);

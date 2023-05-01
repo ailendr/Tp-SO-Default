@@ -10,6 +10,8 @@
 
 t_queue* colaNew ;
 t_list* colaReady ;
+int procesosActivos=0;
+uint32_t pid=1;
 
 void crearEstados(){
   colaNew = queue_create();
@@ -24,6 +26,7 @@ void crearEstados(){
  void agregarAEstadoReady(t_pcb* procesoListo){
 	 list_add(colaReady, procesoListo);
 	 procesoListo->estadoPcb = READY;
+	 procesosActivos++;//Esto no estoy segura de que deberia incrementar aca
  }
 
  t_pcb* extraerDeNew(){
@@ -37,8 +40,7 @@ void crearEstados(){
 	 return proceso;
  }
 
- //El grado de multiprogram es todo lo que esté en memoria, los de new cuentan
-
+/*
  int cantProcesosEnMemoria(){
 	 int cantidad=0;
 	 int procesosEnReady = list_size(colaReady);
@@ -46,7 +48,30 @@ void crearEstados(){
 	 cantidad = procesosEnReady + procesosEnNew;
 	 return cantidad;
  }
+*/
 
+//Creo que deber{ia estar en KernelConexiones o en otro lado
+t_contextoEjec* crearContexto(t_list* instrucciones) {
+ 	t_contextoEjec* contexto;
+ 	contexto->instrucciones=instrucciones;
+ 	contexto->PC=0;
+ 	return contexto;
+ }
+
+ t_pcb* crearPcbNuevo (t_list* instrucciones, uint32_t pid, estadoPcb estado){
+	    t_pcb* pcb = malloc(sizeof(t_pcb*));
+	    t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec*));
+	    contexto=crearContexto(instrucciones);
+
+	 	pcb->PID = pid;
+	 	pcb->contexto;
+	 	pcb->tablaSegmentos = list_create();//recibir por parametro
+	 	pcb->estadoPcb = estado;
+	 	pcb->estimadoReady = Estimacion();
+	 	pcb->llegadaAReady = 0;
+	 	pcb->archAbiertos = list_create();//recibir por parametro
+	 	return pcb;
+}
 
 
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
@@ -64,8 +89,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
  void largoPlazo(){
 	 t_pcb* proceso;
 	 //Con un semaforo tendriamos que ver lo de la multiprogramacion, esto lo dejo hasta que los implementemos
-	 //Lo de la multiprogramacion tendría que ser para crear los pcb realmente, no? (preguntar)
-	 int procesosActivos = cantProcesosEnMemoria();
+	 //int procesosActivos = cantProcesosEnMemoria();
 	 int maxGradoMultiprogram = Multiprogramacion();
 	 if(procesosActivos <= maxGradoMultiprogram){
 		 proceso = extraerDeNew(colaNew);
