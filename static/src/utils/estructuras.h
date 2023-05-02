@@ -7,13 +7,13 @@
 
 #ifndef SRC_UTILS_ESTRUCTURAS_H_
 #define SRC_UTILS_ESTRUCTURAS_H_
-
+#include <stdlib.h>
 #include <stdint.h>
 #include <commons/collections/list.h>
 
 typedef struct{
-	t_list* instrucciones;
-	uint32_t PC;
+	    t_list* instrucciones;
+	    uint32_t PC;
 	    char AX[4];
 	    char BX[4];
 	    char CX[4];
@@ -53,7 +53,5 @@ typedef struct{
 	char* dirBase;
 }segmento;
  * */
-t_pcb* crearPcb(uint32_t pid, estadoPcb estado, t_list* instrucciones);
 
-t_contextoEjec* crearContexto(t_list* instrucciones); //TODO
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

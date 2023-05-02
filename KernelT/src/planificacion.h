@@ -8,12 +8,11 @@
 #ifndef SRC_PLANIFICACION_H_
 #define SRC_PLANIFICACION_H_
 #include <commons/collections/queue.h>
-#include <utils/estructuras.h>
 #include "KernelConexiones.h"
+#include "pcb.h"
 
 extern t_queue* colaNew;
 extern t_list* colaReady;
-extern int procesosActivos;
 
 
 void crearEstados();
@@ -26,6 +25,9 @@ void largoPlazo();
 void cortoPlazo();
 void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
+
+void generarProceso(int socket_cliente);
+void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
 
 #endif /* SRC_PLANIFICACION_H_ */

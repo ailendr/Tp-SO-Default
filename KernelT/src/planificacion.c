@@ -11,7 +11,7 @@
 t_queue* colaNew ;
 t_list* colaReady ;
 int procesosActivos=0;
-uint32_t pid=1;
+
 
 void crearEstados(){
   colaNew = queue_create();
@@ -26,7 +26,8 @@ void crearEstados(){
  void agregarAEstadoReady(t_pcb* procesoListo){
 	 list_add(colaReady, procesoListo);
 	 procesoListo->estadoPcb = READY;
-	 procesosActivos++;//Esto no estoy segura de que deberia incrementar aca
+
+	 log_info(loggerKernel, "Cola Ready con algoritmo %s .Ingresa el proceso con id %d:", Algoritmo(), procesoListo->PID);
  }
 
  t_pcb* extraerDeNew(){
@@ -50,28 +51,7 @@ void crearEstados(){
  }
 */
 
-//Creo que deber{ia estar en KernelConexiones o en otro lado
-t_contextoEjec* crearContexto(t_list* instrucciones) {
- 	t_contextoEjec* contexto;
- 	contexto->instrucciones=instrucciones;
- 	contexto->PC=0;
- 	return contexto;
- }
 
- t_pcb* crearPcbNuevo (t_list* instrucciones, uint32_t pid, estadoPcb estado){
-	    t_pcb* pcb = malloc(sizeof(t_pcb*));
-	    t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec*));
-	    contexto=crearContexto(instrucciones);
-
-	 	pcb->PID = pid;
-	 	pcb->contexto;
-	 	pcb->tablaSegmentos = list_create();//recibir por parametro
-	 	pcb->estadoPcb = estado;
-	 	pcb->estimadoReady = Estimacion();
-	 	pcb->llegadaAReady = 0;
-	 	pcb->archAbiertos = list_create();//recibir por parametro
-	 	return pcb;
-}
 
 
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
@@ -90,12 +70,28 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 t_pcb* proceso;
 	 //Con un semaforo tendriamos que ver lo de la multiprogramacion, esto lo dejo hasta que los implementemos
 	 //int procesosActivos = cantProcesosEnMemoria();
-	 int maxGradoMultiprogram = Multiprogramacion();
+
+	 //Pasaje de New a Ready//
+	 int maxGradoMultiprogram = Multiprogramacion(); //Tiene que ser un Globals
 	 if(procesosActivos <= maxGradoMultiprogram){
 		 proceso = extraerDeNew(colaNew);
+		 enviarProtocolo(socketMemoria, loggerKernel);//El handshake seria el pedido de memoria
+		 //asignarMemoria(proceso, tabla); //PCB creado
 		 agregarAEstadoReady(proceso);
+	     procesosActivos ++;
+	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->PID);
 	 }
+
+	 }
+ void finalizarProceso(t_pcb* procesoAFinalizar){
+	 free(procesoAFinalizar->contexto);
+	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
+	 free(procesoAFinalizar);
+	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->PID);
+
+
  }
+
 
  void cortoPlazo(){
 	 char* algoritmo = Algoritmo();
@@ -110,3 +106,21 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 procesoAEjecutar(contextoAEjec);
 
  }
+/// ---------TODO LO QUE TIENE QUE VER CON PCB: En un archivo distinto---------///
+
+ void generarProceso(int socket_cliente){ //Funcion que va en el HILO de AtenderConsolas
+ 	 // recibirProtocolo(socket_cliente); Handashake
+ 	  t_list* instrucciones = list_create();
+ 	 // instrucciones = obtenerInstrucciones(socket_cliente); Obtiene una lista luego de deserializar el paquete enviado por consola y hacer un send a Consola de que recibio todo ok
+ 	  t_pcb* procesoNuevo = crearPcb(instrucciones);
+ 	  agregarAEstadoNew(procesoNuevo);
+ 	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->PID);
+   }
+
+   void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento){
+ 	  procesoNuevo->tablaSegmentos = tablaDeSegmento;
+   }
+
+
+
+
