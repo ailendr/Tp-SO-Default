@@ -34,7 +34,10 @@ int main(void) {
 
 	log_info(loggerConsola, "Enviando mensaje");
 
-	enviarProtocolo(conexion, loggerConsola);
+	if(enviarProtocolo(conexion, loggerConsola) == -1){
+	        terminarModulo(conexion,loggerConsola, configConsola);
+	        return EXIT_FAILURE;
+	}
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 

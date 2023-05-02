@@ -25,7 +25,8 @@ typedef struct{
 	    char RBX[16];
 	    char RCX[16];
 	    char RDX[16];
-}contextoEjec;
+	uint32_t proxInstruccion;
+}t_contextoEjec;
 
 typedef struct{
 	uint32_t PID;
@@ -34,7 +35,7 @@ typedef struct{
 	uint32_t estimadoReady;
 	uint32_t llegadaARedy;
 	t_list* archAbiertos;
-}pcb;
+}t_pcb;
 
 
 /*
