@@ -26,7 +26,8 @@ void cortoPlazo();
 void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 
-void generarProceso(int socket_cliente);
+void generarProceso(int* socket_cliente);
+t_list*  obtenerInstrucciones(int socket_cliente);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
 

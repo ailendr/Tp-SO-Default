@@ -11,7 +11,7 @@ t_contextoEjec* crearContexto(t_list* instrucciones) {
    	contexto->instrucciones=instrucciones;
    	contexto->PC=0;
    	//TODO Al parecer no sé como inicializar vectores :)))
-   	contexto->AX[4] = NULL;
+   /*	contexto->AX[4] = NULL;
    	contexto->BX[4]= "000";
    	contexto->CX[4]= NULL;
    	contexto->DX[4]= NULL;
@@ -22,12 +22,12 @@ t_contextoEjec* crearContexto(t_list* instrucciones) {
     contexto->RBX[16]= NULL;
     contexto->RCX[16]= NULL;
     contexto->RDX[16]= NULL;
+    */
    	return contexto;
    }
 
   t_pcb* crearPcb (t_list* instrucciones){
   	    t_pcb* pcb = malloc(sizeof(t_pcb));
-  	   // t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec));
   	 	pcb->PID = pid;
   	 	pcb->contexto = crearContexto(instrucciones);
   	 	pcb->tablaSegmentos = list_create();//recibir por parametro

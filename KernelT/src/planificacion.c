@@ -41,17 +41,6 @@ void crearEstados(){
 	 return proceso;
  }
 
-/*
- int cantProcesosEnMemoria(){
-	 int cantidad=0;
-	 int procesosEnReady = list_size(colaReady);
-	 //int procesosEnNew = queue_size(colaNew);
-	 cantidad = procesosEnReady + procesosEnNew;
-	 return cantidad;
- }
-*/
-
-
 
 
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
@@ -106,12 +95,23 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 procesoAEjecutar(contextoAEjec);
 
  }
-/// ---------TODO LO QUE TIENE QUE VER CON PCB: En un archivo distinto---------///
+/// ---------TODO LO QUE TIENE QUE VER CON INSTRUCCIONES---------///
 
- void generarProceso(int socket_cliente){ //Funcion que va en el HILO de AtenderConsolas
- 	 // recibirProtocolo(socket_cliente); Handashake
- 	  t_list* instrucciones = list_create();
- 	 // instrucciones = obtenerInstrucciones(socket_cliente); Obtiene una lista luego de deserializar el paquete enviado por consola y hacer un send a Consola de que recibio todo ok
+ t_list* obtenerInstrucciones(int socket_cliente){
+	 int codigoOp = recibir_operacion(socket_cliente);
+	 t_list* listaDeInstrucciones; //Recordar liberar esto cuando terminemos
+	 uint32_t recepcion = 1; //Consola deberia verificar que si es 1 -> kernel recibio todo OK
+	 if(codigoOp == PAQUETE){
+	 listaDeInstrucciones = recibir_paquete(socket_cliente);
+	 send(socket_cliente, &recepcion, sizeof(uint32_t),0);
+	 return listaDeInstrucciones;
+   }
+ }
+
+ void generarProceso(int* socket_cliente){
+	 int consolaNueva = *socket_cliente;
+	   recibirProtocolo(socket_cliente); //Handashake
+ 	  t_list* instrucciones = obtenerInstrucciones(consolaNueva);
  	  t_pcb* procesoNuevo = crearPcb(instrucciones);
  	  agregarAEstadoNew(procesoNuevo);
  	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->PID);
