@@ -27,7 +27,7 @@ void iniciarConexionesDeKernel(){
             socketCPU = iniciarCliente(ipCPU, puertoCPU, loggerKernel);
 			  if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) exit(1);
 			  log_info(loggerKernel, "Enviando mensaje \n");
-			  enviarProtocolo(socketCPU, loggerKernel);
+			  if (enviarProtocolo(socketCPU, loggerKernel) == -1) exit(1);
 			  log_info(loggerKernel, "Finalizando conexion con CPU");
 
 
@@ -39,7 +39,7 @@ void iniciarConexionesDeKernel(){
 			   if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) exit(1);
 
 			   log_info(loggerKernel, "Enviando mensaje \n");
-                enviarProtocolo(socketFs,loggerKernel);
+               if (enviarProtocolo(socketFs,loggerKernel) == -1) exit(1);
 
 
 			   //>>>>>>CONEXION CON MEMORIA <<<<<<<<<
@@ -50,7 +50,7 @@ void iniciarConexionesDeKernel(){
 			  	if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) exit(1);
 
 			  	log_info(loggerKernel, "Enviando mensaje \n");
-			  	enviarProtocolo(socketMemoria, loggerKernel);
+			  	if (enviarProtocolo(socketMemoria, loggerKernel) == -1) exit(1);
 
 		}
 

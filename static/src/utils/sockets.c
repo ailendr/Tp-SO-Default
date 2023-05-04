@@ -41,7 +41,6 @@ int iniciarCliente(char *ip, char* puerto, t_log* logger)
     int conexion = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
       if(conexion  == -1){
         	log_info(logger, "\n Error : fallo la conexion");
-            
         	freeaddrinfo(server_info);
         	return -1;
         }
@@ -74,6 +73,8 @@ void enviar_mensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en u
 	free(a_enviar); //libera puntero
 	eliminar_paquete(paquete);//libera los punteros q componen la estructura paquete y luego la estructura en si
 }
+
+
 
 void* serializar_paquete(t_paquete* paquete, int bytes) // pone lo del paquete posta en ptra estructura magic para copiarlo basicamente
 {
@@ -125,6 +126,42 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente)
 }
 
 
+void crear_buffer(t_paquete* paquete)
+{
+	paquete->buffer = malloc(sizeof(t_buffer));
+	paquete->buffer->size = 0;
+	paquete->buffer->stream = NULL;
+}
+
+t_paquete* crear_paquete(void)
+{
+	t_paquete* paquete = malloc(sizeof(t_paquete));
+	paquete->codigo_operacion = PAQUETE;
+	crear_buffer(paquete);
+	return paquete;
+}
+
+void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio)
+{
+	paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + tamanio + sizeof(int));
+
+	memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio, sizeof(int));
+	memcpy(paquete->buffer->stream + paquete->buffer->size + sizeof(int), valor, tamanio);
+
+	paquete->buffer->size += tamanio + sizeof(int);
+}
+
+void enviar_paquete(t_paquete* paquete, int socket_cliente)
+{
+	int bytes = paquete->buffer->size + 2*sizeof(int);
+	void* a_enviar = serializar_paquete(paquete, bytes);
+
+	send(socket_cliente, a_enviar, bytes, 0);
+
+	free(a_enviar);
+}
+
+
 void eliminar_paquete(t_paquete* paquete)
 {
 	free(paquete->buffer->stream);
@@ -133,27 +170,30 @@ void eliminar_paquete(t_paquete* paquete)
 }
 
 ///Mensaje de protocolo//
-void enviarProtocolo(int conexion, t_log* logger){
+int enviarProtocolo(int conexion, t_log* logger){
 	uint32_t handshake = 1;
 	uint32_t resultado = 2 ;//Lo inicialice asi para verificar que funcione el recv en los hilos
 	int returnSend = send(conexion, &handshake, sizeof(uint32_t), 0);
 
 	if(returnSend == -1){
 		log_info(logger, "Error al enviar el mensaje de protocolo");
-		close(conexion);
+		return -1;
 	}
-	else{ log_info(logger, "He podido enviar un mensaje de protocolo");
+	else{
+		log_info(logger, "He podido enviar un mensaje de protocolo");
 	}
 
 	recv(conexion, &resultado, sizeof(uint32_t), MSG_WAITALL);
 
 	if(resultado == -1){
 		log_info(logger,"No cumple el protocolo.Terminando la conexion");
-		close(conexion);
+		return -1;
 	}
 	else if(resultado == 0){
 		log_info(logger, "El valor devuelto cumple con el protocolo");
 	}
+
+	return 0;
 
 }
 
