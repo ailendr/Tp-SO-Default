@@ -8,7 +8,10 @@
 #ifndef SRC_PLANIFICACION_H_
 #define SRC_PLANIFICACION_H_
 #include <commons/collections/queue.h>
-#include "KernelConexiones.h"
+
+#include "kernelGlobales.h"
+#include "kernelConfig.h"
+//#include "KernelConexiones.h"
 #include "pcb.h"
 
 extern t_queue* colaNew;

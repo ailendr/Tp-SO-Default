@@ -8,7 +8,7 @@
 #ifndef SRC_PCB_H_
 #define SRC_PCB_H_
 #include <utils/estructuras.h>
-#include "KernelConexiones.h"
+#include "kernelConexiones.h"
 
 t_pcb* crearPcb(t_list* instrucciones);
 

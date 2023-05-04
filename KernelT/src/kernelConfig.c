@@ -1,4 +1,4 @@
-#include "KernelConfig.h"
+#include "kernelConfig.h"
 
 t_log* loggerKernel;
 t_config* configKernel;

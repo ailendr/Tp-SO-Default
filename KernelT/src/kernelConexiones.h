@@ -9,10 +9,11 @@
 #define SRC_KERNELCONEXIONES_H_
 
 #include <utils/sockets.h>
-#include "KernelConfig.h"
-#include "KernelGlobales.h"
-
 #include <pthread.h>
+
+#include "kernelConfig.h"
+#include "kernelGlobales.h"
+#include "planificacion.h"
 
 
 void iniciarConexionesDeKernel();

@@ -5,7 +5,7 @@
  *      Author: utnso
  */
 
-#include "KernelConexiones.h"
+#include "kernelConexiones.h"
 
 
 //GLOBALES: Los puse asi para poder liberarlos desde el main//
@@ -72,7 +72,7 @@ void atenderConsolas(int socket_servidor){
 
 		   pthread_create(&hiloServidor,
 		                    NULL,
-		                   (void*) recibirProtocolo,
+		                   (void*) generarProceso,
 		                   (void*)socket_cliente);
 
 		   pthread_detach(hiloServidor);
