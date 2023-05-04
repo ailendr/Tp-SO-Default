@@ -6,14 +6,13 @@
  */
 
 #include "KernelConexiones.h"
-#include <utils/sockets.h>
-#include "KernelConfig.h"
-#include <pthread.h>
+
 
 //GLOBALES: Los puse asi para poder liberarlos desde el main//
 int socketCPU;
 int socketFs;
 int socketMemoria;
+uint32_t pid = 0;
 
 void iniciarConexionesDeKernel(){
 
@@ -58,6 +57,7 @@ void iniciarConexionesDeKernel(){
 
 
 void atenderConsolas(int socket_servidor){
+
 	while (1) {
 		  pthread_t hiloServidor;
 
@@ -68,6 +68,7 @@ void atenderConsolas(int socket_servidor){
 			  close(socket_servidor);
 			  exit(1);
 		   }
+          // pid ++;
 
 		   pthread_create(&hiloServidor,
 		                    NULL,
@@ -75,6 +76,8 @@ void atenderConsolas(int socket_servidor){
 		                   (void*)socket_cliente);
 
 		   pthread_detach(hiloServidor);
+
+		  // log_info(loggerKernel, "El pid del proceso es: %d", pid);
 
    }
 }

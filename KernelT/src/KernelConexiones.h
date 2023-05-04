@@ -8,6 +8,11 @@
 #ifndef SRC_KERNELCONEXIONES_H_
 #define SRC_KERNELCONEXIONES_H_
 
+#include <utils/sockets.h>
+#include "KernelConfig.h"
+#include "KernelGlobales.h"
+
+#include <pthread.h>
 
 
 void iniciarConexionesDeKernel();
