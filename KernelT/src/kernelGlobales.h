@@ -8,6 +8,8 @@
 #ifndef SRC_KERNELGLOBALES_H_
 #define SRC_KERNELGLOBALES_H_
 
+#include <stdint.h>//BORRAR SI NO SIRVE
+
 extern int socketCPU;
 extern int socketFs;
 extern int socketMemoria;
