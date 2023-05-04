@@ -43,16 +43,59 @@ void crearEstados(){
 
 
 
-void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
-	//Aca tendría que llamar a lo de serializar, dejo un tipo provisional asi no rompe
-	uint32_t paquete = 0;
-	uint32_t paqueteRecibido;
-	 send(socketCPU,&paquete, sizeof(uint32_t), 0);
-     recv(socketCPU, &paqueteRecibido,sizeof(uint32_t),MSG_WAITALL);
 
-	//Aca habria que deserializar y actualizar el proceso
-	//t_contextoEjec* procesoDeserializado;
-	//funcion que coloque ese nuevo contexto recibido al pcb enviado
+void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
+	////----SERIALIZACION------///
+
+	 t_paquete* paqueteContexto = malloc(sizeof(t_paquete));
+	 paqueteContexto->codigo_operacion = CONTEXTO;
+	 paqueteContexto->buffer = malloc(sizeof(t_buffer));
+	// t_paquete* paqueteInstrucciones = malloc(sizeof(t_paquete));
+	 //paqueteInstrucciones->buffer->size
+	 //paqueteInstrucciones->buffer->stream
+	 paqueteContexto->buffer->size = 0;
+	 paqueteContexto->buffer->stream = NULL;
+	 t_list* instrucciones = procesoAEjecutar->instrucciones;
+	 int tamanioInstrucciones = list_size(instrucciones);
+	 for(int i = 0; i < tamanioInstrucciones ;i++){
+		 char* instruccion = list_get(instrucciones, i);
+		 agregar_a_paquete(paqueteContexto, instruccion, strlen(instruccion)+1); //para q cpu pueda usar recibirPaquete del otro lado
+	 }
+		 //int bytesPaqInstruc = paqueteInstrucciones->buffer->size + sizeof(int); //tamaño en bytes del stream con instrucciones + byte del int por el tamaño del stream
+        // paqueteContexto->buffer->size = bytesPaqInstruc + sizeof(uint32_t)+ 4*4 + 8*4 + 16*4;//los numeros son por los registros
+        // void * streamContexto = malloc(paqueteContexto->buffer->size);
+         int offset = paqueteContexto->buffer->size ;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
+         offset += sizeof(uint32_t);
+
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->AX), 4);
+         offset += 4;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->BX), 4);
+         offset += 4;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->CX), 4);
+         offset += 4;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->DX), 4);
+         offset += 4;
+
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EAX), 8);
+         offset += 8;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EBX), 8);
+         offset += 8;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->ECX), 8);
+         offset += 8;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EDX), 8);
+         offset += 8;
+
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RAX), 16);
+         offset += 16;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RBX), 16);
+         offset += 16;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RCX), 16);
+         offset += 16;
+         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RDX), 16);
+         /////----FIN DE SERIALIZACION----///
+
+         enviar_paquete(paqueteContexto,socketCPU);
 }
 
  void largoPlazo(){
