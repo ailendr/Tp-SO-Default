@@ -11,7 +11,7 @@
 t_queue* colaNew ;
 t_list* colaReady ;
 int procesosActivos=0;
-
+t_pcb* ultimoEjecutado;
 
 void crearEstados(){
   colaNew = queue_create();
@@ -50,9 +50,6 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 t_paquete* paqueteContexto = malloc(sizeof(t_paquete));
 	 paqueteContexto->codigo_operacion = CONTEXTO;
 	 paqueteContexto->buffer = malloc(sizeof(t_buffer));
-	// t_paquete* paqueteInstrucciones = malloc(sizeof(t_paquete));
-	 //paqueteInstrucciones->buffer->size
-	 //paqueteInstrucciones->buffer->stream
 	 paqueteContexto->buffer->size = 0;
 	 paqueteContexto->buffer->stream = NULL;
 	 t_list* instrucciones = procesoAEjecutar->instrucciones;
@@ -61,9 +58,6 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 		 char* instruccion = list_get(instrucciones, i);
 		 agregar_a_paquete(paqueteContexto, instruccion, strlen(instruccion)+1); //para q cpu pueda usar recibirPaquete del otro lado
 	 }
-		 //int bytesPaqInstruc = paqueteInstrucciones->buffer->size + sizeof(int); //tamaño en bytes del stream con instrucciones + byte del int por el tamaño del stream
-        // paqueteContexto->buffer->size = bytesPaqInstruc + sizeof(uint32_t)+ 4*4 + 8*4 + 16*4;//los numeros son por los registros
-        // void * streamContexto = malloc(paqueteContexto->buffer->size);
          int offset = paqueteContexto->buffer->size ;
          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
          offset += sizeof(uint32_t);
@@ -93,6 +87,9 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RCX), 16);
          offset += 16;
          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RDX), 16);
+         offset += 16;
+
+         memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->instrucActual), sizeof(instruccionActual));
          /////----FIN DE SERIALIZACION----///
 
          enviar_paquete(paqueteContexto,socketCPU);
@@ -114,7 +111,20 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->PID);
 	 }
 
-	 }
+	 ///Cualquier estado a EXIT///
+	/* t_paquete* paquete = malloc(sizeof(t_paquete));
+	 paquete->buffer=malloc(sizeof(t_buffer));
+	 int codigo = recibir_operacion(socketCPU);
+	 if(codigo=CONTEXTO){
+	 recv(socketCPU, &paquete->buffer->size,sizeof(uint32_t),MSG_WAITALL);
+	 //TODO DESERIALIZARRRRRRRRRRR
+	  if(contexto->proxInstruccion == EXIT){
+	  finalizarProceso(ultimoEjecutado);
+	  * */
+
+	    }
+
+
  void finalizarProceso(t_pcb* procesoAFinalizar){
 	 free(procesoAFinalizar->contexto);
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
@@ -136,6 +146,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 t_pcb* procesoAEjec = extraerDeReady();
 	 t_contextoEjec* contextoAEjec = procesoAEjec->contexto; //podria usar el concepto de encapsulamiento y q pcb sepa retornarme su contexto pero wee
 	 procesoAEjecutar(contextoAEjec);
+	 ultimoEjecutado = procesoAEjec;
 
  }
 /// ---------TODO LO QUE TIENE QUE VER CON INSTRUCCIONES---------///
@@ -144,11 +155,12 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 int codigoOp = recibir_operacion(socket_cliente);
 	 t_list* listaDeInstrucciones; //Recordar liberar esto cuando terminemos
 	 uint32_t recepcion = 1; //Consola deberia verificar que si es 1 -> kernel recibio todo OK
-	 if(codigoOp == PAQUETE){
+	 if(codigoOp == PAQUETE){//Ver si lo aplicamos o sacamos
 	 listaDeInstrucciones = recibir_paquete(socket_cliente);
 	 send(socket_cliente, &recepcion, sizeof(uint32_t),0);
 	 return listaDeInstrucciones;
    }
+
  }
 
  void generarProceso(int* socket_cliente){

@@ -11,6 +11,11 @@
 #include <stdint.h>
 #include <commons/collections/list.h>
 
+typedef enum{
+	IO,
+	EXIT
+} instruccionActual;
+
 typedef struct{
 	    t_list* instrucciones;
 	    uint32_t PC;
@@ -27,7 +32,7 @@ typedef struct{
 	    char RCX[16];
 	    char RDX[16];
 
-	uint32_t proxInstruccion;
+	instruccionActual instrucActual;
 }t_contextoEjec;
 
 typedef enum{

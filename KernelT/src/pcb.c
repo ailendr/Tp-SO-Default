@@ -9,7 +9,7 @@
 t_contextoEjec* crearContexto(t_list* instrucciones) {
    	t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec));
    	contexto->instrucciones=instrucciones;
-   	contexto->PC=0;
+   	contexto->PC = 0;
    	//TODO Al parecer no sé como inicializar vectores :)))
    /*	contexto->AX[4] = NULL;
    	contexto->BX[4]= "000";
