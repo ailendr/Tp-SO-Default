@@ -112,17 +112,53 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 }
 
 	 ///Cualquier estado a EXIT///
-	/* t_paquete* paquete = malloc(sizeof(t_paquete));
+	/*t_paquete* paquete = malloc(sizeof(t_paquete));
 	 paquete->buffer=malloc(sizeof(t_buffer));
 	 int codigo = recibir_operacion(socketCPU);
 	 if(codigo=CONTEXTO){
 	 recv(socketCPU, &paquete->buffer->size,sizeof(uint32_t),MSG_WAITALL);
-	 //TODO DESERIALIZARRRRRRRRRRR
+	 paquete->buffer->stream = malloc(paquete->buffer->size);
+	 recv(socketCPU, paquete->buffer->stream, paquete->buffer->size, 0);
+	 /////////DESERIALIZACION////////////////
+	 deserializarContexto(paquete->buffer);
 	  if(contexto->proxInstruccion == EXIT){
 	  finalizarProceso(ultimoEjecutado);
-	  * */
 
-	    }
+	    }*/
+
+t_contextoEjec* deserializarContexto(t_buffer* buffer){
+	 t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec));
+
+	 void * stream= buffer->stream;
+	 //DUDA: para deserializar la lista debería recibir el tamaño?
+
+	 memcpy(&(contexto->PC), stream, sizeof(uint32_t));
+	 stream+= sizeof(uint32_t);
+	 memcpy(&(contexto->AX), stream, sizeof(char[4]));
+	 stream+=sizeof(char[4]);
+	 memcpy(&(contexto->BX), stream, sizeof(char[4]));
+	 stream+=sizeof(char[4]);
+	 memcpy(&(contexto->CX), stream, sizeof(char[4]));
+	 stream+=sizeof(char[4]);
+	 memcpy(&(contexto->DX), stream, sizeof(char[4]));
+	 stream+=sizeof(char[4]);
+	 memcpy(&(contexto->EAX), stream, sizeof(char[8]));
+	 stream+=sizeof(char[8]);
+	 memcpy(&(contexto->EBX), stream, sizeof(char[8]));
+	 stream+=sizeof(char[8]);
+	 memcpy(&(contexto->ECX), stream, sizeof(char[8]));
+	 stream+=sizeof(char[8]);
+	 memcpy(&(contexto->EDX), stream, sizeof(char[8]));
+	 stream+=sizeof(char[8]);
+	 memcpy(&(contexto->RAX), stream, sizeof(char[16]));
+	 stream+=sizeof(char[16]);
+	 memcpy(&(contexto->RBX), stream, sizeof(char[16]));
+	 stream+=sizeof(char[16]);
+	 memcpy(&(contexto->RCX), stream, sizeof(char[16]));
+	 stream+=sizeof(char[16]);
+	 memcpy(&(contexto->RDX), stream, sizeof(char[16]));
+	 stream+=sizeof(char[16]);
+ }
 
 
  void finalizarProceso(t_pcb* procesoAFinalizar){
