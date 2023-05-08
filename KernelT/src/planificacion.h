@@ -24,6 +24,9 @@ void agregarAEstadoReady(t_pcb* procesoListo);
 t_pcb* extraerDeNew();
 t_pcb* extraerDeReady();
 
+//lo pongo aca porq largo plazo los usa//
+t_list* deserializarInstrucciones(void*buffer, int desplazamiento,int tamanioBuffer);
+t_contextoEjec* deserializarContexto(void* buffer, int tamanio);
 void largoPlazo();
 void cortoPlazo();
 void algoritmoFIFO();
@@ -32,6 +35,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void generarProceso(int* socket_cliente);
 t_list*  obtenerInstrucciones(int socket_cliente);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
+
 
 
 #endif /* SRC_PLANIFICACION_H_ */

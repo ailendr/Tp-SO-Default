@@ -38,7 +38,8 @@ typedef struct{
 typedef enum{
 	NEW,
 	READY,
-	BLOCK
+	BLOCK,
+	EXEC
 	} estadoPcb;
 
 typedef struct{

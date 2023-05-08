@@ -44,21 +44,16 @@ void crearEstados(){
 
 
 
-void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
+void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	////----SERIALIZACION------///
 
-	 t_paquete* paqueteContexto = malloc(sizeof(t_paquete));
-	 paqueteContexto->codigo_operacion = CONTEXTO;
-	 paqueteContexto->buffer = malloc(sizeof(t_buffer));
-	 paqueteContexto->buffer->size = 0;
-	 paqueteContexto->buffer->stream = NULL;
-	 t_list* instrucciones = procesoAEjecutar->instrucciones;
-	 int tamanioInstrucciones = list_size(instrucciones);
-	 for(int i = 0; i < tamanioInstrucciones ;i++){
-		 char* instruccion = list_get(instrucciones, i);
-		 agregar_a_paquete(paqueteContexto, instruccion, strlen(instruccion)+1); //para q cpu pueda usar recibirPaquete del otro lado
-	 }
-         int offset = paqueteContexto->buffer->size ;
+	 	 t_paquete* paqueteContexto = malloc(sizeof(t_paquete));
+	 	 paqueteContexto->codigo_operacion = CONTEXTO;
+	 	 paqueteContexto->buffer = malloc(sizeof(t_buffer));
+	 	 paqueteContexto->buffer->size = 0;
+	 	 paqueteContexto->buffer->stream = NULL;
+
+         int offset = 0;
          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
          offset += sizeof(uint32_t);
 
@@ -90,10 +85,79 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
          offset += 16;
 
          memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->instrucActual), sizeof(instruccionActual));
-         /////----FIN DE SERIALIZACION----///
+         offset += sizeof(instruccionActual);
 
-         enviar_paquete(paqueteContexto,socketCPU);
+         t_list* instrucciones = procesoAEjecutar->instrucciones;
+        	 int tamanioInstrucciones = list_size(instrucciones);
+        	 for(int i = 0; i < tamanioInstrucciones ;i++){
+        		 char* instruccion = list_get(instrucciones, i);
+        		 agregar_a_paquete(paqueteContexto, instruccion, strlen(instruccion)+1); //para q cpu pueda usar recibirPaquete del otro lado
+        	 }
+
+         enviar_paquete(paqueteContexto,socketCPU); //Acá se serializa el paquete y se envia
 }
+
+t_list* deserializarInstrucciones(void*buffer, int desplazamiento,int tamanioBuffer){
+		t_list* listaInstrucciones = list_create();
+		int tamanioInstruccion;
+		while(desplazamiento < tamanioBuffer)
+		{
+			memcpy(&tamanioInstruccion, buffer + desplazamiento, sizeof(int));
+			desplazamiento+=sizeof(int);
+			char* instruccion = malloc(tamanioInstruccion);
+			memcpy(instruccion, buffer+desplazamiento, tamanioInstruccion);
+			desplazamiento+=tamanioInstruccion;
+			list_add(listaInstrucciones, instruccion);
+		}
+		return listaInstrucciones;
+}
+
+t_contextoEjec* deserializarContexto(void* buffer, int tamanio){
+
+
+	 t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec));
+
+	 void * stream = buffer;
+	 int tamanioBuffer = tamanio;
+	 int desplazamiento = 0;
+
+	 memcpy(&(contexto->PC), stream+desplazamiento,sizeof(uint32_t));
+	 desplazamiento+= sizeof(uint32_t);
+	 memcpy(&(contexto->AX), stream+desplazamiento, sizeof(char[4]));
+	 desplazamiento+=sizeof(char[4]);
+	 memcpy(&(contexto->BX), stream+desplazamiento, sizeof(char[4]));
+	 desplazamiento+=sizeof(char[4]);
+	 memcpy(&(contexto->CX), stream+desplazamiento, sizeof(char[4]));
+	 desplazamiento+=sizeof(char[4]);
+	 memcpy(&(contexto->DX), stream+desplazamiento, sizeof(char[4]));
+	 desplazamiento+=sizeof(char[4]);
+
+	 memcpy(&(contexto->EAX), stream+desplazamiento, sizeof(char[8]));
+	 desplazamiento+=sizeof(char[8]);
+	 memcpy(&(contexto->EBX), stream+desplazamiento, sizeof(char[8]));
+	 desplazamiento+=sizeof(char[8]);
+	 memcpy(&(contexto->ECX), stream+desplazamiento, sizeof(char[8]));
+	 desplazamiento+=sizeof(char[8]);
+	 memcpy(&(contexto->EDX), stream+desplazamiento, sizeof(char[8]));
+	 desplazamiento+=sizeof(char[8]);
+
+	 memcpy(&(contexto->RAX), stream+desplazamiento, sizeof(char[16]));
+	 desplazamiento+=sizeof(char[16]);
+	 memcpy(&(contexto->RBX), stream+desplazamiento, sizeof(char[16]));
+	 desplazamiento+=sizeof(char[16]);
+	 memcpy(&(contexto->RCX), stream+desplazamiento,sizeof(char[16]));
+	 desplazamiento+=sizeof(char[16]);
+	 memcpy(&(contexto->RDX), stream+desplazamiento, sizeof(char[16]));
+	 desplazamiento+=sizeof(char[16]);
+
+	 memcpy(&(contexto->instrucActual), stream+desplazamiento,sizeof(instruccionActual));
+     desplazamiento += sizeof(instruccionActual);
+
+     contexto->instrucciones = deserializarInstrucciones(stream, desplazamiento,tamanioBuffer);
+
+     return contexto;
+     }
+
 
  void largoPlazo(){
 	 t_pcb* proceso;
@@ -111,54 +175,20 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->PID);
 	 }
 
-	 ///Cualquier estado a EXIT///
-	/*t_paquete* paquete = malloc(sizeof(t_paquete));
-	 paquete->buffer=malloc(sizeof(t_buffer));
+
+	 ///Cualquier estado a EXIT/: 1° Recepcion del contexto que recibe de cpu//
 	 int codigo = recibir_operacion(socketCPU);
-	 if(codigo=CONTEXTO){
-	 recv(socketCPU, &paquete->buffer->size,sizeof(uint32_t),MSG_WAITALL);
-	 paquete->buffer->stream = malloc(paquete->buffer->size);
-	 recv(socketCPU, paquete->buffer->stream, paquete->buffer->size, 0);
-	 /////////DESERIALIZACION////////////////
-	 deserializarContexto(paquete->buffer);
-	  if(contexto->proxInstruccion == EXIT){
-	  finalizarProceso(ultimoEjecutado);
+	 int tamanio = 0;
+	 void* buffer = recibir_buffer(&tamanio, socketCPU); //recibe el tamanio del stream y llena el buffer con el contenido del stream
+	 if(codigo == CONTEXTO){
+      /////////DESERIALIZACION////////////////
+	 t_contextoEjec* contexto = deserializarContexto(buffer, tamanio);
+	 free(buffer);
+	 }//Liberamos el buffer
+	 // if(contexto->proxInstruccion == EXIT){
+	 //  finalizarProceso(ultimoEjecutado);
 
-	    }*/
-
-t_contextoEjec* deserializarContexto(t_buffer* buffer){
-	 t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec));
-
-	 void * stream= buffer->stream;
-	 //DUDA: para deserializar la lista debería recibir el tamaño?
-
-	 memcpy(&(contexto->PC), stream, sizeof(uint32_t));
-	 stream+= sizeof(uint32_t);
-	 memcpy(&(contexto->AX), stream, sizeof(char[4]));
-	 stream+=sizeof(char[4]);
-	 memcpy(&(contexto->BX), stream, sizeof(char[4]));
-	 stream+=sizeof(char[4]);
-	 memcpy(&(contexto->CX), stream, sizeof(char[4]));
-	 stream+=sizeof(char[4]);
-	 memcpy(&(contexto->DX), stream, sizeof(char[4]));
-	 stream+=sizeof(char[4]);
-	 memcpy(&(contexto->EAX), stream, sizeof(char[8]));
-	 stream+=sizeof(char[8]);
-	 memcpy(&(contexto->EBX), stream, sizeof(char[8]));
-	 stream+=sizeof(char[8]);
-	 memcpy(&(contexto->ECX), stream, sizeof(char[8]));
-	 stream+=sizeof(char[8]);
-	 memcpy(&(contexto->EDX), stream, sizeof(char[8]));
-	 stream+=sizeof(char[8]);
-	 memcpy(&(contexto->RAX), stream, sizeof(char[16]));
-	 stream+=sizeof(char[16]);
-	 memcpy(&(contexto->RBX), stream, sizeof(char[16]));
-	 stream+=sizeof(char[16]);
-	 memcpy(&(contexto->RCX), stream, sizeof(char[16]));
-	 stream+=sizeof(char[16]);
-	 memcpy(&(contexto->RDX), stream, sizeof(char[16]));
-	 stream+=sizeof(char[16]);
- }
+}
 
 
  void finalizarProceso(t_pcb* procesoAFinalizar){
@@ -166,7 +196,6 @@ t_contextoEjec* deserializarContexto(t_buffer* buffer){
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	 free(procesoAFinalizar);
 	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->PID);
-
 
  }
 
@@ -182,9 +211,10 @@ t_contextoEjec* deserializarContexto(t_buffer* buffer){
 	 t_pcb* procesoAEjec = extraerDeReady();
 	 t_contextoEjec* contextoAEjec = procesoAEjec->contexto; //podria usar el concepto de encapsulamiento y q pcb sepa retornarme su contexto pero wee
 	 procesoAEjecutar(contextoAEjec);
+	 procesoAEjec->estadoPcb = EXEC;
 	 ultimoEjecutado = procesoAEjec;
-
  }
+
 /// ---------TODO LO QUE TIENE QUE VER CON INSTRUCCIONES---------///
 
  t_list* obtenerInstrucciones(int socket_cliente){
@@ -194,10 +224,12 @@ t_contextoEjec* deserializarContexto(t_buffer* buffer){
 	 if(codigoOp == PAQUETE){//Ver si lo aplicamos o sacamos
 	 listaDeInstrucciones = recibir_paquete(socket_cliente);
 	 send(socket_cliente, &recepcion, sizeof(uint32_t),0);
+	 //return listaDeInstrucciones;
+    }
 	 return listaDeInstrucciones;
-   }
-
  }
+
+
 
  void generarProceso(int* socket_cliente){
 	 int consolaNueva = *socket_cliente;
@@ -208,9 +240,10 @@ t_contextoEjec* deserializarContexto(t_buffer* buffer){
  	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->PID);
    }
 
-   void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento){
+ void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento){
  	  procesoNuevo->tablaSegmentos = tablaDeSegmento;
-   }
+
+  }
 
 
 
