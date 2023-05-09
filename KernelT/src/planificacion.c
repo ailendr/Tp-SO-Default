@@ -45,7 +45,7 @@ void crearEstados(){
 
 
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
-	////----SERIALIZACION------///
+	////----SERIALIZACION DE CONTEXTO------///
 
 	 	 t_paquete* paqueteContexto = malloc(sizeof(t_paquete));
 	 	 paqueteContexto->codigo_operacion = CONTEXTO;
@@ -84,8 +84,10 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RDX), 16);
          offset += 16;
 
-         memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->instrucActual), sizeof(instruccionActual));
-         offset += sizeof(instruccionActual);
+	 //PID : Descomentar cuando dany lo pushee en main//
+
+      /*   memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->PID), sizeof(uint32_t));
+         offset +=  sizeof(uint32_t);*/
 
          t_list* instrucciones = procesoAEjecutar->instrucciones;
         	 int tamanioInstrucciones = list_size(instrucciones);
@@ -150,8 +152,9 @@ t_contextoEjec* deserializarContexto(void* buffer, int tamanio){
 	 memcpy(&(contexto->RDX), stream+desplazamiento, sizeof(char[16]));
 	 desplazamiento+=sizeof(char[16]);
 
-	 memcpy(&(contexto->instrucActual), stream+desplazamiento,sizeof(instruccionActual));
-     desplazamiento += sizeof(instruccionActual);
+	 //PID : Descomentar cuando dany lo pushee en main//
+	/* memcpy(&(contexto->PID), stream+desplazamiento,sizeof(uint32_t));
+     desplazamiento += sizeof(instruccionActual);*/
 
      contexto->instrucciones = deserializarInstrucciones(stream, desplazamiento,tamanioBuffer);
 

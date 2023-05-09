@@ -32,7 +32,7 @@ typedef struct{
 	    char RCX[16];
 	    char RDX[16];
 
-	instruccionActual instrucActual;
+	//instruccionActual instrucActual;
 }t_contextoEjec;
 
 typedef enum{
