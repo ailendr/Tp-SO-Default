@@ -7,7 +7,7 @@
 
 #include "planificacion.h"
 
-//Dany tuvo x aqui -> Despues borrenlo pero no me deja sino
+//Dany tuvo x aqui -> Despues borrenlo pero no me deja
 
 t_queue *colaNew;
 t_list *colaReady;
