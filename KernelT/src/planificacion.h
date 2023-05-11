@@ -33,6 +33,7 @@ void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 
 void generarProceso(int* socket_cliente);
+void finalizarProceso(t_pcb* procesoAFinalizar);
 t_list*  obtenerInstrucciones(int socket_cliente);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 

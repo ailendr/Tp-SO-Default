@@ -25,6 +25,7 @@ typedef enum
 	MENSAJE,
 	PAQUETE,
 	CONTEXTO,
+	YIELD,
 	EXIT
 
 }op_code;
