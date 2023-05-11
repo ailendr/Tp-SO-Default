@@ -56,6 +56,28 @@ typedef struct{
 }t_pcb;
 
 
+typedef enum{
+    F_READ,
+    F_WRITE,
+
+    SET,
+    MOV_IN,
+    MOV_OUT,
+    F_TRUNCATE,
+    F_SEEK,
+    CREATE_SEGMENT,
+
+    IO,
+    WAIT,
+    SIGNAL,
+    F_OPEN,
+    F_CLOSE,
+    DELETE_SEGMENT,
+
+    EXIT,
+    YIELD
+}t_instruccion;
+
 /*
 Lo dejo así ya queda a futuro, pero por ahora que quede comentado
 typedef struct{
