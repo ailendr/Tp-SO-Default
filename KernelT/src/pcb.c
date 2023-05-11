@@ -6,10 +6,11 @@
  */
 #include "pcb.h"
 
-t_contextoEjec* crearContexto(t_list* instrucciones) {
+t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto) {
    	t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec));
    	contexto->instrucciones=instrucciones;
    	contexto->PC = 0;
+   	contexto->pid = pidDelContexto;
    	//TODO Al parecer no sé como inicializar vectores :)))
    /*	contexto->AX[4] = NULL;
    	contexto->BX[4]= "000";
@@ -29,7 +30,7 @@ t_contextoEjec* crearContexto(t_list* instrucciones) {
   t_pcb* crearPcb (t_list* instrucciones){
   	    t_pcb* pcb = malloc(sizeof(t_pcb));
   	 	pcb->PID = pid;
-  	 	pcb->contexto = crearContexto(instrucciones);
+  	 	pcb->contexto = crearContexto(instrucciones, pid);
   	 	pcb->tablaSegmentos = list_create();//recibir por parametro
   	 //	pcb->estadoPcb = estado; El estado se pone en agregarANew
   	 	pcb->estimadoReady = Estimacion(); //debe ser un globals

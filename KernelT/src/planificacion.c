@@ -84,10 +84,8 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RDX), 16);
          offset += 16;
 
-	 //PID : Descomentar cuando dany lo pushee en main//
-
-      /*   memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->PID), sizeof(uint32_t));
-         offset +=  sizeof(uint32_t);*/
+         memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->pid), sizeof(uint32_t));
+         offset +=  sizeof(uint32_t);
 
          t_list* instrucciones = procesoAEjecutar->instrucciones;
         	 int tamanioInstrucciones = list_size(instrucciones);
@@ -152,16 +150,23 @@ t_contextoEjec* deserializarContexto(void* buffer, int tamanio){
 	 memcpy(&(contexto->RDX), stream+desplazamiento, sizeof(char[16]));
 	 desplazamiento+=sizeof(char[16]);
 
-	 //PID : Descomentar cuando dany lo pushee en main//
-	/* memcpy(&(contexto->PID), stream+desplazamiento,sizeof(uint32_t));
-     desplazamiento += sizeof(instruccionActual);*/
+
+	 memcpy(&(contexto->pid), stream+desplazamiento,sizeof(uint32_t));
+     desplazamiento += sizeof(uint32_t);
 
      contexto->instrucciones = deserializarInstrucciones(stream, desplazamiento,tamanioBuffer);
 
      return contexto;
      }
 
+void finalizarProceso(t_pcb* procesoAFinalizar){
+	 free(procesoAFinalizar->contexto->instrucciones);
+	 free(procesoAFinalizar->contexto);
+	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
+	 free(procesoAFinalizar);
+	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->PID);
 
+ }
  void largoPlazo(){
 	 t_pcb* proceso;
 	 //Con un semaforo tendriamos que ver lo de la multiprogramacion, esto lo dejo hasta que los implementemos
@@ -183,24 +188,30 @@ t_contextoEjec* deserializarContexto(void* buffer, int tamanio){
 	 int codigo = recibir_operacion(socketCPU);
 	 int tamanio = 0;
 	 void* buffer = recibir_buffer(&tamanio, socketCPU); //recibe el tamanio del stream y llena el buffer con el contenido del stream
-	 if(codigo == CONTEXTO){
+	 t_contextoEjec* contexto ; //para poder conservarlo dsps del switch
+	 switch (codigo) {
+		case CONTEXTO:
+			contexto = deserializarContexto(buffer, tamanio);
+			 free(buffer);
+			break;
+		case EXIT:
+			finalizarProceso(ultimoEjecutado);
+			break;
+		default:
+			break;
+	}
+
+	 /*if(codigo == CONTEXTO){
       /////////DESERIALIZACION////////////////
 	 t_contextoEjec* contexto = deserializarContexto(buffer, tamanio);
 	 free(buffer);
-	 }//Liberamos el buffer
-	 // if(contexto->proxInstruccion == EXIT){
-	 //  finalizarProceso(ultimoEjecutado);
+	 }
+	 */
 
 }
 
 
- void finalizarProceso(t_pcb* procesoAFinalizar){
-	 free(procesoAFinalizar->contexto);
-	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
-	 free(procesoAFinalizar);
-	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->PID);
 
- }
 
 
  void cortoPlazo(){
@@ -225,8 +236,8 @@ t_contextoEjec* deserializarContexto(void* buffer, int tamanio){
 	 t_list* listaDeInstrucciones; //Recordar liberar esto cuando terminemos
 	 uint32_t recepcion = 1; //Consola deberia verificar que si es 1 -> kernel recibio todo OK
 	 if(codigoOp == PAQUETE){//Ver si lo aplicamos o sacamos
-	 listaDeInstrucciones = recibir_paquete(socket_cliente);
-	 send(socket_cliente, &recepcion, sizeof(uint32_t),0);
+		 listaDeInstrucciones = recibir_paquete(socket_cliente);
+		 send(socket_cliente, &recepcion, sizeof(uint32_t),0);
 	 //return listaDeInstrucciones;
     }
 	 return listaDeInstrucciones;
@@ -236,7 +247,7 @@ t_contextoEjec* deserializarContexto(void* buffer, int tamanio){
 
  void generarProceso(int* socket_cliente){
 	 int consolaNueva = *socket_cliente;
-	   recibirProtocolo(socket_cliente); //Handashake
+	  recibirProtocolo(socket_cliente); //Handashake
  	  t_list* instrucciones = obtenerInstrucciones(consolaNueva);
  	  t_pcb* procesoNuevo = crearPcb(instrucciones);
  	  agregarAEstadoNew(procesoNuevo);

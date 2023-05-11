@@ -24,7 +24,9 @@ typedef enum
 {
 	MENSAJE,
 	PAQUETE,
-	CONTEXTO
+	CONTEXTO,
+	EXIT
+
 }op_code;
 
 typedef struct
