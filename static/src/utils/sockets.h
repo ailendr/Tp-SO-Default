@@ -26,6 +26,8 @@ typedef enum
 	PAQUETE,
 	CONTEXTO,
 	YIELD,
+	CREATE_SEGMENT,
+	DELETE_SEGMENT,
 	EXIT
 
 }op_code;

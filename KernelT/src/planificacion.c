@@ -127,9 +127,6 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 		case EXIT:
 			finalizarProceso(ultimoEjecutado);
 			break;
-		case YIELD:
-			agregarAEstadoReady(ultimoEjecutado);
-			break;
 		default:
 			break;
 	}
@@ -138,8 +135,32 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 
  void cortoPlazo(){
 	 char* algoritmo = Algoritmo();
-	 if(strcmp(algoritmo,"FIFO")){
+	 //while(procesosActivos!=0){
+	 if(strcmp(algoritmo,"FIFO")==0){
 		 algoritmoFIFO();
+	 }
+	 //mover esto
+	 op_code codigo = recibir_operacion(socketCPU);
+	 instruccionAEjecutar(codigo);
+}
+
+
+ void instruccionAEjecutar(op_code codigo){
+	 int tamanio=0;
+	 void* buffer = recibir_buffer(&tamanio, socketCPU);
+	 t_contextoEjec* contextoActualizado=deserializarContexto(buffer, tamanio);
+	 ultimoEjecutado->contexto=contextoActualizado;
+	 //A futuro agregar los de FS
+	 switch(codigo){
+	 	 case YIELD:
+		 agregarAColaReady(ultimoEjecutado);
+		 break;
+	 	 case CREATE_SEGMENT:
+	 		 break;
+	 	 case DELETE_SEGMENT:
+	 		 break;
+	 	 default:
+	 		 break;
 	 }
  }
 
@@ -150,6 +171,9 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	 procesoAEjec->estadoPcb = EXEC;
 	 ultimoEjecutado = procesoAEjec;
  }
+
+
+
 
 /// ---------TODO LO QUE TIENE QUE VER CON INSTRUCCIONES Y PROCESOS---------///
 
