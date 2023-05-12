@@ -114,28 +114,6 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	     procesosActivos ++;
 	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->PID);
 	 }
-
-
-	 ///Cualquier estado a EXIT/: 1° Recepcion del contexto que recibe de cpu//
-	 int tamanio = 0;
-	 t_contextoEjec* contexto ; //para poder conservarlo dsps del switch
-	 while(1){
-		 int codigo = recibir_operacion(socketCPU);
-
-		 switch (codigo) {
-			case CONTEXTO:
-				void* buffer = recibir_buffer(&tamanio, socketCPU); //recibe el tamanio del stream y llena el buffer con el contenido del stream
-				contexto = deserializarContexto(buffer, tamanio);
-				free(buffer);
-				break;
-			case EXIT:
-				finalizarProceso(ultimoEjecutado);
-				break;
-			default:
-				break;
-				 }
-	 }
-
 }
 
  void cortoPlazo(){
@@ -143,26 +121,17 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	 //while(procesosActivos!=0){
 	 if(strcmp(algoritmo,"FIFO")==0){
 		 algoritmoFIFO();
-	 }
-	 //mover esto
 
-	 op_code codigo = recibir_operacion(socketCPU); //para mi ya no va esto
-	 instruccionAEjecutar(codigo);
+	 }
+
+	 	instruccionAEjecutar();
 }
 
 
- /*NOTA: NO ESTOY SEGURA DE Q ME GUSTE ESTO,CREO Q HAY Q UNIFICAR LARGO PLAZO (LA PARTE A EXIT) CON ESTO : EN UNA FUNC
- 	     QUE PUEDAN USAR AMBOS PLANIFICADORES. MAÑANA LO VEMOS */
- void instruccionAEjecutar(op_code codigo){
+ void instruccionAEjecutar(){
 	 int tamanio=0;
 
-	/*
-	 No se esta chequeando q sea un CONTEXTO: recibir buffer es solo para eso, capaz te llega otra cosa q no sea el contexto y ya se esta deserializando
-	 El otro problema es q se ustaba usando el mismo codigo q llego de solo UN recv para deserializar contexto y a la vez interpretar q instruccion es
 
-	 void* buffer = recibir_buffer(&tamanio, socketCPU);
-	 t_contextoEjec* contextoActualizado=deserializarContexto(buffer, tamanio);
-	 ultimoEjecutado->contexto=contextoActualizado;    */
 	 //A futuro agregar los de FS
 	 t_contextoEjec* contextoActualizado ;
 	 while(1){
@@ -175,6 +144,10 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	 		ultimoEjecutado->contexto=contextoActualizado;
 	 		free(buffer);
 	 		break;
+	 		//Consultar si esto debería estar en largo plazo por teoría
+		case EXIT:
+			finalizarProceso(ultimoEjecutado);
+			break;
 	 	 case YIELD:
 	 		 agregarAEstadoReady(ultimoEjecutado);
 		 break;
