@@ -153,7 +153,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	 //A futuro agregar los de FS
 	 switch(codigo){
 	 	 case YIELD:
-		 agregarAColaReady(ultimoEjecutado);
+		 agregarAEstadoReady(ultimoEjecutado);
 		 break;
 	 	 case CREATE_SEGMENT:
 	 		 break;

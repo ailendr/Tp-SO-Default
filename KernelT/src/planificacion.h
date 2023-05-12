@@ -31,7 +31,7 @@ void largoPlazo();
 void cortoPlazo();
 void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
-void instruccionAEjecutar(int codigo);
+void instruccionAEjecutar(op_code codigo);
 
 void generarProceso(int* socket_cliente);
 void finalizarProceso(t_pcb* procesoAFinalizar);
