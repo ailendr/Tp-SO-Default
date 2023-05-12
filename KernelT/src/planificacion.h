@@ -19,12 +19,14 @@ extern t_list* colaReady;
 
 
 void crearEstados();
+void eliminarEstados();
 void agregarAEstadoNew(t_pcb* procesoNuevo);
 void agregarAEstadoReady(t_pcb* procesoListo);
 t_pcb* extraerDeNew();
 t_pcb* extraerDeReady();
 
 //lo pongo aca porq largo plazo los usa//
+t_paquete* serializarContexto(t_contextoEjec* procesoAEjecutar);
 t_list* deserializarInstrucciones(void*buffer, int desplazamiento,int tamanioBuffer);
 t_contextoEjec* deserializarContexto(void* buffer, int tamanio);
 void largoPlazo();

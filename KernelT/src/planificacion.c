@@ -20,6 +20,12 @@ void crearEstados(){
   colaReady = list_create();
 }
 
+void eliminarEstados(){
+	list_destroy(colaReady);
+	queue_clean(colaNew);
+	queue_destroy(colaNew);
+}
+
  void agregarAEstadoNew(t_pcb* procesoNuevo){
  queue_push(colaNew, procesoNuevo);
  procesoNuevo->estadoPcb = NEW;
@@ -29,7 +35,7 @@ void crearEstados(){
 	 list_add(colaReady, procesoListo);
 	 procesoListo->estadoPcb = READY;
 
-	 log_info(loggerKernel, "Cola Ready con algoritmo %s .Ingresa el proceso con id %d:", Algoritmo(), procesoListo->PID);
+	 log_info(loggerKernel, "Cola Ready con algoritmo %s .Ingresa el proceso con id %d:", Algoritmo(), procesoListo->contexto->pid);
  }
 
  t_pcb* extraerDeNew(){
@@ -43,58 +49,63 @@ void crearEstados(){
 	 return proceso;
  }
 
+ t_paquete* serializarContexto(t_contextoEjec* procesoAEjecutar){ //En realidad pone todo en un paquete
+	 ////----SERIALIZACION DE CONTEXTO------///
+
+	 	 	 t_paquete* paqueteContexto = malloc(sizeof(t_paquete));
+	 	 	 paqueteContexto->codigo_operacion = CONTEXTO;
+	 	 	 paqueteContexto->buffer = malloc(sizeof(t_buffer));
+	 	 	 paqueteContexto->buffer->size = 0;
+	 	 	 paqueteContexto->buffer->stream = NULL;
+
+	          int offset = 0;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
+	          offset += sizeof(uint32_t);
+
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->AX), 4);
+	          offset += 4;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->BX), 4);
+	          offset += 4;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->CX), 4);
+	          offset += 4;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->DX), 4);
+	          offset += 4;
+
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EAX), 8);
+	          offset += 8;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EBX), 8);
+	          offset += 8;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->ECX), 8);
+	          offset += 8;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EDX), 8);
+	          offset += 8;
+
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RAX), 16);
+	          offset += 16;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RBX), 16);
+	          offset += 16;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RCX), 16);
+	          offset += 16;
+	          memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RDX), 16);
+	          offset += 16;
+
+	          memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->pid), sizeof(uint32_t));
+	          offset +=  sizeof(uint32_t);
+
+	          t_list* instrucciones = procesoAEjecutar->instrucciones;
+	         	 int tamanioInstrucciones = list_size(instrucciones);
+	         	 for(int i = 0; i < tamanioInstrucciones ;i++){
+	         		 char* instruccion = list_get(instrucciones, i);
+	         		 agregar_a_paquete(paqueteContexto, instruccion, strlen(instruccion)+1); //para q cpu pueda usar recibirPaquete del otro lado
+	         	 }
+	 return paqueteContexto;
+ 	 }
+
 
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
-	////----SERIALIZACION DE CONTEXTO------///
 
-	 	 t_paquete* paqueteContexto = malloc(sizeof(t_paquete));
-	 	 paqueteContexto->codigo_operacion = CONTEXTO;
-	 	 paqueteContexto->buffer = malloc(sizeof(t_buffer));
-	 	 paqueteContexto->buffer->size = 0;
-	 	 paqueteContexto->buffer->stream = NULL;
-
-         int offset = 0;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
-         offset += sizeof(uint32_t);
-
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->AX), 4);
-         offset += 4;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->BX), 4);
-         offset += 4;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->CX), 4);
-         offset += 4;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->DX), 4);
-         offset += 4;
-
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EAX), 8);
-         offset += 8;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EBX), 8);
-         offset += 8;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->ECX), 8);
-         offset += 8;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->EDX), 8);
-         offset += 8;
-
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RAX), 16);
-         offset += 16;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RBX), 16);
-         offset += 16;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RCX), 16);
-         offset += 16;
-         memcpy(paqueteContexto->buffer->stream +offset, &(procesoAEjecutar->RDX), 16);
-         offset += 16;
-
-         memcpy(paqueteContexto->buffer->stream +offset,&(procesoAEjecutar->pid), sizeof(uint32_t));
-         offset +=  sizeof(uint32_t);
-
-         t_list* instrucciones = procesoAEjecutar->instrucciones;
-        	 int tamanioInstrucciones = list_size(instrucciones);
-        	 for(int i = 0; i < tamanioInstrucciones ;i++){
-        		 char* instruccion = list_get(instrucciones, i);
-        		 agregar_a_paquete(paqueteContexto, instruccion, strlen(instruccion)+1); //para q cpu pueda usar recibirPaquete del otro lado
-        	 }
-
-         enviar_paquete(paqueteContexto,socketCPU); //Acá se serializa el paquete y se envia
+         t_paquete* paqueteDeContexto = serializarContexto(procesoAEjecutar);// "Pone el contexto en un paquete"
+         enviar_paquete(paqueteDeContexto,socketCPU); //Acá se serializa el paquete y se envia
 }
 
 
@@ -112,7 +123,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 		 //asignarMemoria(proceso, tabla); //PCB creado
 		 agregarAEstadoReady(proceso);
 	     procesosActivos ++;
-	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->PID);
+	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->contexto->pid);
 	 }
 }
 
@@ -252,12 +263,12 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 
  void generarProceso(int* socket_cliente){
 	 int consolaNueva = *socket_cliente;
-	  recibirProtocolo(socket_cliente); //Handashake
+	  //recibirProtocolo(socket_cliente); //Handashake No lo incluimos por el momento porq la func cierra las conexiones-> podemos modificarla dsps
  	  t_list* instrucciones = obtenerInstrucciones(consolaNueva);
  	  t_pcb* procesoNuevo = crearPcb(instrucciones, pid);
  	  agregarAEstadoNew(procesoNuevo);
  	  pid ++;
- 	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->PID);
+ 	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->contexto->pid);
  	  //Cerrando recursos
  	  close(consolaNueva);
  	  free(socket_cliente);
@@ -274,7 +285,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
  	 free(procesoAFinalizar->contexto);
  	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
  	 free(procesoAFinalizar);
- 	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->PID);
+ 	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->contexto->pid);
 
   }
 

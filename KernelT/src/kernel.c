@@ -28,16 +28,29 @@ int main(void) {
 
 	///Funcion para inicializar las conexiones con FS,CPU y MEMORIA//
 		//Por el momento deje las funciones enviarMensaje adentro pero no deberian//
-  //  iniciarConexionesDeKernel();
+   iniciarConexionesDeKernel();
+
+
+    crearEstados();
+
 
     ///------Kernel como Servidor------//
 
     log_info(loggerKernel, "Iniciando Servidor ... \n");
-    	server_fd = iniciarServidor(ip, puerto);
-    	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
-    	log_info(loggerKernel, "Servidor listo para recibir al cliente");
-         atenderConsolas(server_fd);
+	server_fd = iniciarServidor(ip, puerto);
+	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+	log_info(loggerKernel, "Servidor listo para recibir al cliente");
+    atenderConsolas(server_fd);//Recibe las instrucciones de consola, crea el pcb y agrega a new
 
+    //----Creando Hilos Planificadores---///
+
+    pthread_t  hiloCortoPlazo, hiloLargoPlazo;
+	 pthread_create(&hiloLargoPlazo,NULL,(void*)largoPlazo,NULL);
+	 pthread_create(&hiloCortoPlazo,NULL,(void*)cortoPlazo,NULL);
+
+	 //NOTA: nos conviene usar join o detach??? preguntar
+	 pthread_join(hiloLargoPlazo, NULL);
+	 pthread_join(hiloCortoPlazo, NULL);
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
     terminarModulo(server_fd,loggerKernel, configKernel);
@@ -45,6 +58,7 @@ int main(void) {
 	close (socketFs);
 	close (socketMemoria);
 	close (socketCPU);
+	eliminarEstados();//finaliza estructuras de ready y new
 
 	printf ("\n Finalizo Kernel correctamente\n ");
 
