@@ -12,7 +12,6 @@
 int socketCPU;
 int socketFs;
 int socketMemoria;
-uint32_t pid = 0;
 
 void iniciarConexionesDeKernel(){
 

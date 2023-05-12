@@ -12,6 +12,8 @@ t_queue* colaNew ;
 t_list* colaReady ;
 int procesosActivos=0;
 t_pcb* ultimoEjecutado;
+uint32_t pid = 0;
+
 
 void crearEstados(){
   colaNew = queue_create();
@@ -279,9 +281,13 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	 int consolaNueva = *socket_cliente;
 	  recibirProtocolo(socket_cliente); //Handashake
  	  t_list* instrucciones = obtenerInstrucciones(consolaNueva);
- 	  t_pcb* procesoNuevo = crearPcb(instrucciones);
+ 	  t_pcb* procesoNuevo = crearPcb(instrucciones, pid);
  	  agregarAEstadoNew(procesoNuevo);
+ 	  pid ++;
  	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->PID);
+ 	  //Cerrando recursos
+ 	  close(consolaNueva);
+ 	  free(socket_cliente);
    }
 
 

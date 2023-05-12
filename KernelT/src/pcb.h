@@ -10,7 +10,7 @@
 #include <utils/estructuras.h>
 #include "kernelConexiones.h"
 
-t_pcb* crearPcb(t_list* instrucciones);
+t_pcb* crearPcb(t_list* instrucciones, uint32_t pidNuevo);
 
 t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto);
 

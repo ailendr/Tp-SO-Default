@@ -27,10 +27,10 @@ t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto) {
    	return contexto;
    }
 
-  t_pcb* crearPcb (t_list* instrucciones){
+  t_pcb* crearPcb (t_list* instrucciones, uint32_t pidNuevo){
   	    t_pcb* pcb = malloc(sizeof(t_pcb));
-  	 	pcb->PID = pid;
-  	 	pcb->contexto = crearContexto(instrucciones, pid);
+  	 	pcb->PID = pidNuevo;
+  	 	pcb->contexto = crearContexto(instrucciones, pidNuevo);
   	 	pcb->tablaSegmentos = list_create();//recibir por parametro
   	 //	pcb->estadoPcb = estado; El estado se pone en agregarANew
   	 	pcb->estimadoReady = Estimacion(); //debe ser un globals
