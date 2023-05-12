@@ -115,21 +115,24 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 
 
 	 ///Cualquier estado a EXIT/: 1° Recepcion del contexto que recibe de cpu//
-	 int codigo = recibir_operacion(socketCPU);
 	 int tamanio = 0;
-	 void* buffer = recibir_buffer(&tamanio, socketCPU); //recibe el tamanio del stream y llena el buffer con el contenido del stream
 	 t_contextoEjec* contexto ; //para poder conservarlo dsps del switch
-	 switch (codigo) {
-		case CONTEXTO:
-			contexto = deserializarContexto(buffer, tamanio);
-			 free(buffer);
-			break;
-		case EXIT:
-			finalizarProceso(ultimoEjecutado);
-			break;
-		default:
-			break;
-	}
+	 while(1){
+		 int codigo = recibir_operacion(socketCPU);
+
+		 switch (codigo) {
+			case CONTEXTO:
+				void* buffer = recibir_buffer(&tamanio, socketCPU); //recibe el tamanio del stream y llena el buffer con el contenido del stream
+				contexto = deserializarContexto(buffer, tamanio);
+				free(buffer);
+				break;
+			case EXIT:
+				finalizarProceso(ultimoEjecutado);
+				break;
+			default:
+				break;
+				 }
+	 }
 
 }
 
@@ -140,20 +143,38 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 		 algoritmoFIFO();
 	 }
 	 //mover esto
-	 op_code codigo = recibir_operacion(socketCPU);
+
+	 op_code codigo = recibir_operacion(socketCPU); //para mi ya no va esto
 	 instruccionAEjecutar(codigo);
 }
 
 
+ /*NOTA: NO ESTOY SEGURA DE Q ME GUSTE ESTO,CREO Q HAY Q UNIFICAR LARGO PLAZO (LA PARTE A EXIT) CON ESTO : EN UNA FUNC
+ 	     QUE PUEDAN USAR AMBOS PLANIFICADORES. MAÑANA LO VEMOS */
  void instruccionAEjecutar(op_code codigo){
 	 int tamanio=0;
+
+	/*
+	 No se esta chequeando q sea un CONTEXTO: recibir buffer es solo para eso, capaz te llega otra cosa q no sea el contexto y ya se esta deserializando
+	 El otro problema es q se ustaba usando el mismo codigo q llego de solo UN recv para deserializar contexto y a la vez interpretar q instruccion es
+
 	 void* buffer = recibir_buffer(&tamanio, socketCPU);
 	 t_contextoEjec* contextoActualizado=deserializarContexto(buffer, tamanio);
-	 ultimoEjecutado->contexto=contextoActualizado;
+	 ultimoEjecutado->contexto=contextoActualizado;    */
 	 //A futuro agregar los de FS
-	 switch(codigo){
+	 t_contextoEjec* contextoActualizado ;
+	 while(1){
+	 	int codigo = recibir_operacion(socketCPU);
+
+	 	 switch (codigo) {
+	 	 case CONTEXTO:
+	 		void* buffer = recibir_buffer(&tamanio, socketCPU);
+	 		contextoActualizado = deserializarContexto(buffer, tamanio);
+	 		ultimoEjecutado->contexto=contextoActualizado;
+	 		free(buffer);
+	 		break;
 	 	 case YIELD:
-		 agregarAEstadoReady(ultimoEjecutado);
+	 		 agregarAEstadoReady(ultimoEjecutado);
 		 break;
 	 	 case CREATE_SEGMENT:
 	 		 break;
@@ -161,6 +182,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	 		 break;
 	 	 default:
 	 		 break;
+		}
 	 }
  }
 
