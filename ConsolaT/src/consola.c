@@ -6,14 +6,12 @@
  */
 
 #include "consola.h"
-//#include "parseoInstrucciones.h"
 
 
-void enviarInstruccionesAKernel(const char* pathInstrucciones, int conexionConKernel){
-	//t_paquete *paqueteConInstrucciones = crear_paquete();
-	//parseoDeInstrucciones(pathPseudo);
-	//enviarPaquete(paqueteConInstrucciones, conexionConKernel);
-	//log_info(loggerConsola,"Envio paquete con las instrucciones a kernel");
+static void enviarInstruccionesAKernel(char* pathInstrucciones, int conexionConKernel){
+	t_paquete *paqueteConInstrucciones = parseoDeInstrucciones(pathInstrucciones);
+	enviar_paquete(paqueteConInstrucciones, conexionConKernel);
+	log_info(loggerConsola,"Envio paquete con las instrucciones a kernel");
 
 }
 
@@ -23,16 +21,15 @@ int main(int argc, char** argv[]) {
 	if(argc < 3){
 		return EXIT_FAILURE;
 	}
+
 	loggerConsola = log_create("./consola.log","ConsolaT", 1, LOG_LEVEL_INFO);
 	log_info(loggerConsola, "---------------------------------------------------------------------------");
 	log_info(loggerConsola, "Iniciando Consola...");
 	int conexionConKernel = 0;
 	char* pathConfig = argv[1];
-	char* pathPseudo = argv[2];
+	char* pathInstrucciones = argv[2];
 
 	configConsola = config_create(pathConfig);
-
-
 
 	if( verificarConfig (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
@@ -44,14 +41,17 @@ int main(int argc, char** argv[]) {
 	conexionConKernel = iniciarCliente(ip, puerto, loggerConsola);
 	if( verificarSocket (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
-	char *pathInstrucciones = argv[2]; //o *archivoInstruciones
-	enviarInstruccionesAKernel(pathInstrucciones, conexionConKernel);
-	//log_info(loggerConsola, "Enviando mensaje");
+	//char *pathInstrucciones = argv[2]; //o *archivoInstruciones
 
-	//if(enviarProtocolo(conexion, loggerConsola) == -1){
-	  //      terminarModulo(conexion,loggerConsola, configConsola);
-	  //      return EXIT_FAILURE;
-	//}
+	//log_info(loggerConsola, "Enviando mensaje");
+	// VER LA CONEXION DESDE KERNEL
+
+	if(enviarProtocolo(conexionConKernel, loggerConsola) == -1){
+	        terminarModulo(conexionConKernel,loggerConsola, configConsola);
+	        return EXIT_FAILURE;
+	}
+
+	enviarInstruccionesAKernel(pathInstrucciones, conexionConKernel);
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 

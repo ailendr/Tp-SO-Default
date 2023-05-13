@@ -14,6 +14,7 @@
 #include <utils/sockets.h>
 #include <utils/modulo.h>
 #include "ConsolaConfig.h"
+#include "parseoInstrucciones.h"
 
 //Para mostrar el git add /ConsolaT
 

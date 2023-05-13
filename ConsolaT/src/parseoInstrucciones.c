@@ -7,8 +7,41 @@
 
 
 #include "consola.h"
-#include "estructuras.h"
 
+
+t_paquete* parseoDeInstrucciones(char *pathInstrucciones){
+    FILE *archivoDeInstrucciones;
+    archivoDeInstrucciones = fopen(pathInstrucciones, "r");
+    char *auxInstrucciones; // para guardar las instrucciones leidas del archivo
+    t_list* listaDeInstrucciones = list_create();
+    t_paquete* paqueteConInstrucciones = crear_paquete();
+
+    if (archivoDeInstrucciones == NULL) {
+        printf("Error al abrir el archivo de pseudocodigo\n");
+        return EXIT_FAILURE;
+    }
+
+    fscanf(archivoDeInstrucciones, "%s", auxInstrucciones);
+    string_split (auxInstrucciones, "\n");
+    int tamanioAuxInstruciones = sizeof(auxInstrucciones);
+    for (int i = 0; i < tamanioAuxInstruciones; i++){
+    	list_add(listaDeInstrucciones, auxInstrucciones[i]);
+    }
+    //luego agrego la lista a un paquete
+    int tamanioListaInstrucciones = list_size(listaDeInstrucciones);
+    for (int i = 0; i < tamanioListaInstrucciones; i++){
+
+    	//agregar_a_paquete(paqueteConInstrucciones, void* valor, tamanio);
+    }
+
+    fclose(archivoDeInstrucciones);
+    eliminar_paquete(paqueteConInstrucciones);
+
+    return paqueteConInstrucciones;
+
+}
+
+/*
 typedef struct {
     t_instruc tipoInstruccion;
     uint32_t operando1;
@@ -25,38 +58,6 @@ instruccion* crearInstruccion(t_instruc tipoDeInstruccion,uint32_t parametro1, u
     return nuevaInstruccion;
 }
 
-/*
-parseoDeInstrucciones(cont char *pathPseudo, ){
-    FILE *archivoDeInstrucciones;
-    archivoDeInstrucciones = fopen(pathPseudo, "r");
-    char *auxInstrucciones; // para guardar las instrucciones leidas del archivo
-    t_list listaDeInstrucciones = list_create();
-
-    if (archivoDeInstrucciones == NULL) {
-        printf("Error al abrir el archivo de pseudocodigo\n");
-        return EXIT_FAILURE;
-    }
-    HAY QUE VERIFICAR QUE CADA INSTRUCCION SEA LAS QUE SE PIDE
-    fscanf(archivoDeInstrucciones, "%s", auxInstrucciones);
-    string_split (auxInstrucciones, "\n")
-
-
-
-
-
-
-
-
-    agregar_a_paquete((t_paquete* paquete, void* valor, int tamanio);
-
-    fclose(archivoInstrucciones);
-    free(paquete)
-
-
-}
-
-   string_from_format // pasa a un string
-     string_split
 */
 
 /*
