@@ -46,6 +46,7 @@ typedef enum{
 
 typedef struct{
 	uint32_t PID;
+	int socketConsola;
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;
 	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro

@@ -27,8 +27,9 @@ t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto) {
    	return contexto;
    }
 
-  t_pcb* crearPcb (t_list* instrucciones, uint32_t pidNuevo){
+  t_pcb* crearPcb (t_list* instrucciones, uint32_t pidNuevo, int conexionConsola){
   	    t_pcb* pcb = malloc(sizeof(t_pcb));
+  	    pcb->socketConsola = conexionConsola;
   	 	pcb->contexto = crearContexto(instrucciones, pidNuevo);
   	 	pcb->tablaSegmentos = list_create();//recibir por parametro
   	 //	pcb->estadoPcb = estado; El estado se pone en agregarANew

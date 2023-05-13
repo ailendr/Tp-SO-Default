@@ -40,17 +40,18 @@ int main(void) {
 	server_fd = iniciarServidor(ip, puerto);
 	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 	log_info(loggerKernel, "Servidor listo para recibir al cliente");
-    atenderConsolas(server_fd);//Recibe las instrucciones de consola, crea el pcb y agrega a new
 
     //----Creando Hilos Planificadores---///
-
+    //USAR SEMAFOROS BINARIOS///
     pthread_t  hiloCortoPlazo, hiloLargoPlazo;
 	 pthread_create(&hiloLargoPlazo,NULL,(void*)largoPlazo,NULL);
 	 pthread_create(&hiloCortoPlazo,NULL,(void*)cortoPlazo,NULL);
 
-	 //NOTA: nos conviene usar join o detach??? preguntar
-	 pthread_join(hiloLargoPlazo, NULL);
-	 pthread_join(hiloCortoPlazo, NULL);
+	 pthread_detach(hiloLargoPlazo);
+	 pthread_detach(hiloCortoPlazo);
+
+	 atenderConsolas(server_fd);//Recibe las instrucciones de consola, crea el pcb y agrega a new
+
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
     terminarModulo(server_fd,loggerKernel, configKernel);

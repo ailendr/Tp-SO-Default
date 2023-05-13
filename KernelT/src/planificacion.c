@@ -111,6 +111,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 
 
  void largoPlazo(){
+	 //while(1){
 	 t_pcb* proceso;
 	 //Con un semaforo tendriamos que ver lo de la multiprogramacion, esto lo dejo hasta que los implementemos
 	 //int procesosActivos = cantProcesosEnMemoria();
@@ -124,7 +125,8 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 		 agregarAEstadoReady(proceso);
 	     procesosActivos ++;
 	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->contexto->pid);
-	 }
+	 	 }
+	// }
 }
 
  void cortoPlazo(){
@@ -211,32 +213,32 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 
  	 memcpy(&(contexto->PC), stream+desplazamiento,sizeof(uint32_t));
  	 desplazamiento+= sizeof(uint32_t);
- 	 memcpy(&(contexto->AX), stream+desplazamiento, sizeof(char[4]));
- 	 desplazamiento+=sizeof(char[4]);
- 	 memcpy(&(contexto->BX), stream+desplazamiento, sizeof(char[4]));
- 	 desplazamiento+=sizeof(char[4]);
- 	 memcpy(&(contexto->CX), stream+desplazamiento, sizeof(char[4]));
- 	 desplazamiento+=sizeof(char[4]);
- 	 memcpy(&(contexto->DX), stream+desplazamiento, sizeof(char[4]));
- 	 desplazamiento+=sizeof(char[4]);
+ 	 memcpy(&(contexto->AX), stream+desplazamiento, 4);
+ 	 desplazamiento+=4;
+ 	 memcpy(&(contexto->BX), stream+desplazamiento, 4);
+ 	 desplazamiento+=4;
+ 	 memcpy(&(contexto->CX), stream+desplazamiento, 4);
+ 	 desplazamiento+=4;
+ 	 memcpy(&(contexto->DX), stream+desplazamiento, 4);
+ 	 desplazamiento+=4;
 
- 	 memcpy(&(contexto->EAX), stream+desplazamiento, sizeof(char[8]));
- 	 desplazamiento+=sizeof(char[8]);
- 	 memcpy(&(contexto->EBX), stream+desplazamiento, sizeof(char[8]));
- 	 desplazamiento+=sizeof(char[8]);
- 	 memcpy(&(contexto->ECX), stream+desplazamiento, sizeof(char[8]));
- 	 desplazamiento+=sizeof(char[8]);
- 	 memcpy(&(contexto->EDX), stream+desplazamiento, sizeof(char[8]));
- 	 desplazamiento+=sizeof(char[8]);
+ 	 memcpy(&(contexto->EAX), stream+desplazamiento, 8);
+ 	 desplazamiento+=8;
+ 	 memcpy(&(contexto->EBX), stream+desplazamiento, 8);
+ 	 desplazamiento+=8;
+ 	 memcpy(&(contexto->ECX), stream+desplazamiento, 8);
+ 	 desplazamiento+=8;
+ 	 memcpy(&(contexto->EDX), stream+desplazamiento, 8);
+ 	 desplazamiento+=8;
 
- 	 memcpy(&(contexto->RAX), stream+desplazamiento, sizeof(char[16]));
- 	 desplazamiento+=sizeof(char[16]);
- 	 memcpy(&(contexto->RBX), stream+desplazamiento, sizeof(char[16]));
- 	 desplazamiento+=sizeof(char[16]);
- 	 memcpy(&(contexto->RCX), stream+desplazamiento,sizeof(char[16]));
- 	 desplazamiento+=sizeof(char[16]);
- 	 memcpy(&(contexto->RDX), stream+desplazamiento, sizeof(char[16]));
- 	 desplazamiento+=sizeof(char[16]);
+ 	 memcpy(&(contexto->RAX), stream+desplazamiento, 16);
+ 	 desplazamiento+=16;
+ 	 memcpy(&(contexto->RBX), stream+desplazamiento, 16);
+ 	 desplazamiento+=16;
+ 	 memcpy(&(contexto->RCX), stream+desplazamiento,16);
+ 	 desplazamiento+=16;
+ 	 memcpy(&(contexto->RDX), stream+desplazamiento, 16);
+ 	 desplazamiento+=16;
 
 
  	 memcpy(&(contexto->pid), stream+desplazamiento,sizeof(uint32_t));
@@ -265,7 +267,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 	 int consolaNueva = *socket_cliente;
 	  //recibirProtocolo(socket_cliente); //Handashake No lo incluimos por el momento porq la func cierra las conexiones-> podemos modificarla dsps
  	  t_list* instrucciones = obtenerInstrucciones(consolaNueva);
- 	  t_pcb* procesoNuevo = crearPcb(instrucciones, pid);
+ 	  t_pcb* procesoNuevo = crearPcb(instrucciones, pid, consolaNueva);
  	  agregarAEstadoNew(procesoNuevo);
  	  pid ++;
  	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->contexto->pid);
@@ -285,6 +287,9 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
  	 free(procesoAFinalizar->contexto);
  	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
  	 free(procesoAFinalizar);
+ 	 procesosActivos --;
+ 	 int terminar = -1;
+ 	 send(procesoAFinalizar->socketConsola,&terminar, sizeof(int),0); //Avisa a consola que finalice
  	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->contexto->pid);
 
   }
