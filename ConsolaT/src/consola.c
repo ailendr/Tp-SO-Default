@@ -41,9 +41,7 @@ int main(int argc, char** argv[]) {
 	conexionConKernel = iniciarCliente(ip, puerto, loggerConsola);
 	if( verificarSocket (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
-	//char *pathInstrucciones = argv[2]; //o *archivoInstruciones
-
-	//log_info(loggerConsola, "Enviando mensaje");
+	log_info(loggerConsola, "Enviando mensaje");
 	// VER LA CONEXION DESDE KERNEL
 
 	if(enviarProtocolo(conexionConKernel, loggerConsola) == -1){
@@ -52,6 +50,7 @@ int main(int argc, char** argv[]) {
 	}
 
 	enviarInstruccionesAKernel(pathInstrucciones, conexionConKernel);
+
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 
