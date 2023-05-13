@@ -11,16 +11,15 @@
 
 void enviarInstruccionesAKernel(const char* pathInstrucciones, int conexionConKernel){
 	//t_paquete *paqueteConInstrucciones = crear_paquete();
-	//parseoDeInstrucciones(pathInstrucciones);
+	//parseoDeInstrucciones(pathPseudo);
 	//enviarPaquete(paqueteConInstrucciones, conexionConKernel);
 	//log_info(loggerConsola,"Envio paquete con las instrucciones a kernel");
 
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char** argv[]) {
 
 	//printf ("Hola soy consola y quiero conectarme con kernel \n ");
-
 	if(argc < 3){
 		return EXIT_FAILURE;
 	}
@@ -29,7 +28,11 @@ int main(int argc, char *argv[]) {
 	log_info(loggerConsola, "Iniciando Consola...");
 	int conexionConKernel = 0;
 	char* pathConfig = argv[1];
-	configConsola = config_create("../ConsolaT/consola.config");
+	char* pathPseudo = argv[2];
+
+	configConsola = config_create(pathConfig);
+
+
 
 	if( verificarConfig (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
