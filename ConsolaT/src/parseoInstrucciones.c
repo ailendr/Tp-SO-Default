@@ -17,21 +17,28 @@ t_paquete* parseoDeInstrucciones(char *pathInstrucciones){
     t_paquete* paqueteConInstrucciones = crear_paquete();
 
     if (archivoDeInstrucciones == NULL) {
-        printf("Error al abrir el archivo de pseudocodigo\n");
+        printf("Error al abrir el archivo de pseudocodigo\n");//loguear
         return EXIT_FAILURE;
     }
 
     fscanf(archivoDeInstrucciones, "%s", auxInstrucciones);
-    string_split (auxInstrucciones, "\n");
-    int tamanioAuxInstruciones = sizeof(auxInstrucciones);
-    for (int i = 0; i < tamanioAuxInstruciones; i++){
-    	list_add(listaDeInstrucciones, auxInstrucciones[i]);
-    }
+
+   char** vectorInstrucciones= string_split (auxInstrucciones, "\n"); //Devuelve un null al final
+    //int tamanioAuxInstruciones = sizeof(auxInstrucciones);
+   int i = 0;
+   while (vectorInstrucciones[i] != NULL){
+	   list_add(listaDeInstrucciones, vectorInstrucciones[i]);
+	   i++;
+   }
+
+    /*for (int i = 0; i < tamanioAuxInstruciones; i++){
+    	list_add(listaDeInstrucciones, vectorInstrucciones[i]);
+    }*/
     //luego agrego la lista a un paquete
     int tamanioListaInstrucciones = list_size(listaDeInstrucciones);
     for (int i = 0; i < tamanioListaInstrucciones; i++){
-
-    	//agregar_a_paquete(paqueteConInstrucciones, void* valor, tamanio);
+         char* instruccion= list_get(listaDeInstrucciones,i);
+    	 agregar_a_paquete(paqueteConInstrucciones, instruccion, strlen(instruccion)+1);
     }
 
     fclose(archivoDeInstrucciones);
