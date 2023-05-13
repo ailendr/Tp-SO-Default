@@ -6,6 +6,12 @@ int main(void) {
 
 	if (iniciarCpu () == 1) return EXIT_FAILURE;
 
+	while (1){
+
+
+
+	}
+
 	//t_contextoEjec* contextoRecibido = deserializarContexto(....)
 	//t_instruccion* instr = fetch (contextoRecibido);
 
