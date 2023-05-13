@@ -4,21 +4,26 @@ int main(void) {
 
 	printf ("Hola soy cpu y estoy queriendo recibir mensajes\n ");
 
+	t_contextoEjec* contextoRecibido = NULL;
+	t_instruccion* instr = NULL;
+	void* buffer = NULL;
+	int tamanio = 0;
+
 	if (iniciarCpu () == 1) return EXIT_FAILURE;
 
 	while (1){
 
+		buffer = recibir_buffer(&tamanio, servidorCpu);
+		contextoRecibido = deserializarContexto(buffer, tamanio);
+		free(buffer);
 
+		instr = fetch (contextoRecibido);
 
 	}
-
-	//t_contextoEjec* contextoRecibido = deserializarContexto(....)
-	//t_instruccion* instr = fetch (contextoRecibido);
 
     /*
      ----------------------------------------------------
      TODO
-     fetch()
      Decode()
      Execute()
 
