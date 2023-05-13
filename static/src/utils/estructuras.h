@@ -76,7 +76,7 @@ typedef enum{
 
     EXIT,
     YIELD
-}t_instruccion;
+}t_instruc;
 
 /*
 Lo dejo así ya queda a futuro, pero por ahora que quede comentado
