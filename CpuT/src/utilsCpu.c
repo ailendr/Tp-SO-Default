@@ -31,12 +31,41 @@ int iniciarCpu (){
 
 }
 
-t_instruccion* fetch(t_contextoEjec* cont) {
+char* fetch (t_contextoEjec* cont) {
 
     char* proxInstr = list_get(cont->instrucciones, cont->PC);
-    t_instruccion* instAEjecutar;
     log_info(loggerCPU, "FETCH: PCB <ID %d>", cont->pid);
     log_info(loggerCPU, "Instruccion: %s", proxInstr);
-    //Separa instruccion y guardarlo
-    return instAEjecutar;
+    cont->PC+=1;
+
+    //REVISAR
+
+    return proxInstr;
+}
+
+t_instruccion* decode (char* instruccion) {
+
+	t_instruccion* nuevaInstruccion;
+
+	//Separa instruccion y guardarlo
+
+	if (nuevaInstruccion->nombre == SET){
+		sleep(retardo());
+	}
+
+	if (nuevaInstruccion->nombre == MOV_IN){
+
+	}
+
+	if (nuevaInstruccion->nombre == MOV_OUT){
+
+	}
+
+	return nuevaInstruccion;
+
+}
+
+void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
+
+
 }

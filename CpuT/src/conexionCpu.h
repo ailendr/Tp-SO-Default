@@ -10,7 +10,6 @@
 
 #include "./cpuConfig.h"
 #include <utils/sockets.h>
-#include <utils/estructuras.h>
 
 extern int servidorCpu;
 extern int socketMemoria;

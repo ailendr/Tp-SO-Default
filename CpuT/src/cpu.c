@@ -5,9 +5,12 @@ int main(void) {
 	printf ("Hola soy cpu y estoy queriendo recibir mensajes\n ");
 
 	t_contextoEjec* contextoRecibido = NULL;
-	t_instruccion* instr = NULL;
+	char* instr;
+	t_instruccion* nuevaInstr = NULL;
 	void* buffer = NULL;
 	int tamanio = 0;
+	t_paquete* paqueteI = NULL;
+	t_paquete* paqueteC = NULL;
 
 	if (iniciarCpu () == 1) return EXIT_FAILURE;
 
@@ -17,7 +20,18 @@ int main(void) {
 		contextoRecibido = deserializarContexto(buffer, tamanio);
 		free(buffer);
 
-		instr = fetch (contextoRecibido);
+		instr = fetch (&contextoRecibido);
+		nuevaInstr = decode (&instr);
+		execute (&nuevaInstr, contextoRecibido);
+
+		paqueteC = serializarContexto(contextoRecibido);
+		enviar_paquete(paqueteC, servidorCpu);
+
+
+		if (nuevaInstr->nombre != SET && nuevaInstr->nombre != MOV_IN && nuevaInstr->nombre != MOV_OUT){
+			paqueteI = serializarInstrucciones (nuevaInstr);
+			enviar_paquete(paqueteC, servidorCpu);
+		}
 
 	}
 

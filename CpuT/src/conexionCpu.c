@@ -53,6 +53,7 @@ int iniciarSocketsCpu(){
 	return 0;
 }
 
+
 t_paquete* serializarContexto(t_contextoEjec* procesoAEjecutar){
 
 	t_paquete* paqueteContexto = malloc(sizeof(t_paquete));

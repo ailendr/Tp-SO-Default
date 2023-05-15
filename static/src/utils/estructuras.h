@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <commons/collections/list.h>
+#include "sockets.h" //Tengo que agregarlo por el t_instruccion
 
 typedef struct{
 	uint32_t pid;
@@ -30,7 +31,7 @@ typedef struct{
 }t_contextoEjec;
 
 typedef struct {
-	char* nombre;
+	op_code nombre;
 	uint32_t pid;
 	char* param1;
 	char* param2;
