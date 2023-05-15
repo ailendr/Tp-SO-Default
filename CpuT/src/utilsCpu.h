@@ -8,7 +8,7 @@
 #ifndef SRC_UTILSCPU_H_
 #define SRC_UTILSCPU_H_
 
-#include "./conexionCpu.h"
+#include "./instruccion.h"
 
 int iniciarCpu ();
 

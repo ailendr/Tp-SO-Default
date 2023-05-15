@@ -54,11 +54,11 @@ t_instruccion* decode (char* instruccion) {
 	}
 
 	if (nuevaInstruccion->nombre == MOV_IN){
-
+		//TODO traduccion
 	}
 
 	if (nuevaInstruccion->nombre == MOV_OUT){
-
+		//TODO traduccion
 	}
 
 	return nuevaInstruccion;
@@ -67,5 +67,18 @@ t_instruccion* decode (char* instruccion) {
 
 void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 
+	switch (instruccion->nombre){
+		case SET:
+			set (instruccion, contexto);
+			break;
+		case MOV_IN:
+			//TODO lo que se deba, la traduccion se hace, borrarlo aca
+			break;
+		case MOV_OUT:
+			//TODO lo que se deba, la traduccion se hace, borrarlo aca
+			break;
+		default:
+			log_error(loggerCPU, "Error con instruccion");
+	}
 
 }

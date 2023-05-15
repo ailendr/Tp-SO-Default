@@ -30,7 +30,7 @@ int main(void) {
 
 		if (nuevaInstr->nombre != SET && nuevaInstr->nombre != MOV_IN && nuevaInstr->nombre != MOV_OUT){
 			paqueteI = serializarInstrucciones (nuevaInstr);
-			enviar_paquete(paqueteC, servidorCpu);
+			enviar_paquete(paqueteI, servidorCpu);
 		}
 
 	}
