@@ -13,6 +13,7 @@
 #include "kernelConfig.h"
 //#include "KernelConexiones.h"
 #include "pcb.h"
+#include "semaforos.h"
 
 extern t_queue* colaNew;
 extern t_list* colaReady;

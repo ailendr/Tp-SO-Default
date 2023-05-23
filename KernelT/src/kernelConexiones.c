@@ -67,13 +67,12 @@ void atenderConsolas(int socket_servidor){
 			  close(socket_servidor);
 			  exit(1);
 		   }
-          // pid ++;
 
 		   pthread_create(&hiloServidor,
 		                    NULL,
 		                   (void*) generarProceso,
 		                   (void*)socket_cliente);
-
+		   sem_post(&procesoNuevo);
 		   pthread_detach(hiloServidor);
 
 		  // log_info(loggerKernel, "El pid del proceso es: %d", pid);

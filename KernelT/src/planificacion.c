@@ -7,11 +7,11 @@
 
 #include "planificacion.h"
 
-
+//A todo estos hay que ponerles mutex
 t_queue* colaNew ;
 t_list* colaReady ;
 int procesosActivos=0;
-t_pcb* ultimoEjecutado;
+t_pcb* ultimoEjecutado;//Falta lo de esto
 uint32_t pid = 0;
 
 
@@ -27,25 +27,31 @@ void eliminarEstados(){
 }
 
  void agregarAEstadoNew(t_pcb* procesoNuevo){
+ pthread_mutex_lock(&mutexNew);
  queue_push(colaNew, procesoNuevo);
  procesoNuevo->estadoPcb = NEW;
+ pthread_mutex_unlock(&mutexNew);
  }
 
  void agregarAEstadoReady(t_pcb* procesoListo){
+	 pthread_mutex_lock(&mutexReady);
 	 list_add(colaReady, procesoListo);
 	 procesoListo->estadoPcb = READY;
-
+	 pthread_mutex_lock(&mutexReady);
 	 log_info(loggerKernel, "Cola Ready con algoritmo %s .Ingresa el proceso con id %d:", Algoritmo(), procesoListo->contexto->pid);
  }
 
  t_pcb* extraerDeNew(){
+	 pthread_mutex_lock(&mutexNew);
  	 t_pcb* proceso = queue_pop(colaNew);
-
+ 	 pthread_mutex_lock(&mutexNew);
  	 return proceso;
   }
 
  t_pcb* extraerDeReady(){
+	 pthread_mutex_lock(&mutexReady);
 	 t_pcb* proceso = list_remove(colaReady,0);//Iba a usar el list_get pero tiene sentido sacar el elemento de la cola y eliminarlo de ahi
+	 pthread_mutex_lock(&mutexReady);
 	 return proceso;
  }
 
@@ -112,26 +118,29 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
 
  void largoPlazo(){
 	 //while(1){
+	 //
+	 sem_wait(&procesoNuevo);
 	 t_pcb* proceso;
-	 //Con un semaforo tendriamos que ver lo de la multiprogramacion, esto lo dejo hasta que los implementemos
-	 //int procesosActivos = cantProcesosEnMemoria();
-
 	 //Pasaje de New a Ready//
-	 int maxGradoMultiprogram = Multiprogramacion(); //Tiene que ser un Globals
+	 int maxGradoMultiprogram = Multiprogramacion();
 	 if(procesosActivos <= maxGradoMultiprogram){
 		 proceso = extraerDeNew(colaNew);
 		 enviarProtocolo(socketMemoria, loggerKernel);//El handshake seria el pedido de memoria
 		 //asignarMemoria(proceso, tabla); //PCB creado
 		 agregarAEstadoReady(proceso);
+	 	 pthread_mutex_lock(&mutexMultiprogramacion);
 	     procesosActivos ++;
+	 	 pthread_mutex_lock(&mutexMultiprogramacion);
 	     log_info(loggerKernel, "PID: %d - Estado Anterior: NEW - Estado Actual: READY", proceso->contexto->pid);
 	 	 }
+	 	 sem_post(&procesoReady);
 	// }
 }
 
  void cortoPlazo(){
 	 char* algoritmo = Algoritmo();
-	 //while(procesosActivos!=0){
+	 //while(1){
+	 sem_wait(&procesoReady);
 	 if(strcmp(algoritmo,"FIFO")==0){
 		 algoritmoFIFO();
 
@@ -269,7 +278,9 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
  	  t_list* instrucciones = obtenerInstrucciones(consolaNueva);
  	  t_pcb* procesoNuevo = crearPcb(instrucciones, pid, consolaNueva);
  	  agregarAEstadoNew(procesoNuevo);
+ 	  pthread_mutex_lock(&mutexPID);
  	  pid ++;
+ 	  pthread_mutex_unlock(&mutexPID);
  	  log_info(loggerKernel, "Se crea el proceso %d en New", procesoNuevo->contexto->pid);
  	  //Cerrando recursos
  	  close(consolaNueva);
@@ -287,7 +298,9 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){
  	 free(procesoAFinalizar->contexto);
  	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
  	 free(procesoAFinalizar);
+ 	 pthread_mutex_lock(&mutexMultiprogramacion);
  	 procesosActivos --;
+ 	 pthread_mutex_lock(&mutexMultiprogramacion);
  	 int terminar = -1;
  	 send(procesoAFinalizar->socketConsola,&terminar, sizeof(int),0); //Avisa a consola que finalice
  	 log_info(loggerKernel,"Finaliza el proceso %d - Motivo: SUCCESS", procesoAFinalizar->contexto->pid);

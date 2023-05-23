@@ -43,7 +43,9 @@ int main(void) {
 
     //----Creando Hilos Planificadores---///
     //USAR SEMAFOROS BINARIOS///
-    pthread_t  hiloCortoPlazo, hiloLargoPlazo;
+	inicializarSemaforos();
+
+     pthread_t  hiloCortoPlazo, hiloLargoPlazo;
 	 pthread_create(&hiloLargoPlazo,NULL,(void*)largoPlazo,NULL);
 	 pthread_create(&hiloCortoPlazo,NULL,(void*)cortoPlazo,NULL);
 
