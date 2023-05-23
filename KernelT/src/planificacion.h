@@ -10,7 +10,7 @@
 #include <commons/collections/queue.h>
 
 #include "kernelGlobales.h"
-#include "kernelConfig.h"
+//#include "kernelConfig.h" lo incluimos dentro de semaforos
 //#include "KernelConexiones.h"
 #include "pcb.h"
 #include "semaforos.h"

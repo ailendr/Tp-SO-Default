@@ -1,17 +1,22 @@
 #include "semaforos.h"
 
 
-sem_t procesoNuevo;
-sem_t procesoReady;
-
+sem_t planiLargoPlazo;
+sem_t planiCortoPlazo;
+sem_t multiprogramacion;///semaforo contador
+sem_t productorListaReady;
+sem_t productorColaNew;
 pthread_mutex_t mutexReady;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexPID;
-pthread_mutex_t mutexMultiprogramacion;
+pthread_mutex_t mutexMultiprogramacion;//controla la variable procesosActivos: son los procesos q se admiten en Ready con memoria
 
 void inicializarSemaforos(){
-	sem_init(&procesoNuevo, 0,0);
-	sem_init(&procesoReady, 0,0);
+	sem_init(&planiLargoPlazo ,0,0);
+	sem_init(&planiCortoPlazo, 0,0);
+	sem_init(&productorListaReady,0, 0);
+	sem_init(&productorColaNew,0,0);
+	sem_init(&multiprogramacion,0, Multiprogramacion());
 
 	pthread_mutex_init(&mutexReady, NULL);
 	pthread_mutex_init(&mutexNew, NULL);
