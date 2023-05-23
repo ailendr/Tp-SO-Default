@@ -13,7 +13,6 @@
 #include <utils/sockets.h>
 #include <utils/modulo.h>
 #include "ConsolaConfig.h"
-#include "archivo.h"
 //Para mostrar el git add /ConsolaT
 
 #endif /* SRC_CONSOLA_H_ */

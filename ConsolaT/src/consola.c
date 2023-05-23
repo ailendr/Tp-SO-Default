@@ -38,7 +38,6 @@ int main(int argc, char** argv) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	t_list* listaInstrucciones = crearLista(pathPseudo);
 
 
 	//conexion//
@@ -53,8 +52,6 @@ int main(int argc, char** argv) {
 	        return EXIT_FAILURE;
 	}
 
-	log_info(loggerConsola, "Enviando instrucciones");
-	enviarListaDeIntrucciones(listaInstrucciones, conexion);
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 
