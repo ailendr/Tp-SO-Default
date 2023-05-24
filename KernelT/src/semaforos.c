@@ -9,7 +9,7 @@ sem_t productorColaNew;
 pthread_mutex_t mutexReady;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexPID;
-pthread_mutex_t mutexMultiprogramacion;//controla la variable procesosActivos: son los procesos q se admiten en Ready con memoria
+
 
 void inicializarSemaforos(){
 	sem_init(&planiLargoPlazo ,0,0);
@@ -21,5 +21,5 @@ void inicializarSemaforos(){
 	pthread_mutex_init(&mutexReady, NULL);
 	pthread_mutex_init(&mutexNew, NULL);
 	pthread_mutex_init(&mutexPID, NULL);
-	pthread_mutex_init(&mutexMultiprogramacion, NULL);
+
 }

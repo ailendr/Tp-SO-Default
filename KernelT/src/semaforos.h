@@ -12,7 +12,6 @@ extern sem_t productorColaNew;
 extern pthread_mutex_t mutexReady;
 extern pthread_mutex_t mutexNew;
 extern pthread_mutex_t mutexPID;
-extern pthread_mutex_t mutexMultiprogramacion;
 
 
 

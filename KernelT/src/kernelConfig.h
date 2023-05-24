@@ -28,9 +28,9 @@ char* Puerto();
 //ALGORITMO
 char* Algoritmo();
 //ESTIMACION INICIAL
-int Estimacion();
+double Estimacion();
 //ALFA
-int Alfa();
+double Alfa();
 //MULTIPROGRAMACION
 int Multiprogramacion();
 //RECURSOS

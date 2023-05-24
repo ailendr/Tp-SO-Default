@@ -8,6 +8,7 @@
 #ifndef SRC_PLANIFICACION_H_
 #define SRC_PLANIFICACION_H_
 #include <commons/collections/queue.h>
+#include <time.h>
 
 #include "kernelGlobales.h"
 //#include "kernelConfig.h" lo incluimos dentro de semaforos
@@ -35,6 +36,11 @@ void cortoPlazo();
 void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void instruccionAEjecutar();
+//PARA HRRN
+void algoritmoHRRN();
+void calcularNuevaRafaga();
+void calcularRR(t_pcb* proceso);
+bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);
 
 void generarProceso(int* socket_cliente);
 void finalizarProceso(t_pcb* procesoAFinalizar);

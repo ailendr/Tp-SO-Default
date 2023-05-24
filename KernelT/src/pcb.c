@@ -34,8 +34,10 @@ t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto) {
   	 	pcb->tablaSegmentos = list_create();//recibir por parametro
   	 //	pcb->estadoPcb = estado; El estado se pone en agregarANew
   	 	pcb->estimadoReady = Estimacion(); //debe ser un globals
-  	 	pcb->llegadaAReady = 0;
   	 	pcb->archAbiertos = list_create();//recibir por parametro
+  	 	pcb->RR=0;
+  	 	pcb->tiempoDeEspera=0;
+  	 	pcb->ultimaRafagaEjecutada=0;
   	 	return pcb;
   }
 

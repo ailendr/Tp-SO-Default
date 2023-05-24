@@ -37,6 +37,7 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 	pthread_mutex_lock(&mutexReady);
 	list_add(colaReady, procesoListo);
 	procesoListo->estadoPcb = READY;
+	clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));//Por HRRN
 	pthread_mutex_lock(&mutexReady);
 	sem_post(&productorListaReady);
 	log_info(loggerKernel,
@@ -145,9 +146,6 @@ void largoPlazo() {
 		enviarProtocolo(socketMemoria, loggerKernel); //El handshake seria el pedido de memoria
 		//asignarMemoria(proceso, tabla); //PCB creado
 		agregarAEstadoReady(proceso);
-		pthread_mutex_lock(&mutexMultiprogramacion);
-		procesosActivos++;
-		pthread_mutex_lock(&mutexMultiprogramacion);
 		log_info(loggerKernel,
 				"PID: %d - Estado Anterior: NEW - Estado Actual: READY",
 				proceso->contexto->pid);
@@ -161,9 +159,12 @@ void cortoPlazo() {
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
+			instruccionAEjecutar();
 		}
-
-		instruccionAEjecutar();
+		if (strcmp(algoritmo, "HRRN")==0){
+			algoritmoHRRN();
+			instruccionAEjecutar();
+		}
 	}
 }
 
@@ -186,6 +187,9 @@ void instruccionAEjecutar() {
 			finalizarProceso(ultimoEjecutado);
 			break;
 		case YIELD:
+			if(strcmp(Algoritmo(),"HRRN")==0){
+				calcularNuevaRafaga(ultimoEjecutado);
+			}
 			agregarAEstadoReady(ultimoEjecutado);
 			break;
 		case CREATE_SEGMENT:
@@ -205,6 +209,45 @@ void algoritmoFIFO() {
 	procesoAEjec->estadoPcb = EXEC;
 	ultimoEjecutado = procesoAEjec;
 }
+
+
+void algoritmoHRRN(){
+	t_pcb* procesoAEjec;
+	list_iterate(colaReady, (void*) calcularRR);
+	list_sort(colaReady, (void*)comparadorRR);//Aca me ordena la lista por el comparador de RR
+	procesoAEjec=extraerDeReady();
+	t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
+	procesoAEjecutar(contextoAEjec);
+	procesoAEjec->estadoPcb=EXEC;
+	ultimoEjecutado = procesoAEjec;
+}
+
+void calcularNuevaRafaga(t_pcb* proceso) {
+	double alfa = Alfa();
+    double nuevaRafaga = (alfa * proceso->estimadoReady)+ ((proceso->ultimaRafagaEjecutada) *(1 - alfa));
+    proceso->estimadoReady = nuevaRafaga;
+}
+
+void calcularRR(t_pcb* proceso) {
+
+    struct timespec end;
+    clock_gettime(CLOCK_REALTIME, &end);
+
+    long seconds = end.tv_sec - proceso->llegadaAReady.tv_sec;
+    long nanoseconds = end.tv_nsec - proceso->llegadaAReady.tv_nsec;
+    double elapsed = seconds + nanoseconds*1e-9;
+
+    proceso->tiempoDeEspera = elapsed;
+	proceso->RR = 1 + (proceso->tiempoDeEspera / proceso->estimadoReady);
+
+}
+
+bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
+
+    return proceso1->RR >= proceso2->RR;
+
+}
+
 
 /// ---------TODO LO QUE TIENE QUE VER CON INSTRUCCIONES Y PROCESOS---------///
 
@@ -308,9 +351,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar) {
 	free(procesoAFinalizar->contexto);
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
-	pthread_mutex_lock(&mutexMultiprogramacion);
-	procesosActivos--;
-	pthread_mutex_lock(&mutexMultiprogramacion);
+	sem_post(&multiprogramacion);
 	int terminar = -1;
 	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
 	log_info(loggerKernel, "Finaliza el proceso %d - Motivo: SUCCESS",

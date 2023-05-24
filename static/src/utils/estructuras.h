@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <commons/collections/list.h>
+#include <time.h>
 
 typedef struct{
 		uint32_t pid;
@@ -50,9 +51,13 @@ typedef struct{
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;
 	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
-	uint32_t estimadoReady;//estimadorafaga
-	uint32_t llegadaAReady;//timestamp
+	double estimadoReady;//estimadorafaga
 	t_list* archAbiertos;
+
+	struct timespec llegadaAReady;//timestamp
+	double tiempoDeEspera;
+	double ultimaRafagaEjecutada;
+	double RR;
 }t_pcb;
 
 
