@@ -32,6 +32,7 @@ int main(void) {
 
 
     crearEstados();
+    crearEstructurasDeRecursos();
 
 
     ///------Kernel como Servidor------//

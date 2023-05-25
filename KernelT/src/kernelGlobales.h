@@ -17,6 +17,8 @@ extern int socketMemoria;
 extern uint32_t pid;
 extern int procesosActivos;
 extern t_pcb* ultimoEjecutado;
+extern t_list* listaDeBloqueo;
+extern t_list* listaDeInstancias;
 
 
 #endif /* SRC_KERNELGLOBALES_H_ */

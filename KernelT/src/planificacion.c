@@ -192,10 +192,21 @@ void instruccionAEjecutar() {
 			}
 			agregarAEstadoReady(ultimoEjecutado);
 			break;
+
+		case WAIT:
+			char* recursoAConsumir = "recurso"; //= deserializarInstruccion(); Supongamos que recibimos el parametro. Hay q ver como serializa dany
+			implementacionWait(recursoAConsumir);
+			break;
+		case SIGNAL:
+			char* recursoALiberar = "recurso"; // = deserializarInstruccion();
+			implementacionSignal(recursoALiberar);
+            procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
+			break;
 		case CREATE_SEGMENT:
 			break;
 		case DELETE_SEGMENT:
 			break;
+
 		default:
 			break;
 		}

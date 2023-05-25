@@ -28,7 +28,19 @@ typedef enum
 	YIELD,
 	CREATE_SEGMENT,
 	DELETE_SEGMENT,
-	EXIT
+	EXIT,
+	SET,
+	MOV_IN,
+	MOV_OUT,
+	IO,
+	F_OPEN,
+	F_CLOSE,
+	F_SEEK,
+	F_READ,
+	F_WRITE,
+	F_TRUNCATE,
+	WAIT,
+	SIGNAL
 
 }op_code;
 

@@ -11,10 +11,11 @@
 #include <time.h>
 
 #include "kernelGlobales.h"
-//#include "kernelConfig.h" lo incluimos dentro de semaforos
+//#include "kernelConfig.h" //lo incluimos dentro de semaforos.h
 //#include "KernelConexiones.h"
 #include "pcb.h"
 #include "semaforos.h"
+#include "recursos.h"
 
 extern t_queue* colaNew;
 extern t_list* colaReady;
