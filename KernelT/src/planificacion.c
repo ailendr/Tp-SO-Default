@@ -195,11 +195,11 @@ void instruccionAEjecutar() {
 
 		case WAIT:
 			char* recursoAConsumir = "recurso"; //= deserializarInstruccion(); Supongamos que recibimos el parametro. Hay q ver como serializa dany
-			implementacionWait(recursoAConsumir);
+			implementacionWyS(recursoAConsumir, 1);
 			break;
 		case SIGNAL:
 			char* recursoALiberar = "recurso"; // = deserializarInstruccion();
-			implementacionSignal(recursoALiberar);
+			implementacionWyS(recursoALiberar, 2);
             procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
 			break;
 		case CREATE_SEGMENT:

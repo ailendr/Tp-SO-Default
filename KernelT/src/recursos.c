@@ -36,8 +36,10 @@ t_list* crearListaDeInstancias(){
 	int i =0;
 	while(instanciasDeRecursos[i] != NULL){
 		char* stringCantidad = instanciasDeRecursos[i];
-		int cantidad = (int) stringCantidad;
-		list_add(listaDeInstancias, cantidad);
+		int cantidad = atoi(stringCantidad); // se puede usar tambien strtol(stringCantidad, NULL, 10)
+		int* cant = &cantidad;
+		list_add(listaDeInstancias, (void*)cant);
+
 		i++;
 	}
 	return listaDeInstancias;
@@ -60,7 +62,7 @@ int recursoDisponible(char* nombre){
 	return -1;
 }
 
-void fwait(int posRecurso){
+/*void fwait(int posRecurso){
 	int valor = list_get(listaDeInstancias, posRecurso);
 	valor --;
 	if(valor<0){
@@ -80,6 +82,7 @@ void implementacionWait(char* nombreRecurso){
     else{ //ejecuta lo que haria un wait
     	fwait(posicionRecurso);
     	}
+
 }
 
 void fsignal(int posRecurso){
@@ -87,19 +90,52 @@ void fsignal(int posRecurso){
 	valor ++;
 	t_queue* colaDeBloqueo = list_get(listaDeBloqueo, posRecurso);
 	t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
-	//agregarAEstadoReady(procesoDesbloqueado); Lo dejo comentado porq deberia incluir a planificacion.h y como planificacion.h incluye a recursos.h se llamaran circularmente
+	agregarAEstadoReady(procesoDesbloqueado); //Lo dejo comentado porq deberia incluir a planificacion.h y como planificacion.h incluye a recursos.h se llamaran circularmente
 
 
 }
 
 void implementacionSignal(char* nombreRecurso){
-	int posicionRecurso = recursoDisponible(nombreRecurso);
+int posicionRecurso = recursoDisponible(nombreRecurso);
 	    if(posicionRecurso ==-1){
 	    	finalizarProceso(ultimoEjecutado);
 	    }
 	    else{ //ejecuta lo que haria un signal
 	    	fsignal(posicionRecurso);
 	    	}
-}
 
+}
+*/
+
+/*1)podemos agregar esta funcion en planificacion y evitar la invocacion circular de bibliotecas
+ * 2)podemos pasar las funciones sobre ready,new y finalizar en otro archivo y como son las minimas e indispensables es mas facil incluirlas en donde quieras"
+ */
+
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
+	/*1ero buscar el recurso: si no está finaliza el proceso
+	 -----------                         si esta decrementa o incrementa la instancia*/
+	int posicionRecurso = recursoDisponible(nombreRecurso);
+		if(posicionRecurso ==-1){
+			finalizarProceso(ultimoEjecutado);
+		}
+		else{
+			int valor = *(int*)list_get(listaDeInstancias,posicionRecurso);
+			switch (nombreInstruccion){
+			case 1: //1=WAIT
+				valor --;
+				 if(valor<0){
+				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
+				queue_push(colaDeBloqueo, ultimoEjecutado);
+				ultimoEjecutado->estadoPcb = BLOCK;
+				 }
+				break;
+			case 2://2=SIGNAL
+				valor ++;
+				t_queue* colaDeBloqueo = list_get(listaDeBloqueo, posicionRecurso);
+				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
+				agregarAEstadoReady(procesoDesbloqueado);
+				break;
+			 }
+			}
+		}
 
