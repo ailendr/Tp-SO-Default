@@ -186,7 +186,7 @@ void instruccionAEjecutar() {
 			free(buffer);
 			break;
 		case EXIT:
-			finalizarProceso(ultimoEjecutado);
+			finalizarProceso(ultimoEjecutado, "SUCCESS");
 			break;
 		case YIELD:
 			if(strcmp(Algoritmo(),"HRRN")==0){
@@ -376,7 +376,7 @@ void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
 
 }
 
-void finalizarProceso(t_pcb *procesoAFinalizar) {
+void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	free(procesoAFinalizar->contexto->instrucciones);
 	free(procesoAFinalizar->contexto);
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
@@ -384,8 +384,8 @@ void finalizarProceso(t_pcb *procesoAFinalizar) {
 	sem_post(&multiprogramacion);
 	int terminar = -1;
 	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
-	log_info(loggerKernel, "Finaliza el proceso %d - Motivo: SUCCESS",
-			procesoAFinalizar->contexto->pid);
+	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
+			procesoAFinalizar->contexto->pid, motivoDeFin);
 
 }
 
@@ -395,23 +395,25 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 	 -----------                         si esta decrementa o incrementa la instancia*/
 	int posicionRecurso = recursoDisponible(nombreRecurso);
 		if(posicionRecurso ==-1){
-			finalizarProceso(ultimoEjecutado);
+			finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 		}
 		else{
 			int valor = *(int*)list_get(listaDeInstancias,posicionRecurso);
 			switch (nombreInstruccion){
 			case 1: //1=WAIT
 				valor --;
+				log_info(loggerKernel, "PID: %d - WAIT: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
 				 if(valor<0){
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				queue_push(colaDeBloqueo, ultimoEjecutado);
 				tiempoEnCPU(ultimoEjecutado);
 				ultimoEjecutado->estadoPcb = BLOCK;
-				log_info(loggerKernel, "PID: %d Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
+				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
 				 }
 				break;
 			case 2://2=SIGNAL
 				valor ++;
+				log_info(loggerKernel, "PID: %d - SIGNAL: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);

@@ -45,7 +45,7 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);
 void tiempoEnCPU(t_pcb* proceso);
 
 void generarProceso(int* socket_cliente);
-void finalizarProceso(t_pcb* procesoAFinalizar);
+void finalizarProceso(t_pcb* procesoAFinalizar, char* motivoDeFin);
 t_list*  obtenerInstrucciones(int socket_cliente);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
