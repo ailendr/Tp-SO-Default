@@ -54,6 +54,7 @@ typedef struct{
 	double estimadoReady;//estimadorafaga
 	t_list* archAbiertos;
 
+	struct timespec llegadaACPU;//timestamp
 	struct timespec llegadaAReady;//timestamp
 	double tiempoDeEspera;
 	double ultimaRafagaEjecutada;

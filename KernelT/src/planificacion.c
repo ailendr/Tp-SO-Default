@@ -7,11 +7,11 @@
 
 #include "planificacion.h"
 
-//A todo estos hay que ponerles mutex
+
 t_queue *colaNew;
 t_list *colaReady;
 int procesosActivos = 0;
-t_pcb *ultimoEjecutado; //Falta lo de esto ->No se si tiene sentido porq el unico q lo toca es el hilo corto plazo
+t_pcb *ultimoEjecutado;
 uint32_t pid = 0;
 
 void crearEstados() {
@@ -159,12 +159,14 @@ void cortoPlazo() {
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
-			instruccionAEjecutar();
 		}
 		if (strcmp(algoritmo, "HRRN")==0){
 			algoritmoHRRN();
-			instruccionAEjecutar();
+		}else{
+			log_info(loggerKernel, "El algoritmo obtenido por archivo de config no es válido");
+			exit(1);
 		}
+		instruccionAEjecutar();
 	}
 }
 
@@ -188,7 +190,8 @@ void instruccionAEjecutar() {
 			break;
 		case YIELD:
 			if(strcmp(Algoritmo(),"HRRN")==0){
-				calcularNuevaRafaga(ultimoEjecutado);
+				tiempoEnCPU(ultimoEjecutado);
+				calcularNuevaEstimacion(ultimoEjecutado);
 			}
 			agregarAEstadoReady(ultimoEjecutado);
 			break;
@@ -207,6 +210,8 @@ void instruccionAEjecutar() {
 		case DELETE_SEGMENT:
 			break;
 
+		case IO:
+			break;//Cuando hagamos esto hay que ponerle lo de calcular tiempo en cpu
 		default:
 			break;
 		}
@@ -224,19 +229,33 @@ void algoritmoFIFO() {
 
 void algoritmoHRRN(){
 	t_pcb* procesoAEjec;
+	list_iterate(colaReady, (void*) calcularNuevaEstimacion);
 	list_iterate(colaReady, (void*) calcularRR);
 	list_sort(colaReady, (void*)comparadorRR);//Aca me ordena la lista por el comparador de RR
 	procesoAEjec=extraerDeReady();
 	t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 	procesoAEjecutar(contextoAEjec);
 	procesoAEjec->estadoPcb=EXEC;
+	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
 	ultimoEjecutado = procesoAEjec;
 }
 
-void calcularNuevaRafaga(t_pcb* proceso) {
+void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
-    double nuevaRafaga = (alfa * proceso->estimadoReady)+ ((proceso->ultimaRafagaEjecutada) *(1 - alfa));
-    proceso->estimadoReady = nuevaRafaga;
+    double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
+    proceso->estimadoReady = nuevaEstimacion;
+}
+
+void tiempoEnCPU(t_pcb* proceso){
+    struct timespec end;
+    clock_gettime(CLOCK_REALTIME, &end);
+
+    long seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
+    long nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
+    double elapsed = seconds + nanoseconds*1e-9;
+
+    proceso->ultimaRafagaEjecutada=elapsed;
+
 }
 
 void calcularRR(t_pcb* proceso) {
@@ -386,6 +405,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				 if(valor<0){
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				queue_push(colaDeBloqueo, ultimoEjecutado);
+				tiempoEnCPU(ultimoEjecutado);
 				ultimoEjecutado->estadoPcb = BLOCK;
 				log_info(loggerKernel, "PID: %d Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
 				 }

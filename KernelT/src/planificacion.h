@@ -39,9 +39,10 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void instruccionAEjecutar();
 //PARA HRRN
 void algoritmoHRRN();
-void calcularNuevaRafaga();
+void calcularNuevaEstimacion(t_pcb* proceso);
 void calcularRR(t_pcb* proceso);
 bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);
+void tiempoEnCPU(t_pcb* proceso);
 
 void generarProceso(int* socket_cliente);
 void finalizarProceso(t_pcb* procesoAFinalizar);
