@@ -370,3 +370,33 @@ void finalizarProceso(t_pcb *procesoAFinalizar) {
 
 }
 
+///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
+	/*1ero buscar el recurso: si no está finaliza el proceso
+	 -----------                         si esta decrementa o incrementa la instancia*/
+	int posicionRecurso = recursoDisponible(nombreRecurso);
+		if(posicionRecurso ==-1){
+			finalizarProceso(ultimoEjecutado);
+		}
+		else{
+			int valor = *(int*)list_get(listaDeInstancias,posicionRecurso);
+			switch (nombreInstruccion){
+			case 1: //1=WAIT
+				valor --;
+				 if(valor<0){
+				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
+				queue_push(colaDeBloqueo, ultimoEjecutado);
+				ultimoEjecutado->estadoPcb = BLOCK;
+				log_info(loggerKernel, "PID: %d Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
+				 }
+				break;
+			case 2://2=SIGNAL
+				valor ++;
+				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
+				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
+				agregarAEstadoReady(procesoDesbloqueado);
+				break;
+			 }
+			}
+		}
+

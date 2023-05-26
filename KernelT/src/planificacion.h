@@ -48,6 +48,9 @@ void finalizarProceso(t_pcb* procesoAFinalizar);
 t_list*  obtenerInstrucciones(int socket_cliente);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion);
+
+
 
 
 #endif /* SRC_PLANIFICACION_H_ */
