@@ -86,5 +86,7 @@ typedef struct{
 	char* dirBase;
 }segmento;
  * */
+t_pcb* crearPcb(uint32_t pid, uint32_t estado);
 
+t_contextoEjec* crearContexto(); //TODO
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */
