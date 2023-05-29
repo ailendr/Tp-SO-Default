@@ -16,6 +16,7 @@
 #include "pcb.h"
 #include "semaforos.h"
 #include "recursos.h"
+#include <utils/serializacion.h>
 
 extern t_queue* colaNew;
 extern t_list* colaReady;
@@ -27,11 +28,9 @@ void agregarAEstadoNew(t_pcb* procesoNuevo);
 void agregarAEstadoReady(t_pcb* procesoListo);
 t_pcb* extraerDeNew();
 t_pcb* extraerDeReady();
+void cambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado);
 
 //lo pongo aca porq largo plazo los usa//
-t_paquete* serializarContexto(t_contextoEjec* procesoAEjecutar);
-t_list* deserializarInstrucciones(void*buffer, int desplazamiento,int tamanioBuffer);
-t_contextoEjec* deserializarContexto(void* buffer, int tamanio);
 void largoPlazo();
 void cortoPlazo();
 void algoritmoFIFO();
