@@ -132,7 +132,7 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad 
 	for (int i = 0; i < tamanioInstrucciones; i++) {
 		char *instruccion = list_get(instrucciones, i);
 		agregar_a_paquete(paqueteContexto, instruccion,
-				strlen(instruccion) + 1); //para q cpu pueda usar recibirPaquete del otro lado
+				strlen(instruccion) + 1);
 	}
 	return paqueteContexto;
 }

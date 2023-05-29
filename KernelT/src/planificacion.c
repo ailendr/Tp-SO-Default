@@ -147,6 +147,10 @@ void instruccionAEjecutar() {
 			break;
 
 		case IO:
+			int tiempoDeIO = 1000; //en microsegundos tendriamos q deserializarInstruccion y seria el primer parametro
+			pthread_t hiloDeBloqueo; //crear hilo
+			pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
+			pthread_detach(hiloDeBloqueo);
 			break;//Cuando hagamos esto hay que ponerle lo de calcular tiempo en cpu
 		default:
 			break;
@@ -242,8 +246,8 @@ void generarProceso(int *socket_cliente) {
 	log_info(loggerKernel, "Se crea el proceso %d en New",
 			procesoNuevo->contexto->pid);
 	//Cerrando recursos
-	close(consolaNueva);
-	free(socket_cliente);
+	//close(consolaNueva);//Ver si esta demas esto o nos romperia
+	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
 	sem_post(&planiLargoPlazo); //Duda si hacerlo acá o dsps de agregarAEstadoNew
 }
 
@@ -298,3 +302,14 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 			}
 		}
 
+////---Funcion de IO---///
+void bloquearHilo(int* tiempo){
+	int tiempoDeBloqueo = *tiempo;
+	ultimoEjecutado->estadoPcb= BLOCK;
+	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", ultimoEjecutado->contexto->pid);
+    cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+	usleep(tiempoDeBloqueo);
+	ultimoEjecutado->estadoPcb= READY;
+	cambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
+
+}

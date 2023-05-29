@@ -72,10 +72,7 @@ void atenderConsolas(int socket_servidor){
 		                    NULL,
 		                   (void*) generarProceso,
 		                   (void*)socket_cliente);
-		   //sem_post(&planiLargoPlazo);
 		   pthread_detach(hiloServidor);
-
-		  // log_info(loggerKernel, "El pid del proceso es: %d", pid);
 
    }
 }

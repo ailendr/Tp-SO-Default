@@ -18,6 +18,7 @@
 #include "recursos.h"
 #include <utils/serializacion.h>
 
+
 extern t_queue* colaNew;
 extern t_list* colaReady;
 
@@ -49,6 +50,7 @@ t_list*  obtenerInstrucciones(int socket_cliente);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion);
+void bloquearHilo(int* tiempo);
 
 
 
