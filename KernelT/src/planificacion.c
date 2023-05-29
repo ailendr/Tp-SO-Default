@@ -309,7 +309,7 @@ void bloquearHilo(int* tiempo){
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", ultimoEjecutado->contexto->pid);
     cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 	usleep(tiempoDeBloqueo);
-	ultimoEjecutado->estadoPcb= READY;
+	agregarAEstadoReady(ultimoEjecutado); //Agrega a la cola y cambia el estado del pcb
 	cambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
 
 }
