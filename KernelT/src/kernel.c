@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
 
     crearEstados();
     crearEstructurasDeRecursos();
+	inicializarSemaforos();
 
 
     ///------Kernel como Servidor------//
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
 
     //----Creando Hilos Planificadores---///
     //USAR SEMAFOROS BINARIOS///
-	inicializarSemaforos();
+
 
      pthread_t  hiloCortoPlazo, hiloLargoPlazo;
 	 pthread_create(&hiloLargoPlazo,NULL,(void*)largoPlazo,NULL);

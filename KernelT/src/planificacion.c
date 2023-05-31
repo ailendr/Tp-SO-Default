@@ -127,7 +127,6 @@ void instruccionAEjecutar() {
 		case YIELD:
 			if(strcmp(Algoritmo(),"HRRN")==0){
 				tiempoEnCPU(ultimoEjecutado);
-				calcularNuevaEstimacion(ultimoEjecutado);
 			}
 			agregarAEstadoReady(ultimoEjecutado);
 			break;
@@ -238,11 +237,11 @@ void generarProceso(int *socket_cliente) {
 	int consolaNueva = *socket_cliente;
 	//recibirProtocolo(socket_cliente); //Handashake No lo incluimos por el momento porq la func cierra las conexiones-> podemos modificarla dsps
 	t_list *instrucciones = obtenerInstrucciones(consolaNueva);
-	t_pcb *procesoNuevo = crearPcb(instrucciones, pid, consolaNueva);
-	agregarAEstadoNew(procesoNuevo);
 	pthread_mutex_lock(&mutexPID);
+	t_pcb *procesoNuevo = crearPcb(instrucciones, pid, consolaNueva);
 	pid++;
 	pthread_mutex_unlock(&mutexPID);
+	agregarAEstadoNew(procesoNuevo);
 	log_info(loggerKernel, "Se crea el proceso %d en New",
 			procesoNuevo->contexto->pid);
 	//Cerrando recursos
@@ -288,6 +287,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				queue_push(colaDeBloqueo, ultimoEjecutado);
 				tiempoEnCPU(ultimoEjecutado);
 				ultimoEjecutado->estadoPcb = BLOCK;
+				cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
 				 }
 				break;
@@ -297,6 +297,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
+				cambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
 				break;
 			 }
 			}

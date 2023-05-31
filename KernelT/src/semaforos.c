@@ -6,9 +6,11 @@ sem_t planiCortoPlazo;
 sem_t multiprogramacion;///semaforo contador
 sem_t productorListaReady;
 sem_t productorColaNew;
+sem_t cpuOcupada;
 pthread_mutex_t mutexReady;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexPID;
+
 
 
 void inicializarSemaforos(){
@@ -17,6 +19,7 @@ void inicializarSemaforos(){
 	sem_init(&productorListaReady,0, 0);
 	sem_init(&productorColaNew,0,0);
 	sem_init(&multiprogramacion,0, Multiprogramacion());
+	sem_init(&cpuOcupada,0, 1);
 
 	pthread_mutex_init(&mutexReady, NULL);
 	pthread_mutex_init(&mutexNew, NULL);
