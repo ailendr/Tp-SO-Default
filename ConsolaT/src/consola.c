@@ -28,13 +28,13 @@ int main(void) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	log_info(loggerConsola, "Iniciando como Cliente ... \n");
+	log_info(loggerConsola, "Iniciando como Cliente ...");
 	conexion = iniciarCliente(ip, puerto, loggerConsola);
 	if( verificarSocket (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerConsola, "Enviando mensaje");
 
-	if(enviarProtocolo(conexion, loggerConsola) == -1){
+	if(enviarProtocolo(conexion, HANDSHAKE_Consola,loggerConsola) == -1){
 	        terminarModulo(conexion,loggerConsola, configConsola);
 	        return EXIT_FAILURE;
 	}

@@ -64,7 +64,7 @@ void procesoAEjecutar(t_contextoEjec* procesoAEjecutar){ //TODO
 	 int maxGradoMultiprogram = Multiprogramacion(); //Tiene que ser un Globals
 	 if(procesosActivos <= maxGradoMultiprogram){
 		 proceso = extraerDeNew(colaNew);
-		 enviarProtocolo(socketMemoria, loggerKernel);//El handshake seria el pedido de memoria
+		 enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel);//El handshake seria el pedido de memoria
 		 //asignarMemoria(proceso, tabla); //PCB creado
 		 agregarAEstadoReady(proceso);
 	     procesosActivos ++;

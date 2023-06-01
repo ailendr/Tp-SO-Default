@@ -9,5 +9,8 @@
 #define SRC_MEMORIACONEXIONES_H_
 
 void atenderModulos(int socket_servidor);
+void atenderPeticionesCpu(int socket);
+void atenderPeticionesFs(int socket);
+void atenderPeticionesKernel(int socket);
 
 #endif /* SRC_MEMORIACONEXIONES_H_ */

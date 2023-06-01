@@ -21,12 +21,12 @@ int main(void) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	log_info(loggerMemoria, "Iniciando Servidor ... \n");
+	log_info(loggerMemoria, "Iniciando Servidor ...");
 	servidorMemoria = iniciarServidor(ip, puerto);
 	if( verificarSocket (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 	log_info(loggerMemoria, "Servidor listo para recibir al cliente");
 
-	log_info(loggerMemoria, "Esperando Clientes ... \n");
+	log_info(loggerMemoria, "Esperando Clientes ...");
 
 	atenderModulos(servidorMemoria);
 
