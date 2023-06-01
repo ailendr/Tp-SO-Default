@@ -3,8 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "./cpuConfig.h"
-#include <utils/sockets.h>
 
+#include "./utilsCpu.h"
 
 #endif

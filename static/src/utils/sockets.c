@@ -40,7 +40,7 @@ int iniciarCliente(char *ip, char* puerto, t_log* logger)
 	// Ahora que tenemos el socket, vamos a conectarlo
     int conexion = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
       if(conexion  == -1){
-        	log_info(logger, "\n Error : fallo la conexion");
+        	log_error(logger, "\n Error : fallo la conexion");
         	freeaddrinfo(server_info);
         	return -1;
         }

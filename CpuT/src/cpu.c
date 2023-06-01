@@ -4,51 +4,40 @@ int main(void) {
 
 	printf ("Hola soy cpu y estoy queriendo recibir mensajes\n ");
 
-	loggerCPU = log_create("cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
+	t_contextoEjec* contextoRecibido = NULL;
+	char* instr;
+	t_instruccion* nuevaInstr = NULL;
+	void* buffer = NULL;
+	int tamanio = 0;
+	t_paquete* paqueteI = NULL;
+	t_paquete* paqueteC = NULL;
 
-	log_info(loggerCPU, "---------------------------------------------------------------------------");
+	if (iniciarCpu () == 1) return EXIT_FAILURE;
 
-	log_info(loggerCPU, "Iniciando CPU...");
+	while (1){
 
-	int servidorCpu = 0;
+		buffer = recibir_buffer(&tamanio, servidorCpu);
+		contextoRecibido = deserializarContexto(buffer, tamanio);
+		free(buffer);
 
-	configCPU = config_create("../CpuT/cpu.config");
-	if(verificarConfig (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+		instr = fetch (&contextoRecibido);
+		nuevaInstr = decode (&instr);
+		execute (&nuevaInstr, contextoRecibido);
 
-	printf ("\n El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
+		paqueteC = serializarContexto(contextoRecibido);
+		enviar_paquete(paqueteC, servidorCpu);
 
-	log_info(loggerCPU, "Iniciando conexion con Memoria ... \n");
 
-	int socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerCPU);
-	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+		if (nuevaInstr->nombre != SET && nuevaInstr->nombre != MOV_IN && nuevaInstr->nombre != MOV_OUT){
+			paqueteI = serializarInstrucciones (nuevaInstr);
+			enviar_paquete(paqueteI, servidorCpu);
+		}
 
-	log_info(loggerCPU, "Enviando mensaje a Memoria para corroborar conexion \n");
-    if(enviarProtocolo(socketMemoria, loggerCPU) == -1){
-    	terminarModulo(socketMemoria,loggerCPU, configCPU);
-    	return EXIT_FAILURE;
-    }
-
-    log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel... \n");
-    servidorCpu = iniciarServidor(IP_Escucha(), puertoEscucha());
-    if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ){
-    	close(socketMemoria);
-    	return EXIT_FAILURE;
-    }
-    log_info(loggerCPU, "Servidor listo para recibir al Kernel");
-
- 	log_info(loggerCPU ,"Esperando un Cliente ... \n");
-    int cliente = esperar_cliente(servidorCpu, loggerCPU);
-    if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
-    	close(servidorCpu);
-    	close(socketMemoria);
-        return EXIT_FAILURE;
-    }
-    recibirHandshake(cliente);
+	}
 
     /*
      ----------------------------------------------------
      TODO
-     fetch()
      Decode()
      Execute()
 

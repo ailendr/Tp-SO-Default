@@ -31,7 +31,7 @@ typedef struct{
 }t_contextoEjec;
 
 typedef struct {
-	char* nombre;
+  op_code nombre;
 	uint32_t pid;
 	char* param1;
 	char* param2;
@@ -62,6 +62,28 @@ typedef struct{
 }t_pcb;
 
 
+typedef enum{
+    F_READ,
+    F_WRITE,
+
+    SET,
+    MOV_IN,
+    MOV_OUT,
+    F_TRUNCATE,
+    F_SEEK,
+    CREATE_SEGMENT,
+
+    IO,
+    WAIT,
+    SIGNAL,
+    F_OPEN,
+    F_CLOSE,
+    DELETE_SEGMENT,
+
+    EXIT,
+    YIELD
+}t_instruc;
+
 /*
 Lo dejo así ya queda a futuro, pero por ahora que quede comentado
 typedef struct{
@@ -70,5 +92,7 @@ typedef struct{
 	char* dirBase;
 }segmento;
  * */
+t_pcb* crearPcb(uint32_t pid, uint32_t estado);
 
+t_contextoEjec* crearContexto(); //TODO
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

@@ -7,55 +7,60 @@
 
 #include "consola.h"
 
-int main(int argc, char** argv) {
-	/*NOTA: argv[0]: almacena el nombre del programa.
-			argv[1]: almacena el primer argumento.
-			argv[2]: almacena el segundo argumento. */
+static void enviarInstruccionesAKernel(char* pathInstrucciones, int conexionConKernel){
+	t_paquete *paqueteConInstrucciones = parseoDeInstrucciones(pathInstrucciones);
+	enviar_paquete(paqueteConInstrucciones, conexionConKernel);
+	log_info(loggerConsola,"Envio paquete con las instrucciones a kernel");
 
-//validacion de cantidad de argumentos
-	 if (argc < 3) {
-	        return EXIT_FAILURE;
-	    }
+}
 
-	printf ("Hola soy consola y quiero conectarme con kernel \n ");
+int main(int argc, char** argv[]) {
 
-	loggerConsola = log_create("./consola.log","Consola", 1, LOG_LEVEL_INFO);
+	//printf ("Hola soy consola y quiero conectarme con kernel \n ");
+	if(argc < 3){
+		return EXIT_FAILURE;
+	}
 
+  loggerConsola = log_create("./consola.log","ConsolaT", 1, LOG_LEVEL_INFO);
 	log_info(loggerConsola, "---------------------------------------------------------------------------");
-
 	log_info(loggerConsola, "Iniciando Consola...");
-
-	int conexion = 0;
-    char* pathConfig = argv[1];
-    char* pathPseudo = argv[2];
-
+	int conexionConKernel = 0;
+	char* pathConfig = argv[1];
+	char* pathInstrucciones = argv[2];
+  
 	configConsola = config_create(pathConfig);
 
-	if( verificarConfig (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
+	if( verificarConfig (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
 	char* ip = IpKernel();
 	char* puerto = PuertoKernel();
 
-	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+	//printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-
-
-	//conexion//
 	log_info(loggerConsola, "Iniciando como Cliente ... \n");
-	conexion = iniciarCliente(ip, puerto, loggerConsola);
-	if( verificarSocket (conexion, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
+	conexionConKernel = iniciarCliente(ip, puerto, loggerConsola);
+	if( verificarSocket (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerConsola, "Enviando mensaje de protocolo");
 
-	if(enviarProtocolo(conexion, loggerConsola) == -1){
-	        terminarModulo(conexion,loggerConsola, configConsola);
+	if(enviarProtocolo(conexionConKernel, loggerConsola) == -1){
+	        terminarModulo(conexionConKernel,loggerConsola, configConsola);
 	        return EXIT_FAILURE;
 	}
 
+  enviarInstruccionesAKernel(pathInstrucciones, conexionConKernel);
+
+	int finalizar;
+	recv(conexionConKernel, &finalizar, sizeof(int), MSG_WAITALL);
+
+	if(finalizar != -1){
+		terminarModulo(conexionConKernel, loggerConsola, configConsola);
+		return EXIT_FAILURE;
+	}
 
 	log_info(loggerConsola, "Finalizando Consola...\n");
 
-	terminarModulo(conexion, loggerConsola, configConsola);
+	terminarModulo(conexionConKernel, loggerConsola, configConsola);
 
 	printf ("Finalizo Consola correctamente\n ");
 
