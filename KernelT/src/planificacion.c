@@ -7,11 +7,8 @@
 
 #include "planificacion.h"
 
-//Dany tuvo x aqui -> Despues borrenlo pero no me deja
-
 t_queue *colaNew;
 t_list *colaReady;
-int procesosActivos = 0;
 t_pcb *ultimoEjecutado;
 uint32_t pid = 0;
 
@@ -84,6 +81,7 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
 		enviarProtocolo(socketMemoria, loggerKernel); //El handshake seria el pedido de memoria
 		//asignarMemoria(proceso, tabla); //PCB creado
+		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d, proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
 		cambioDeEstado(proceso, "NEW", "READY");
 		sem_post(&planiCortoPlazo);
@@ -152,6 +150,7 @@ void instruccionAEjecutar() {
 			pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
 			pthread_detach(hiloDeBloqueo);
 			break;//Cuando hagamos esto hay que ponerle lo de calcular tiempo en cpu
+
 		default:
 			break;
 		}
@@ -266,6 +265,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
 	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
 			procesoAFinalizar->contexto->pid, motivoDeFin);
+	sem_post(&cpuOcupada);
 
 }
 
@@ -290,6 +290,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				ultimoEjecutado->estadoPcb = BLOCK;
 				cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
+				sem_post(&cpuOcupada);
 				 }
 				break;
 			case 2://2=SIGNAL
@@ -310,8 +311,8 @@ void bloquearHilo(int* tiempo){
 	ultimoEjecutado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", ultimoEjecutado->contexto->pid);
     cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+    sem_post(&cpuOcupada);
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(ultimoEjecutado); //Agrega a la cola y cambia el estado del pcb
 	cambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
-
 }

@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
 	close (socketMemoria);
 	close (socketCPU);
 	eliminarEstados();//finaliza estructuras de ready y new
+	finalizarSemaforos();
 
 	printf ("\n Finalizo Kernel correctamente\n ");
 

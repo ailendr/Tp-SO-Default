@@ -6,7 +6,7 @@
  */
 #include "pcb.h"
 
-t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto) {
+t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto){
    	t_contextoEjec* contexto = malloc(sizeof(t_contextoEjec));
    	contexto->instrucciones=instrucciones;
    	contexto->PC = 0;

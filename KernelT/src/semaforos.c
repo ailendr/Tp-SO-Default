@@ -26,3 +26,16 @@ void inicializarSemaforos(){
 	pthread_mutex_init(&mutexPID, NULL);
 
 }
+
+void finalizarSemaforos(){
+	sem_destroy(&planiLargoPlazo);
+	sem_destroy(&planiCortoPlazo);
+	sem_destroy(&multiprogramacion);
+	sem_destroy(&productorListaReady);
+	sem_destroy(&productorColaNew);
+	sem_destroy(&cpuOcupada);
+
+	pthread_mutex_destroy(&mutexReady);
+	pthread_mutex_destroy(&mutexNew);
+	pthread_mutex_destroy(&mutexPID);
+}

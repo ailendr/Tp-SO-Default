@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <commons/collections/list.h>
 #include <time.h>
+#include "sockets.h"
 
 typedef struct{
 	uint32_t pid;
@@ -30,8 +31,9 @@ typedef struct{
     char RDX[16];
 }t_contextoEjec;
 
+
 typedef struct {
-  op_code nombre;
+	op_code nombre;
 	uint32_t pid;
 	char* param1;
 	char* param2;
@@ -61,29 +63,8 @@ typedef struct{
 	double RR;
 }t_pcb;
 
-/* Por lo que tengo entendido esto no lo tendrian asi que lo deje como estaba antes de mis quilombos
-typedef enum{
-    F_READ,
-    F_WRITE,
 
-    SET,
-    MOV_IN,
-    MOV_OUT,
-    F_TRUNCATE,
-    F_SEEK,
-    CREATE_SEGMENT,
 
-    IO,
-    WAIT,
-    SIGNAL,
-    F_OPEN,
-    F_CLOSE,
-    DELETE_SEGMENT,
-
-    EXIT,
-    YIELD
-}t_instruc;
-*/
 
 /*
 Lo dejo así ya queda a futuro, pero por ahora que quede comentado
@@ -93,7 +74,4 @@ typedef struct{
 	char* dirBase;
 }segmento;
  * */
-t_pcb* crearPcb(uint32_t pid, uint32_t estado);
-
-t_contextoEjec* crearContexto(); //TODO
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */
