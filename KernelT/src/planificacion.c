@@ -91,6 +91,7 @@ void largoPlazo() {
 void cortoPlazo() {
 	while (1) {
 		sem_wait(&planiCortoPlazo);
+		sem_wait(&cpuOcupada);
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
@@ -128,6 +129,7 @@ void instruccionAEjecutar() {
 				tiempoEnCPU(ultimoEjecutado);
 			}
 			agregarAEstadoReady(ultimoEjecutado);
+			sem_post(&cpuOcupada);
 			break;
 
 		case WAIT:
@@ -149,7 +151,7 @@ void instruccionAEjecutar() {
 			pthread_t hiloDeBloqueo; //crear hilo
 			pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
 			pthread_detach(hiloDeBloqueo);
-			break;//Cuando hagamos esto hay que ponerle lo de calcular tiempo en cpu
+			break;
 
 		default:
 			break;
@@ -224,11 +226,14 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 t_list* obtenerInstrucciones(int socket_cliente) {
 	int codigoOp = recibir_operacion(socket_cliente);
 	t_list *listaDeInstrucciones; //Recordar liberar esto cuando terminemos->se libera cuando termina el pcb
-	uint32_t recepcion = 1; //Consola deberia verificar que si es 1 -> kernel recibio todo OK
+	uint32_t recepcion = 1;
 	if (codigoOp == PAQUETE) { //Ver si lo aplicamos o sacamos
 		listaDeInstrucciones = recibir_paquete(socket_cliente);
-		send(socket_cliente, &recepcion, sizeof(uint32_t), 0);
-		//return listaDeInstrucciones;
+		if(list_is_empty(listaDeInstrucciones)){
+			recepcion = 0;
+			send(socket_cliente, &recepcion, sizeof(uint32_t), 0);//Consola deberia verificar que si es 1-> kernel recibio todo OK
+		}
+		else{send(socket_cliente, &recepcion, sizeof(uint32_t), 0);} //Consola deberia verificar que si es 0-> Kernel recibio algo vacio
 	}
 	return listaDeInstrucciones;
 }
@@ -237,6 +242,11 @@ void generarProceso(int *socket_cliente) {
 	int consolaNueva = *socket_cliente;
 	//recibirProtocolo(socket_cliente); //Handashake No lo incluimos por el momento porq la func cierra las conexiones-> podemos modificarla dsps
 	t_list *instrucciones = obtenerInstrucciones(consolaNueva);
+	if(list_is_empty(instrucciones)){
+		log_info(loggerKernel, "Error: La lista de instrucciones esta vacia");
+		close(consolaNueva);//cierro la conexion con esa consola
+	}
+	else{
 	pthread_mutex_lock(&mutexPID);
 	t_pcb *procesoNuevo = crearPcb(instrucciones, pid, consolaNueva);
 	pid++;
@@ -247,7 +257,8 @@ void generarProceso(int *socket_cliente) {
 	//Cerrando recursos
 	//close(consolaNueva);//Ver si esta demas esto o nos romperia
 	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
-	sem_post(&planiLargoPlazo); //Duda si hacerlo acá o dsps de agregarAEstadoNew
+	sem_post(&planiLargoPlazo);
+	}
 }
 
 void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
@@ -307,11 +318,11 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 
 ////---Funcion de IO---///
 void bloquearHilo(int* tiempo){
+    sem_post(&cpuOcupada);//Lo primero es liberar la cpu
 	int tiempoDeBloqueo = *tiempo;
 	ultimoEjecutado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", ultimoEjecutado->contexto->pid);
     cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
-    sem_post(&cpuOcupada);
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(ultimoEjecutado); //Agrega a la cola y cambia el estado del pcb
 	cambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
