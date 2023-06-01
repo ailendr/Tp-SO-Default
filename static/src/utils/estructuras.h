@@ -61,7 +61,7 @@ typedef struct{
 	double RR;
 }t_pcb;
 
-
+/* Por lo que tengo entendido esto no lo tendrian asi que lo deje como estaba antes de mis quilombos
 typedef enum{
     F_READ,
     F_WRITE,
@@ -83,6 +83,7 @@ typedef enum{
     EXIT,
     YIELD
 }t_instruc;
+*/
 
 /*
 Lo dejo así ya queda a futuro, pero por ahora que quede comentado
