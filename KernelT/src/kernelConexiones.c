@@ -22,23 +22,23 @@ void iniciarConexionesDeKernel(){
 			char* ipMemoria =IpMemoria ();
 			char* puertoMemoria = PuertoMemoria();
 
-			log_info(loggerKernel, "Iniciando conexion con CPU ... \n");
-            socketCPU = iniciarCliente(ipCPU, puertoCPU, loggerKernel);
-			  if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) exit(1);
-			  log_info(loggerKernel, "Enviando mensaje \n");
-			  if (enviarProtocolo(socketCPU, loggerKernel) == -1) exit(1);
-			  log_info(loggerKernel, "Finalizando conexion con CPU");
+			  log_info(loggerKernel, "Iniciando conexion con CPU ...");
+              socketCPU = iniciarCliente(ipCPU, puertoCPU, loggerKernel);
+			    if( verificarSocket (socketCPU, loggerKernel, configKernel) == 1 ) exit(1);
+			  log_info(loggerKernel, "Enviando mensaje ");
+			    if (enviarProtocolo(socketCPU, HANDSHAKE_Kernel,loggerKernel) == -1) exit(1);
 
 
                //>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<
 
 
-			  log_info(loggerKernel, "Iniciando conexion con FS ... \n");
+			  log_info(loggerKernel, "Iniciando conexion con FS ...");
               socketFs = iniciarCliente(ipFs, puertoFs,loggerKernel);
-			   if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) exit(1);
+			  	if( verificarSocket (socketFs, loggerKernel, configKernel) == 1 ) exit(1);
 
-			   log_info(loggerKernel, "Enviando mensaje \n");
-               if (enviarProtocolo(socketFs,loggerKernel) == -1) exit(1);
+			  log_info(loggerKernel, "Enviando mensaje");
+              if (enviarProtocolo(socketFs,HANDSHAKE_Kernel,loggerKernel) == -1) exit(1);
+ 			  log_info(loggerKernel, "Finalizando conexion con Fs \n");
 
 
 			   //>>>>>>CONEXION CON MEMORIA <<<<<<<<<
@@ -48,8 +48,10 @@ void iniciarConexionesDeKernel(){
 			  socketMemoria = iniciarCliente(ipMemoria, puertoMemoria, loggerKernel);
 			  	if( verificarSocket (socketMemoria, loggerKernel, configKernel) == 1 ) exit(1);
 
-			  	log_info(loggerKernel, "Enviando mensaje \n");
-			  	if (enviarProtocolo(socketMemoria, loggerKernel) == -1) exit(1);
+			  log_info(loggerKernel, "Enviando mensaje");
+
+			  	if (enviarProtocolo(socketMemoria,HANDSHAKE_Kernel, loggerKernel) == -1) exit(1);
+			  log_info(loggerKernel, "Finalizando conexion con Memoria \n");
 
 		}
 

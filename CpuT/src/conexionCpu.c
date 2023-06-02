@@ -22,7 +22,7 @@ int iniciarSocketsCpu(){
 		return 1;
 	}
 	log_info(loggerCPU, "Enviando mensaje a Memoria para corroborar conexion \n");
-	if(enviarProtocolo(socketMemoria, loggerCPU) == -1){
+	if(enviarProtocolo(socketMemoria,HANDSHAKE_Cpu, loggerCPU) == -1){
 		log_info(loggerCPU, "Failed -> Conexion Memoria");
 		terminarModulo(socketMemoria,loggerCPU, configCPU);
 		close (servidorCpu);
@@ -31,7 +31,8 @@ int iniciarSocketsCpu(){
 	}
 	log_info(loggerCPU, "Ok -> Conexion Memoria");
 
-	log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel");
+    log_info(loggerCPU, "---------------------------------------------------------------------------");
+    log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel...");
 	servidorCpu = iniciarServidor(IP_Escucha(), puertoEscucha());
 	if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ){
 		close(socketMemoria);
@@ -47,7 +48,7 @@ int iniciarSocketsCpu(){
 	    close(socketMemoria);
 	    return 1;
 	}
-	recibirHandshake(cliente);
+	recibirHandshake(cliente, HANDSHAKE_Kernel, loggerCPU);
 	log_info(loggerCPU, "Ok -> Conexion Kernel");
 
 	return 0;

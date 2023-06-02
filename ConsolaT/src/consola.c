@@ -14,7 +14,7 @@ static void enviarInstruccionesAKernel(char* pathInstrucciones, int conexionConK
 
 }
 
-int main(int argc, char** argv[]) {
+int main(int argc, char** argv) {
 
 	//printf ("Hola soy consola y quiero conectarme con kernel \n ");
 	if(argc < 3){
@@ -37,13 +37,13 @@ int main(int argc, char** argv[]) {
 
 	//printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
 
-	log_info(loggerConsola, "Iniciando como Cliente ... \n");
+	log_info(loggerConsola, "Iniciando como Cliente ... ");
 	conexionConKernel = iniciarCliente(ip, puerto, loggerConsola);
 	if( verificarSocket (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
 	log_info(loggerConsola, "Enviando mensaje de protocolo");
 
-	if(enviarProtocolo(conexionConKernel, loggerConsola) == -1){
+	if(enviarProtocolo(conexionConKernel, HANDSHAKE_Consola,loggerConsola) == -1){
 	        terminarModulo(conexionConKernel,loggerConsola, configConsola);
 	        return EXIT_FAILURE;
 	}

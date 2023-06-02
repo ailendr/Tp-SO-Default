@@ -43,6 +43,7 @@ int main(int argc, char** argv) {
 
     ///------Kernel como Servidor------//
 
+	log_info(loggerKernel, "---------------------------------------------------------------------------");
     log_info(loggerKernel, "Iniciando Servidor ... \n");
 	server_fd = iniciarServidor(ip, puerto);
 	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
