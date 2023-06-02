@@ -11,7 +11,7 @@ static void enviarInstruccionesAKernel(char* pathInstrucciones, int conexionConK
 	t_paquete *paqueteConInstrucciones = parseoDeInstrucciones(pathInstrucciones);
 	enviar_paquete(paqueteConInstrucciones, conexionConKernel);
 	log_info(loggerConsola,"Envio paquete con las instrucciones a kernel");
-
+	eliminar_paquete(paqueteConInstrucciones);
 }
 
 int main(int argc, char** argv) {

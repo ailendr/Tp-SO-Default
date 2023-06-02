@@ -17,7 +17,7 @@ t_paquete* parseoDeInstrucciones(char *pathInstrucciones){
     t_paquete* paqueteConInstrucciones = crear_paquete();
 
     if (archivoDeInstrucciones == NULL) {
-        printf("Error al abrir el archivo de pseudocodigo\n");//loguear
+        log_info(loggerConsola, "Error al abrir el archivo de pseudocodigo");
         return EXIT_FAILURE;
     }
 
@@ -42,7 +42,6 @@ t_paquete* parseoDeInstrucciones(char *pathInstrucciones){
     }
 
     fclose(archivoDeInstrucciones);
-    eliminar_paquete(paqueteConInstrucciones);
 
     return paqueteConInstrucciones;
 

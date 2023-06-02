@@ -233,7 +233,9 @@ t_list* obtenerInstrucciones(int socket_cliente) {
 			recepcion = 0;
 			send(socket_cliente, &recepcion, sizeof(uint32_t), 0);//Consola deberia verificar que si es 1-> kernel recibio todo OK
 		}
-		else{send(socket_cliente, &recepcion, sizeof(uint32_t), 0);} //Consola deberia verificar que si es 0-> Kernel recibio algo vacio
+	else{
+		send(socket_cliente, &recepcion, sizeof(uint32_t), 0);
+		log_info(loggerKernel, "Error: La lista de instrucciones esta vacia");} //Consola deberia verificar que si es 0-> Kernel recibio algo vacio
 	}
 	return listaDeInstrucciones;
 }
