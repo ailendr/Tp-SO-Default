@@ -46,6 +46,8 @@ int main(void) {
     }
     recibirHandshake(cliente);
 
+
+
 	log_info(loggerFS, "Finalizando File System...\n");
 
 	terminarModulo(cliente, loggerFS, configFS);

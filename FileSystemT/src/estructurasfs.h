@@ -8,8 +8,21 @@
 #ifndef SRC_ESTRUCTURASFS_H_
 #define SRC_ESTRUCTURASFS_H_
 
+#include <sys/mman.h>
 #include "FSConfig.h"
 #include <commons/bitarray.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+typedef enum{
+	BITMAP,
+	ARCHBLOQUES
+}estructura;
+
+typedef struct{
+	uint32_t tamBloque;
+}t_bloque;
 
 typedef struct{
    uint32_t blockSize;
@@ -25,6 +38,16 @@ typedef struct{
 	uint32_t punteroIndirecto; //porque es un numero
 }t_fcb;
 
+
+extern t_superbloque* superBloque;
+extern t_bitarray* bitMap;
+
+
+void iniciarEstructuras();
+void validarArchivo(char* pathArch, int estructura);
+void iniciarSuperBloque();
+void iniciarArchivoDeBloques();
+void iniciarBitMap();
 
 /*
  *
