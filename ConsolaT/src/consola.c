@@ -47,8 +47,20 @@ int main(int argc, char** argv) {
 	        terminarModulo(conexionConKernel,loggerConsola, configConsola);
 	        return EXIT_FAILURE;
 	}
-
+//--Envia instrucciones y espera el mensaje de confirmacion de que llego OK--//
   enviarInstruccionesAKernel(pathInstrucciones, conexionConKernel);
+  int recepcionInstrucciones;
+  recv(conexionConKernel, &recepcionInstrucciones, sizeof(int), MSG_WAITALL);
+  if(recepcionInstrucciones == 0){
+	  log_info(loggerConsola, "Kernel nos informa que la lista de instrucciones llego vacia");
+	  terminarModulo(conexionConKernel, loggerConsola, configConsola);
+	  return EXIT_FAILURE;
+  }
+  else if(recepcionInstrucciones ==1 ){
+	  log_info(loggerConsola, "Kernel nos informa que recibio correctamente la lista de instrucciones");
+  }
+
+ ///--- Esperando mensaje de finalizacion----///
 
 	int finalizar;
 	recv(conexionConKernel, &finalizar, sizeof(int), MSG_WAITALL);
