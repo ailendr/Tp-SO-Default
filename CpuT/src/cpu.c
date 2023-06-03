@@ -22,19 +22,22 @@ int main(/*int argc, char** argv*/) {
 	t_paquete* paqueteI = NULL;
 	t_paquete* paqueteC = NULL;
 
-	//funcionPrueba();
+	funcionPrueba();
 
-	if (iniciarCpu (/*argv[1]*/"../CpuT/cpu.config") == 1) return EXIT_FAILURE;
+	/*
+	if (iniciarCpu (/*argv[1]"../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
 	while (1){
 
-		int codigo = recibir_operacion(cliente);
-
-		if (codigo != CONTEXTO){
+		/*int codigo = recibir_operacion(cliente);
+		 if (codigo != CONTEXTO){
 			log_info(loggerCPU, "...");
 
 		} else {
-			buffer = recibir_buffer(&tamanio, servidorCpu);
+
+
+
+		buffer = recibir_buffer(&tamanio, cliente);
 			contextoRecibido = deserializarContexto(buffer, tamanio);
 			if (contextoRecibido->pid != NULL){
 				log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
@@ -43,26 +46,27 @@ int main(/*int argc, char** argv*/) {
 						/*
 						nuevaInstr = decode (&instr);
 						execute (&nuevaInstr, contextoRecibido);
-						*/
+
 
 				paqueteC = serializarContexto(contextoRecibido);
-				enviar_paquete(paqueteC, servidorCpu);
+				enviar_paquete(paqueteC, cliente);
 
 						/*
 						if (nuevaInstr->nombre != SET && nuevaInstr->nombre != MOV_IN && nuevaInstr->nombre != MOV_OUT){
 							paqueteI = serializarInstrucciones (nuevaInstr);
 							enviar_paquete(paqueteI, servidorCpu);
 						}
-						*/
+
 
 			} else {
 				log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
-			}
-		}
+			}}
+			*/
+		//}
 
 
 
-	}
+
 
 
 	free(buffer);

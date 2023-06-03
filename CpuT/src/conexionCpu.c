@@ -6,7 +6,7 @@
  */
 
 
-#include "./cpu.h"
+#include "./conexionCpu.h"
 
 int servidorCpu;
 int socketMemoria;

@@ -9,6 +9,7 @@
 #define SRC_INSTRUCCION_H_
 
 #include "./conexionCpu.h"
+#include <commons/string.h>
 
 //void set (t_instruccion* instruccion, t_contextoEjec* contexto);
 

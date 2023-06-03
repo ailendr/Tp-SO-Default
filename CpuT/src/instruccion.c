@@ -7,20 +7,19 @@
 #include "instruccion.h"
 
 void set (t_instruccion* instruccion, t_contextoEjec* contexto){
-/*
-	if (instruccion->param1 == "AX") contexto->AX = instruccion->param2;
-	if (instruccion->param1 == "BX") contexto->BX = instruccion->param2;
-	if (instruccion->param1 == "CX") contexto->CX = instruccion->param2;
-	if (instruccion->param1 == "DX") contexto->DX = instruccion->param2;
-	if (instruccion->param1 == "EAX") contexto->EAX = instruccion->param2;
-	if (instruccion->param1 == "EBX") contexto->EBX = instruccion->param2;
-	if (instruccion->param1 == "ECX") contexto->ECX = instruccion->param2;
-	if (instruccion->param1 == "EDX") contexto->EDX = instruccion->param2;
-	if (instruccion->param1 == "RAX") contexto->RAX = instruccion->param2;
-	if (instruccion->param1 == "RBX") contexto->RBX = instruccion->param2;
-	if (instruccion->param1 == "RCX") contexto->RCX = instruccion->param2;
-	if (instruccion->param1 == "RDX") contexto->RDX = instruccion->param2;
-*/
+
+	if (strcmp(instruccion->param1, "AX")) strcpy(contexto->AX, instruccion->param2);
+	if (strcmp(instruccion->param1, "BX")) strcpy(contexto->BX, instruccion->param2);
+	if (strcmp(instruccion->param1, "CX")) strcpy(contexto->CX, instruccion->param2);
+	if (strcmp(instruccion->param1, "DX")) strcpy(contexto->DX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EAX")) strcpy(contexto->EAX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EBX")) strcpy(contexto->EBX, instruccion->param2);
+	if (strcmp(instruccion->param1, "ECX")) strcpy(contexto->ECX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EDX")) strcpy(contexto->EDX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RAX")) strcpy(contexto->RAX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RBX")) strcpy(contexto->RBX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RCX")) strcpy(contexto->RCX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RDX")) strcpy(contexto->RDX, instruccion->param2);
 
 }
 
