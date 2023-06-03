@@ -32,7 +32,7 @@ int iniciarSocketsCpu(){
 	}
 	log_info(loggerCPU, "Ok -> Conexion Memoria");
 	*/
-	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
+	// CONEXION CON KERNEL -----------------------------------------------------------------------------
     log_info(loggerCPU, "---------------------------------------------------------------------------");
     log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel...");
 	servidorCpu = iniciarServidor(IP_Escucha(), puertoEscucha());

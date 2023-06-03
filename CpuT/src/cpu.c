@@ -24,12 +24,12 @@ int main(/*int argc, char** argv*/) {
 
 	funcionPrueba();
 
-	/*
-	if (iniciarCpu (/*argv[1]"../CpuT/cpu.config") == 1) return EXIT_FAILURE;
+
+	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
 	while (1){
 
-		/*int codigo = recibir_operacion(cliente);
+		int codigo = recibir_operacion(cliente);
 		 if (codigo != CONTEXTO){
 			log_info(loggerCPU, "...");
 
@@ -42,8 +42,9 @@ int main(/*int argc, char** argv*/) {
 			if (contextoRecibido->pid != NULL){
 				log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
 
-				instr = fetch (&contextoRecibido);
-						/*
+				instr = fetch (&contextoRecibido);}
+		}
+				/*
 						nuevaInstr = decode (&instr);
 						execute (&nuevaInstr, contextoRecibido);
 
@@ -51,7 +52,7 @@ int main(/*int argc, char** argv*/) {
 				paqueteC = serializarContexto(contextoRecibido);
 				enviar_paquete(paqueteC, cliente);
 
-						/*
+
 						if (nuevaInstr->nombre != SET && nuevaInstr->nombre != MOV_IN && nuevaInstr->nombre != MOV_OUT){
 							paqueteI = serializarInstrucciones (nuevaInstr);
 							enviar_paquete(paqueteI, servidorCpu);
@@ -70,6 +71,7 @@ int main(/*int argc, char** argv*/) {
 
 
 	free(buffer);
+		}
 
     /*
      ----------------------------------------------------

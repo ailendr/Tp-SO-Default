@@ -35,7 +35,7 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 	list_add(colaReady, procesoListo);
 	procesoListo->estadoPcb = READY;
 	clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));//Por HRRN
-	pthread_mutex_lock(&mutexReady);
+	pthread_mutex_unlock(&mutexReady);
 	log_info(loggerKernel,
 			"Cola Ready con algoritmo %s .Ingresa el proceso con id %d:",
 			Algoritmo(), procesoListo->contexto->pid);
@@ -44,14 +44,14 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 t_pcb* extraerDeNew() {
 	pthread_mutex_lock(&mutexNew);
 	t_pcb *proceso = queue_pop(colaNew);
-	pthread_mutex_lock(&mutexNew);
+	pthread_mutex_unlock(&mutexNew);
 	return proceso;
 }
 
 t_pcb* extraerDeReady() {
 	pthread_mutex_lock(&mutexReady);
 	t_pcb *proceso = list_remove(colaReady, 0); //Obtiene el 1er elem de la lista y lo elimina de la lista
-	pthread_mutex_lock(&mutexReady);
+	pthread_mutex_unlock(&mutexReady);
 	return proceso;
 }
 
@@ -74,7 +74,8 @@ void largoPlazo() {
 		t_pcb *proceso;
 		//Pasaje de New a Ready//
 
-		sem_wait(&multiprogramacion); //Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
+		sem_wait(&multiprogramacion);
+		log_info(loggerKernel, "pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //El handshake seria el pedido de memoria
 		//asignarMemoria(proceso, tabla); //PCB creado
@@ -90,8 +91,7 @@ void cortoPlazo() {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Largo plazo habilito corto plazo");
-		sem_wait(&planiCortoPlazo);
-		log_info(loggerKernel, "El corto plazo paso por cpu liberada");
+
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
@@ -156,7 +156,9 @@ void instruccionAEjecutar() {
 
 
 void algoritmoFIFO() {
+	log_info(loggerKernel, "empieza algoritmo FIFO");
 	t_pcb *procesoAEjec = extraerDeReady();
+	log_info(loggerKernel, "FIFO: Obtengo un proceso de ready");
 	t_contextoEjec *contextoAEjec = procesoAEjec->contexto;
 	procesoAEjecutar(contextoAEjec);
 	procesoAEjec->estadoPcb = EXEC;
@@ -166,11 +168,14 @@ void algoritmoFIFO() {
 
 
 void algoritmoHRRN(){
+	log_info(loggerKernel, "Empieza algoritmo HRRN");
 	t_pcb* procesoAEjec;
 	list_iterate(colaReady, (void*) calcularNuevaEstimacion);
 	list_iterate(colaReady, (void*) calcularRR);
 	list_sort(colaReady, (void*)comparadorRR);//Aca me ordena la lista por el comparador de RR
 	procesoAEjec=extraerDeReady();
+	log_info(loggerKernel, "HRRN: Obtengo un proceso de ready");
+
 	t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 	procesoAEjecutar(contextoAEjec);
 	procesoAEjec->estadoPcb=EXEC;
