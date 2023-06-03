@@ -10,6 +10,6 @@
 
 #include "./conexionCpu.h"
 
-void set (t_instruccion* instruccion, t_contextoEjec* contexto);
+//void set (t_instruccion* instruccion, t_contextoEjec* contexto);
 
 #endif /* SRC_INSTRUCCION_H_ */

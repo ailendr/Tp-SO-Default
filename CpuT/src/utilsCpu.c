@@ -7,7 +7,7 @@
 
 #include "./utilsCpu.h"
 
-int iniciarCpu (){
+int iniciarCpu (char* pathConfig){
 
 	servidorCpu = 0;
 	socketMemoria = 0;
@@ -18,7 +18,7 @@ int iniciarCpu (){
 	log_info(loggerCPU, "Iniciando CPU...");
 	log_info(loggerCPU, "Ok -> Logger");
 
-	configCPU = config_create("../CpuT/cpu.config");
+	configCPU = config_create(pathConfig);
 	if(verificarConfig (servidorCpu, loggerCPU, configCPU) == 1 ) {
 		close (socketMemoria);
 		close(cliente);
@@ -69,7 +69,8 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 
 	switch (instruccion->nombre){
 		case SET:
-			set (instruccion, contexto);
+			//set (instruccion, contexto);
+		    log_info(loggerCPU, "Recibio un SET");
 			break;
 		case MOV_IN:
 			//TODO lo que se deba, la traduccion se hace, borrarlo aca
@@ -80,5 +81,9 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 		default:
 			log_error(loggerCPU, "Error con instruccion");
 	}
+
+}
+
+void funcionPrueba (){
 
 }

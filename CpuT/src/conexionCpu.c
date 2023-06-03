@@ -13,7 +13,8 @@ int socketMemoria;
 int cliente;
 
 int iniciarSocketsCpu(){
-
+	/*
+	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
 	log_info(loggerCPU, "Realizando Conexion con Memoria");
 	socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerCPU);
 	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ){
@@ -30,7 +31,8 @@ int iniciarSocketsCpu(){
 	    return 1;
 	}
 	log_info(loggerCPU, "Ok -> Conexion Memoria");
-
+	*/
+	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
     log_info(loggerCPU, "---------------------------------------------------------------------------");
     log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel...");
 	servidorCpu = iniciarServidor(IP_Escucha(), puertoEscucha());

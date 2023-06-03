@@ -8,7 +8,6 @@
 #ifndef SRC_UTILS_SERIALIZACION_H_
 #define SRC_UTILS_SERIALIZACION_H_
 
-#include "estructuras.h"
 #include <string.h>
 #include "sockets.h"
 

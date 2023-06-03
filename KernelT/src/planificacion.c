@@ -90,8 +90,10 @@ void largoPlazo() {
 
 void cortoPlazo() {
 	while (1) {
+		log_info(loggerKernel, "El corto plazo esta trabajando");
 		sem_wait(&planiCortoPlazo);
 		sem_wait(&cpuOcupada);
+		log_info(loggerKernel, "El corto plazo esta trabajando");
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
@@ -119,6 +121,8 @@ void instruccionAEjecutar() {
 			void *buffer = recibir_buffer(&tamanio, socketCPU);
 			contextoActualizado = deserializarContexto(buffer, tamanio);
 			ultimoEjecutado->contexto = contextoActualizado;
+			log_info(loggerKernel, "PID:%d  - PC:%d", contextoActualizado->pid, contextoActualizado->PC);
+			//TODO Eliminar, linea para visualizar el mandado de info
 			free(buffer);
 			break;
 		case EXIT:

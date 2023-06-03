@@ -10,10 +10,12 @@
 
 #include "./instruccion.h"
 
-int iniciarCpu ();
+int iniciarCpu (char* pathConfig);
 
 char* fetch(t_contextoEjec* cont);
 t_instruccion* decode (char* instruccion);
 void execute (t_instruccion* instruccion, t_contextoEjec* contexto);
+
+void funcionPrueba();
 
 #endif /* SRC_UTILSCPU_H_ */

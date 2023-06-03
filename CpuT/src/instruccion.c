@@ -4,7 +4,8 @@
  *  Created on: May 15, 2023
  *      Author: utnso
  */
-
+#include "instruccion.h"
+/*
 void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 
 	if (length(instruccion->param2) == 4){
@@ -68,3 +69,4 @@ void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 	}
 
 }
+*/

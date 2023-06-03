@@ -18,31 +18,7 @@
 #include <netdb.h>
 #include <commons/collections/list.h>
 #include <commons/log.h>
-
-
-typedef enum
-{
-	MENSAJE,
-	PAQUETE,
-	CONTEXTO,
-	YIELD,
-	CREATE_SEGMENT,
-	DELETE_SEGMENT,
-	EXIT,
-	SET,
-	MOV_IN,
-	MOV_OUT,
-	IO,
-	F_OPEN,
-	F_CLOSE,
-	F_SEEK,
-	F_READ,
-	F_WRITE,
-	F_TRUNCATE,
-	WAIT,
-	SIGNAL
-
-}op_code;
+#include "estructuras.h"
 
 typedef struct
 {
