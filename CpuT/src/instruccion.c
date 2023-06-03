@@ -7,7 +7,7 @@
 #include "instruccion.h"
 
 void set (t_instruccion* instruccion, t_contextoEjec* contexto){
-
+/*
 	if (instruccion->param1 == "AX") contexto->AX = instruccion->param2;
 	if (instruccion->param1 == "BX") contexto->BX = instruccion->param2;
 	if (instruccion->param1 == "CX") contexto->CX = instruccion->param2;
@@ -20,7 +20,7 @@ void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 	if (instruccion->param1 == "RBX") contexto->RBX = instruccion->param2;
 	if (instruccion->param1 == "RCX") contexto->RCX = instruccion->param2;
 	if (instruccion->param1 == "RDX") contexto->RDX = instruccion->param2;
-
+*/
 
 }
 

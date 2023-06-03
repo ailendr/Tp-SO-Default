@@ -74,12 +74,13 @@ void largoPlazo() {
 	while (1) {
 
 		sem_wait(&planiLargoPlazo);
+		log_info(loggerKernel, "Pase el semaforo de largo plazo");
 		t_pcb *proceso;
 		//Pasaje de New a Ready//
 
 		sem_wait(&multiprogramacion); //Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
-		enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //El handshake seria el pedido de memoria
+		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //El handshake seria el pedido de memoria
 		//asignarMemoria(proceso, tabla); //PCB creado
 		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d, proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
@@ -90,10 +91,11 @@ void largoPlazo() {
 
 void cortoPlazo() {
 	while (1) {
-		log_info(loggerKernel, "El corto plazo esta trabajando");
+
 		sem_wait(&planiCortoPlazo);
+		log_info(loggerKernel, "Largo plazo habilito corto plazo");
 		sem_wait(&cpuOcupada);
-		log_info(loggerKernel, "El corto plazo esta trabajando");
+		log_info(loggerKernel, "El corto plazo paso por cpu liberada");
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();

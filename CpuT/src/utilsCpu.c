@@ -38,12 +38,12 @@ char* fetch (t_contextoEjec* cont) {
     log_info(loggerCPU, "Instruccion: %s", proxInstr);
     cont->PC+=1;
 
-    char *token = strtok(proxInstr, "-");
+    char *token = strtok(proxInstr, " ");
 
     while (token != NULL)
     {
        printf("%s\n", token);
-       token = strtok(NULL, "-");
+       token = strtok(NULL, " ");
     }
 
     return proxInstr;
