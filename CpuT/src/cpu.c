@@ -23,8 +23,8 @@ int main(/*int argc, char** argv*/) {
 	t_paquete* paqueteC = NULL;
 
 	funcionPrueba();
-
-	if (iniciarCpu (/*argv[1]*/"../CpuT/cpu.config") == 1) return EXIT_FAILURE;
+	/*
+	if (iniciarCpu (/*argv[1]"../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
 	while (1){
 
@@ -42,7 +42,7 @@ int main(/*int argc, char** argv*/) {
 						/*
 						nuevaInstr = decode (&instr);
 						execute (&nuevaInstr, contextoRecibido);
-						*/
+
 
 				paqueteC = serializarContexto(contextoRecibido);
 				enviar_paquete(paqueteC, servidorCpu);
@@ -52,7 +52,7 @@ int main(/*int argc, char** argv*/) {
 							paqueteI = serializarInstrucciones (nuevaInstr);
 							enviar_paquete(paqueteI, servidorCpu);
 						}
-						*/
+
 			} else {
 				log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
 			}
@@ -61,8 +61,10 @@ int main(/*int argc, char** argv*/) {
 
 
 	}
+	*/
 
 	free(buffer);
+
     /*
      ----------------------------------------------------
      TODO

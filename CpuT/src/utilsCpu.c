@@ -33,12 +33,18 @@ int iniciarCpu (char* pathConfig){
 
 char* fetch (t_contextoEjec* cont) {
 
-    char* proxInstr = list_get(cont->instrucciones, cont->PC);
+	char* proxInstr = list_get(cont->instrucciones, cont->PC);
     log_info(loggerCPU, "FETCH: PCB <ID %d>", cont->pid);
     log_info(loggerCPU, "Instruccion: %s", proxInstr);
     cont->PC+=1;
 
-    //REVISAR
+    char *token = strtok(proxInstr, "-");
+
+    while (token != NULL)
+    {
+       printf("%s\n", token);
+       token = strtok(NULL, "-");
+    }
 
     return proxInstr;
 }
@@ -69,7 +75,7 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 
 	switch (instruccion->nombre){
 		case SET:
-			//set (instruccion, contexto);
+			set (instruccion, contexto);
 		    log_info(loggerCPU, "Recibio un SET");
 			break;
 		case MOV_IN:
@@ -84,6 +90,30 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 
 }
 
+//PRUEBAS UNITARIAS -----------------------------------------------------
+
 void funcionPrueba (){
+	t_contextoEjec* contextoRecibido;
+	char* instr;
+	t_instruccion* nuevaInstr = NULL;
+
+	loggerCPU = log_create("cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
+
+	preparandoContexto (&contextoRecibido);
+
+	instr = fetch (&contextoRecibido);
+	/*
+		nuevaInstr = decode (&instr);
+		execute (&nuevaInstr, contextoRecibido);
+	*/
+}
+
+void preparandoContexto (t_contextoEjec* contexto){
+
+	contexto->pid = 0;
+	contexto->PC = 0;
+	contexto->instrucciones = list_create();
+
+	list_add(contexto->instrucciones, "SET AX AAAA");
 
 }
