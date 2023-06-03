@@ -28,7 +28,6 @@ void agregarAEstadoNew(t_pcb *procesoNuevo) {
 	queue_push(colaNew, procesoNuevo);
 	procesoNuevo->estadoPcb = NEW;
 	pthread_mutex_unlock(&mutexNew);
-	sem_post(&productorColaNew);
 }
 
 void agregarAEstadoReady(t_pcb *procesoListo) {
@@ -37,14 +36,12 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 	procesoListo->estadoPcb = READY;
 	clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));//Por HRRN
 	pthread_mutex_lock(&mutexReady);
-	sem_post(&productorListaReady);
 	log_info(loggerKernel,
 			"Cola Ready con algoritmo %s .Ingresa el proceso con id %d:",
 			Algoritmo(), procesoListo->contexto->pid);
 }
 
 t_pcb* extraerDeNew() {
-	sem_wait(&productorColaNew);
 	pthread_mutex_lock(&mutexNew);
 	t_pcb *proceso = queue_pop(colaNew);
 	pthread_mutex_lock(&mutexNew);
@@ -52,14 +49,13 @@ t_pcb* extraerDeNew() {
 }
 
 t_pcb* extraerDeReady() {
-	sem_wait(&productorListaReady);
 	pthread_mutex_lock(&mutexReady);
 	t_pcb *proceso = list_remove(colaReady, 0); //Obtiene el 1er elem de la lista y lo elimina de la lista
 	pthread_mutex_lock(&mutexReady);
 	return proceso;
 }
 
-void cambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado){
+void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado){
 	log_info(loggerKernel, "PID:%d  - Estado Anterior: %s - Estado Actual: %s", proceso->contexto->pid, estadoAnterior, nuevoEstado);
 }
 
@@ -84,7 +80,7 @@ void largoPlazo() {
 		//asignarMemoria(proceso, tabla); //PCB creado
 		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d, proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
-		cambioDeEstado(proceso, "NEW", "READY");
+		logCambioDeEstado(proceso, "NEW", "READY");
 		sem_post(&planiCortoPlazo);
 	}
 }
@@ -94,7 +90,7 @@ void cortoPlazo() {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Largo plazo habilito corto plazo");
-		sem_wait(&cpuOcupada);
+		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "El corto plazo paso por cpu liberada");
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
@@ -111,66 +107,60 @@ void cortoPlazo() {
 }
 
 void instruccionAEjecutar() {
-	int tamanio = 0;
+		int tamanio = 0;
+		t_contextoEjec *contextoActualizado;
+		void *buffer = recibir_buffer(&tamanio, socketCPU);
+		log_info(loggerKernel, "Se recibio el buffer del contexto");
+		contextoActualizado = deserializarContexto(buffer, tamanio);
+		ultimoEjecutado->contexto = contextoActualizado;
+		free(buffer);
 
-	//A futuro agregar los de FS
-	t_contextoEjec *contextoActualizado;
-	while (1) {
 		int codigo = recibir_operacion(socketCPU);
+		switch(codigo){
+			case EXIT:
+				finalizarProceso(ultimoEjecutado, "SUCCESS");
+				break;
+			case YIELD:
+				if(strcmp(Algoritmo(),"HRRN")==0){
+					tiempoEnCPU(ultimoEjecutado);
+				}
+				agregarAEstadoReady(ultimoEjecutado);
+				sem_post(&planiCortoPlazo);
+				break;
 
-		switch (codigo) {
-		case CONTEXTO:
-			void *buffer = recibir_buffer(&tamanio, socketCPU);
-			contextoActualizado = deserializarContexto(buffer, tamanio);
-			ultimoEjecutado->contexto = contextoActualizado;
-			log_info(loggerKernel, "PID:%d  - PC:%d", contextoActualizado->pid, contextoActualizado->PC);
-			//TODO Eliminar, linea para visualizar el mandado de info
-			free(buffer);
-			break;
-		case EXIT:
-			finalizarProceso(ultimoEjecutado, "SUCCESS");
-			break;
-		case YIELD:
-			if(strcmp(Algoritmo(),"HRRN")==0){
-				tiempoEnCPU(ultimoEjecutado);
-			}
-			agregarAEstadoReady(ultimoEjecutado);
-			sem_post(&cpuOcupada);
-			break;
+			case WAIT:
+				char* recursoAConsumir = "recurso"; //= deserializarInstruccion(); Supongamos que recibimos el parametro. Hay q ver como serializa dany
+				implementacionWyS(recursoAConsumir, 1);
+				break;
+			case SIGNAL:
+				char* recursoALiberar = "recurso"; // = deserializarInstruccion();
+				implementacionWyS(recursoALiberar, 2);
+				procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
+				break;
+			case CREATE_SEGMENT:
+				break;
+			case DELETE_SEGMENT:
+				break;
 
-		case WAIT:
-			char* recursoAConsumir = "recurso"; //= deserializarInstruccion(); Supongamos que recibimos el parametro. Hay q ver como serializa dany
-			implementacionWyS(recursoAConsumir, 1);
-			break;
-		case SIGNAL:
-			char* recursoALiberar = "recurso"; // = deserializarInstruccion();
-			implementacionWyS(recursoALiberar, 2);
-            procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
-			break;
-		case CREATE_SEGMENT:
-			break;
-		case DELETE_SEGMENT:
-			break;
+			case IO:
+				int tiempoDeIO = 1000; //en microsegundos tendriamos q deserializarInstruccion y seria el primer parametro
+				pthread_t hiloDeBloqueo; //crear hilo
+				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
+				pthread_detach(hiloDeBloqueo);
+				break;
 
-		case IO:
-			int tiempoDeIO = 1000; //en microsegundos tendriamos q deserializarInstruccion y seria el primer parametro
-			pthread_t hiloDeBloqueo; //crear hilo
-			pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
-			pthread_detach(hiloDeBloqueo);
-			break;
-
-		default:
-			break;
+			default:
+				break;
 		}
 	}
-}
+
 
 void algoritmoFIFO() {
 	t_pcb *procesoAEjec = extraerDeReady();
 	t_contextoEjec *contextoAEjec = procesoAEjec->contexto;
 	procesoAEjecutar(contextoAEjec);
 	procesoAEjec->estadoPcb = EXEC;
-	cambioDeEstado(procesoAEjec, "READY", "EXEC");
+	logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 	ultimoEjecutado = procesoAEjec;
 }
 
@@ -184,7 +174,7 @@ void algoritmoHRRN(){
 	t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 	procesoAEjecutar(contextoAEjec);
 	procesoAEjec->estadoPcb=EXEC;
-	cambioDeEstado(procesoAEjec, "READY", "EXEC");
+	logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
 	ultimoEjecutado = procesoAEjec;
 }
@@ -285,7 +275,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
 	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
 			procesoAFinalizar->contexto->pid, motivoDeFin);
-	sem_post(&cpuOcupada);
+	sem_post(&planiCortoPlazo);
 
 }
 
@@ -308,9 +298,9 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				queue_push(colaDeBloqueo, ultimoEjecutado);
 				tiempoEnCPU(ultimoEjecutado);
 				ultimoEjecutado->estadoPcb = BLOCK;
-				cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
-				sem_post(&cpuOcupada);
+				sem_post(&planiCortoPlazo);
 				 }
 				break;
 			case 2://2=SIGNAL
@@ -319,7 +309,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
-				cambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
+				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
 				break;
 			 }
 			}
@@ -327,12 +317,12 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 
 ////---Funcion de IO---///
 void bloquearHilo(int* tiempo){
-    sem_post(&cpuOcupada);//Lo primero es liberar la cpu
+    sem_post(&planiCortoPlazo);//Lo primero es liberar la cpu
 	int tiempoDeBloqueo = *tiempo;
 	ultimoEjecutado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", ultimoEjecutado->contexto->pid);
-    cambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+    logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(ultimoEjecutado); //Agrega a la cola y cambia el estado del pcb
-	cambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
+	logCambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
 }

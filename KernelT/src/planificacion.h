@@ -29,7 +29,7 @@ void agregarAEstadoNew(t_pcb* procesoNuevo);
 void agregarAEstadoReady(t_pcb* procesoListo);
 t_pcb* extraerDeNew();
 t_pcb* extraerDeReady();
-void cambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado);
+void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado);
 
 //lo pongo aca porq largo plazo los usa//
 void largoPlazo();

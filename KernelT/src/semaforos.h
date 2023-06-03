@@ -6,9 +6,7 @@
 extern sem_t planiLargoPlazo;
 extern sem_t planiCortoPlazo;
 extern sem_t multiprogramacion;///semaforo contador
-extern sem_t productorListaReady;
-extern sem_t productorColaNew;
-extern sem_t cpuOcupada;
+
 
 extern pthread_mutex_t mutexReady;
 extern pthread_mutex_t mutexNew;
