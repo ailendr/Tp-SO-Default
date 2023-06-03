@@ -38,7 +38,7 @@ char* fetch (t_contextoEjec* cont) {
     log_info(loggerCPU, "Instruccion: %s", proxInstr);
     cont->PC+=1;
 
-    char* token = string_split(proxInstr, " ");
+    char** token = string_split(proxInstr, " ");
     uint32_t pos = 0;
 
     while (token[pos] != NULL){
