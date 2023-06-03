@@ -9,8 +9,28 @@
 #include "consola.h"
 
 
-t_paquete* parseoDeInstrucciones(char *pathInstrucciones){
-    FILE *archivoDeInstrucciones;
+t_paquete* parseoDeInstrucciones(char *pathPseudo){
+	t_list* listaDeInstrucciones = list_create();
+	t_paquete* paqueteConInstrucciones = crear_paquete();
+		FILE *pseudocodigo = fopen(pathPseudo, "r");
+			if (pseudocodigo == NULL){
+				return NULL;
+			}
+
+			fseek(pseudocodigo, 0, SEEK_END);
+			int largo = ftell(pseudocodigo);
+			fseek(pseudocodigo, 0, SEEK_SET);
+
+			char *instrucciones = malloc(sizeof(char) * (largo+1));
+
+			char c;
+			int i = 0;
+			while ( (c = fgetc(pseudocodigo)) != EOF){
+				instrucciones[i] = c;
+				i++;
+			}
+			instrucciones[i]= '\0';
+    /*FILE *archivoDeInstrucciones;
     archivoDeInstrucciones = fopen(pathInstrucciones, "r");
     char *auxInstrucciones; // para guardar las instrucciones leidas del archivo
     t_list* listaDeInstrucciones = list_create();
@@ -22,28 +42,31 @@ t_paquete* parseoDeInstrucciones(char *pathInstrucciones){
     }
 
     fscanf(archivoDeInstrucciones, "%s", auxInstrucciones);
+*/
+			 char** vectorInstrucciones = string_split (instrucciones, "\n");
+			  //Devuelve un null al final
+			    //int tamanioAuxInstruciones = sizeof(auxInstrucciones);
+			   int j = 0;
+			   while (vectorInstrucciones[j] != NULL){
+				   list_add(listaDeInstrucciones, vectorInstrucciones[j]);
+				   printf(vectorInstrucciones [j]);
+				   j++;
+			   }
 
-   char** vectorInstrucciones= string_split (auxInstrucciones, "\n"); //Devuelve un null al final
-    //int tamanioAuxInstruciones = sizeof(auxInstrucciones);
-   int i = 0;
-   while (vectorInstrucciones[i] != NULL){
-	   list_add(listaDeInstrucciones, vectorInstrucciones[i]);
-	   i++;
-   }
+			    /*for (int i = 0; i < tamanioAuxInstruciones; i++){
+			    	list_add(listaDeInstrucciones, vectorInstrucciones[i]);
+			    }*/
+			    //luego agrego la lista a un paquete
+			    int tamanioListaInstrucciones = list_size(listaDeInstrucciones);
+			    for (int i = 0; i < tamanioListaInstrucciones; i++){
+			         char* instruccion= list_get(listaDeInstrucciones,i);
+			    	 agregar_a_paquete(paqueteConInstrucciones, instruccion, strlen(instruccion)+1);
+			    }
 
-    /*for (int i = 0; i < tamanioAuxInstruciones; i++){
-    	list_add(listaDeInstrucciones, vectorInstrucciones[i]);
-    }*/
-    //luego agrego la lista a un paquete
-    int tamanioListaInstrucciones = list_size(listaDeInstrucciones);
-    for (int i = 0; i < tamanioListaInstrucciones; i++){
-         char* instruccion= list_get(listaDeInstrucciones,i);
-    	 agregar_a_paquete(paqueteConInstrucciones, instruccion, strlen(instruccion)+1);
-    }
+			    fclose(pseudocodigo);
 
-    fclose(archivoDeInstrucciones);
 
-    return paqueteConInstrucciones;
+			    return paqueteConInstrucciones;
 
 }
 

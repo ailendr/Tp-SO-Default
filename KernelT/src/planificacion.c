@@ -229,11 +229,11 @@ t_list* obtenerInstrucciones(int socket_cliente) {
 	uint32_t recepcion = 1;
 	if (codigoOp == PAQUETE) { //Ver si lo aplicamos o sacamos
 		listaDeInstrucciones = recibir_paquete(socket_cliente);
-		if(list_is_empty(listaDeInstrucciones)){
-			recepcion = 0;
+		if(!list_is_empty(listaDeInstrucciones)){
 			send(socket_cliente, &recepcion, sizeof(uint32_t), 0);//Consola deberia verificar que si es 1-> kernel recibio todo OK
 		}
 	else{
+		recepcion = 0;
 		send(socket_cliente, &recepcion, sizeof(uint32_t), 0);
 		log_info(loggerKernel, "Error: La lista de instrucciones esta vacia");} //Consola deberia verificar que si es 0-> Kernel recibio algo vacio
 	}
@@ -242,7 +242,7 @@ t_list* obtenerInstrucciones(int socket_cliente) {
 
 void generarProceso(int *socket_cliente) {
 	int consolaNueva = *socket_cliente;
-	//recibirProtocolo(socket_cliente); //Handashake No lo incluimos por el momento porq la func cierra las conexiones-> podemos modificarla dsps
+	recibirProtocolo(socket_cliente); //Handashake No lo incluimos por el momento porq la func cierra las conexiones-> podemos modificarla dsps
 	t_list *instrucciones = obtenerInstrucciones(consolaNueva);
 	if(list_is_empty(instrucciones)){
 		log_info(loggerKernel, "Error: La lista de instrucciones esta vacia");
@@ -256,6 +256,7 @@ void generarProceso(int *socket_cliente) {
 	agregarAEstadoNew(procesoNuevo);
 	log_info(loggerKernel, "Se crea el proceso %d en New",
 			procesoNuevo->contexto->pid);
+	log_info(loggerKernel,"%s",list_get(instrucciones,0));
 	//Cerrando recursos
 	//close(consolaNueva);//Ver si esta demas esto o nos romperia
 	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
