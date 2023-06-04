@@ -137,18 +137,25 @@ void instruccionAEjecutar() {
 				implementacionWyS(recursoALiberar, 2);
 				procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
 				break;
-			case CREATE_SEGMENT:
-				break;
-			case DELETE_SEGMENT:
-				break;
-
 			case IO:
 				int tiempoDeIO = 1000; //en microsegundos tendriamos q deserializarInstruccion y seria el primer parametro
 				pthread_t hiloDeBloqueo; //crear hilo
 				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
 				pthread_detach(hiloDeBloqueo);
 				break;
-
+			case MOV_IN:
+				log_info(loggerKernel, "Se está ejecutando MOV_IN en CPU");
+				break;
+			case MOV_OUT:
+				log_info(loggerKernel, "Se está ejecutando MOV_OUT en CPU");
+				break;
+			case SET:
+				log_info(loggerKernel, "Se está ejecutando SET en CPU");
+				break;
+			case CREATE_SEGMENT:
+				break;
+			case DELETE_SEGMENT:
+				break;
 			default:
 				break;
 		}
