@@ -38,14 +38,6 @@ char* fetch (t_contextoEjec* cont) {
     log_info(loggerCPU, "Instruccion: %s", proxInstr);
     cont->PC+=1;
 
-    char** token = string_split(proxInstr, " ");
-    uint32_t pos = 0;
-
-    while (token[pos] != NULL){
-    	log_info(loggerCPU,"%s", token[pos]);
-    	pos++;
-    }
-
     return proxInstr;
 }
 
@@ -53,14 +45,33 @@ t_instruccion* decode (char* instruccion) {
 
 	t_instruccion* nuevaInstruccion;
 
-	//Separa instruccion y guardarlo
+	char** token = string_split(instruccion, " ");
+    	uint32_t pos = 0;
+
+	/*
+   	while (token[pos] != NULL){
+    		log_info(loggerCPU,"%s", token[pos]);
+    		pos++;
+    	}
+	*/
+	
+	nuevaInstruccion->nombre = token[0];
+	if (token[1] != NULL) {
+		nuevaInstruccion->param1 = token[1];
+		if (token[2] != NULL) {
+			nuevaInstruccion->param2 = token[2];
+			if(token[3] != NULL) {
+				nuevaInstruccion->param3 = token[3];
+			}
+		}
+	}
 
 	if (nuevaInstruccion->nombre == SET){
 		sleep(retardo());
 	}
 
 	if (nuevaInstruccion->nombre == MOV_IN){
-		//TODO traduccion
+	//TODO traduccion
 	}
 
 	if (nuevaInstruccion->nombre == MOV_OUT){
