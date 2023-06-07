@@ -63,7 +63,13 @@ void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado){
 void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
 
 	t_paquete *paqueteDeContexto = serializarContexto(procesoAEjecutar); // "Pone el contexto en un paquete"
-	enviar_paquete(paqueteDeContexto, socketCPU); //Acá se serializa el paquete y se envia
+	log_info(loggerKernel, "Paquete de Contexto creado con exito");
+	if(enviarPaquete(paqueteDeContexto, socketCPU, loggerKernel) == -1){
+		log_info(loggerKernel, "Fallo la conexion con Cpu ");
+		terminarModulo(socketCPU, loggerKernel, configKernel);
+		exit(1);
+	}
+	else{log_info(loggerKernel, "Contexto enviado a CPU");}
 }
 
 void largoPlazo() {
@@ -75,7 +81,7 @@ void largoPlazo() {
 		//Pasaje de New a Ready//
 
 		sem_wait(&multiprogramacion);
-		log_info(loggerKernel, "pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
+		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //El handshake seria el pedido de memoria
 		//asignarMemoria(proceso, tabla); //PCB creado
@@ -90,7 +96,7 @@ void cortoPlazo() {
 	while (1) {
 
 		sem_wait(&planiCortoPlazo);
-		log_info(loggerKernel, "Largo plazo habilito corto plazo");
+		log_info(loggerKernel, "Corto Plazo habilitado");
 
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
@@ -163,7 +169,7 @@ void instruccionAEjecutar() {
 
 
 void algoritmoFIFO() {
-	log_info(loggerKernel, "empieza algoritmo FIFO");
+	log_info(loggerKernel, "Empieza algoritmo FIFO");
 	t_pcb *procesoAEjec = extraerDeReady();
 	log_info(loggerKernel, "FIFO: Obtengo un proceso de ready");
 	t_contextoEjec *contextoAEjec = procesoAEjec->contexto;
