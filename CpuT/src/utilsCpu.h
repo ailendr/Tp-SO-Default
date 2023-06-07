@@ -16,6 +16,9 @@ char* fetch(t_contextoEjec* cont);
 t_instruccion* decode (char* instruccion);
 void execute (t_instruccion* instruccion, t_contextoEjec* contexto);
 
+op_code asignarNombre (char* nombre);
+
 void funcionPrueba();
+void preparandoContexto (t_contextoEjec* contexto);
 
 #endif /* SRC_UTILSCPU_H_ */

@@ -204,3 +204,26 @@ t_list* deserializarInstrucciones(void*buffer, int desplazamiento,int tamanioBuf
  	}
  	return listaInstrucciones;
  }
+
+t_instruccion* deserializarInstruccion (void* buffer, int tamanio){
+
+	t_instruccion* instruccion = malloc(sizeof(t_instruccion));
+
+	void * stream = buffer;
+	int tamanioBuffer = tamanio;
+	int desplazamiento = 0;
+
+	memcpy(&(instruccion->nombre), stream+desplazamiento,sizeof(op_code));
+	desplazamiento+= sizeof(op_code);
+	memcpy(&(instruccion->pid), stream+desplazamiento, sizeof(uint32_t));
+	desplazamiento+=sizeof(uint32_t);
+	memcpy(&(instruccion->param1), stream+desplazamiento, sizeof(char*));
+	desplazamiento+=sizeof(char*);
+	memcpy(&(instruccion->param2), stream+desplazamiento, sizeof(char*));
+	desplazamiento+=sizeof(char*);
+	memcpy(&(instruccion->param3), stream+desplazamiento, sizeof(char*));
+	desplazamiento+=sizeof(char*);
+
+	return instruccion;
+
+}

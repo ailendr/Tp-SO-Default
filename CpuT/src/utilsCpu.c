@@ -55,7 +55,7 @@ t_instruccion* decode (char* instruccion) {
     	}
 	*/
 	
-	nuevaInstruccion->nombre = token[0];
+	nuevaInstruccion->nombre = asignarNombre (token[0]);
 	if (token[1] != NULL) {
 		nuevaInstruccion->param1 = token[1];
 		if (token[2] != NULL) {
@@ -71,7 +71,7 @@ t_instruccion* decode (char* instruccion) {
 	}
 
 	if (nuevaInstruccion->nombre == MOV_IN){
-	//TODO traduccion
+		//TODO traduccion
 	}
 
 	if (nuevaInstruccion->nombre == MOV_OUT){
@@ -99,6 +99,25 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 			log_error(loggerCPU, "Error con instruccion");
 	}
 
+}
+
+op_code asignarNombre (char* nombre){
+	if (strcmp(nombre, "YIELD")) return YIELD;
+	if (strcmp(nombre, "CREATE_SEGMENT")) return CREATE_SEGMENT;
+	if (strcmp(nombre, "DELETE_SEGMENT")) return DELETE_SEGMENT;
+	if (strcmp(nombre, "EXIT")) return EXIT;
+	if (strcmp(nombre, "SET")) return SET;
+	if (strcmp(nombre, "MOV_IN")) return MOV_IN;
+	if (strcmp(nombre, "MOV_OUT")) return MOV_OUT;
+	if (strcmp(nombre, "IO")) return IO;
+	if (strcmp(nombre, "F_OPEN")) return F_OPEN;
+	if (strcmp(nombre, "F_CLOSE")) return F_CLOSE;
+	if (strcmp(nombre, "F_SEEK")) return F_SEEK;
+	if (strcmp(nombre, "F_READ")) return F_READ;
+	if (strcmp(nombre, "F_WRITE")) return F_WRITE;
+	if (strcmp(nombre, "F_TRUNCATE")) return F_TRUNCATE;
+	if (strcmp(nombre, "WAIT")) return WAIT;
+	if (strcmp(nombre, "SIGNAL")) return SIGNAL;
 }
 
 //PRUEBAS UNITARIAS -----------------------------------------------------
