@@ -8,9 +8,14 @@
 #ifndef SRC_INSTRUCCION_H_
 #define SRC_INSTRUCCION_H_
 
-#include "./conexionCpu.h"
-#include <commons/string.h>
+#include "./cpuConfig.h"
 
-//void set (t_instruccion* instruccion, t_contextoEjec* contexto);
+char* fetch(t_contextoEjec* cont);
+t_instruccion* decode (char* instruccion);
+void execute (t_instruccion* instruccion, t_contextoEjec* contexto);
+
+op_code asignarNombre (char* nombre);
+
+void set (t_instruccion* instruccion, t_contextoEjec* contexto);
 
 #endif /* SRC_INSTRUCCION_H_ */

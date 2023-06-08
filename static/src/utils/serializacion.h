@@ -16,5 +16,9 @@ t_contextoEjec* deserializarContexto(void *buffer, int tamanio);
 t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar);
 int bytesListaInstrucciones(t_list* instrucciones);
 
+t_paquete* serializarInstrucciones(t_instruccion* instruccion);
+t_paquete* serializacionParametros (t_paquete* pInstruc, int offset, t_instruccion* instruc, int param);
+t_instruccion* deserializarInstruccionEstructura (void* buffer/*, int tamanio*/);
+
 
 #endif /* SRC_UTILS_SERIALIZACION_H_ */

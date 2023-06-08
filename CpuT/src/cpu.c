@@ -22,33 +22,32 @@ int main(/*int argc, char** argv*/) {
 	t_paquete* paqueteI = NULL;
 	t_paquete* paqueteC = NULL;
 
-	//funcionPrueba();
-
-
 	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
 	while (1){
 
 		int codigo = recibir_operacion(cliente);
 
+		if (cliente == 0){
+			log_info(loggerCPU, "Kernel se acaba de desconectar");
+			break;
+		}
+
 		if (codigo != CONTEXTO){
+			log_info(loggerCPU, "No se recibio un contexto");
+			break;
+		}
 
-			log_info(loggerCPU, "...");
-			break; //-> es para que no haga la espera activa ahora que sabemos que hay
+		log_info(loggerCPU, "Se recibio el buffer del contexto");
+		buffer = recibir_buffer(&tamanio, cliente);
+		contextoRecibido = deserializarContexto(buffer, tamanio);
+		log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
 
-		} else {
-
-			buffer = recibir_buffer(&tamanio, cliente);
-			contextoRecibido = deserializarContexto(buffer, tamanio);
-
-			if (contextoRecibido->pid != NULL){
-
-				log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
-
-				instr = fetch (contextoRecibido);
+		instr = fetch (contextoRecibido);
+		nuevaInstr = decode (&instr);
 
 				/*
-						nuevaInstr = decode (&instr);
+
 						execute (&nuevaInstr, contextoRecibido);
 
 
@@ -62,10 +61,6 @@ int main(/*int argc, char** argv*/) {
 						}
 */
 
-			} else {
-				log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
-			}
-		}
 
 	}
 
@@ -75,19 +70,6 @@ int main(/*int argc, char** argv*/) {
 
 
 	free(buffer);
-
-
-    /*
-     ----------------------------------------------------
-     TODO
-     Decode()
-     Execute()
-
-     Traducir direcciones logicas a fisicas
-
-     Actualizando el contexto de ejecucion
-     ----------------------------------------------------
-     */
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);
@@ -99,4 +81,7 @@ int main(/*int argc, char** argv*/) {
 	return EXIT_SUCCESS;
 
 }
+
+
+
 
