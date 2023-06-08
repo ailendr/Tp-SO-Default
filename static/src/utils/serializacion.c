@@ -70,16 +70,27 @@ t_contextoEjec* deserializarContexto(void *buffer, int tamanio) {
 	return contexto;
 }
 
+int bytesListaInstrucciones(t_list* instrucciones){
+	int tamanioInstrucciones = list_size(instrucciones);
+	int bytesAcumulados = 0;
+		for (int i = 0; i < tamanioInstrucciones; i++) {
+			char* instruccion = list_get(instrucciones, i);
+			bytesAcumulados += strlen(instruccion)+1;
+		}
+		return bytesAcumulados;
+}
+
 t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad pone todo en un paquete
 	////----SERIALIZACION DE CONTEXTO------///
 
 	t_paquete *paqueteContexto = malloc(sizeof(t_paquete));
 	paqueteContexto->codigo_operacion = CONTEXTO;
 	paqueteContexto->buffer = malloc(sizeof(t_buffer));
-	paqueteContexto->buffer->size = 0;
-	paqueteContexto->buffer->stream = NULL;
-
+	int bytesLista = bytesListaInstrucciones(procesoAEjecutar->instrucciones);
+	paqueteContexto->buffer->size = sizeof(uint32_t)*2+ 4*4+8*4+16*4; //Nota: cuando serializa la lista de instrucciones pide memoria con realloc
+	paqueteContexto->buffer->stream = malloc(paqueteContexto->buffer->size);
 	int offset = 0;
+
 	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
