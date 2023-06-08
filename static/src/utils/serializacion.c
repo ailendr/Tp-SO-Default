@@ -80,51 +80,37 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad 
 	paqueteContexto->buffer->stream = NULL;
 
 	int offset = 0;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->PC),
-			sizeof(uint32_t));
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->AX),
-			4);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->AX), 4);
 	offset += 4;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->BX),
-			4);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->BX), 4);
 	offset += 4;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->CX),
-			4);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->CX), 4);
 	offset += 4;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->DX),
-			4);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->DX), 4);
 	offset += 4;
 
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->EAX),
-			8);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->EAX), 8);
 	offset += 8;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->EBX),
-			8);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->EBX), 8);
 	offset += 8;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->ECX),
-			8);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->ECX), 8);
 	offset += 8;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->EDX),
-			8);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->EDX), 8);
 	offset += 8;
 
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RAX),
-			16);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RAX), 16);
 	offset += 16;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RBX),
-			16);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RBX), 16);
 	offset += 16;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RCX),
-			16);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RCX), 16);
 	offset += 16;
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RDX),
-			16);
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RDX), 16);
 	offset += 16;
 
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->pid),
-			sizeof(uint32_t));
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->pid), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
 	t_list *instrucciones = procesoAEjecutar->instrucciones;

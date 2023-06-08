@@ -34,6 +34,7 @@ int main(/*int argc, char** argv*/) {
 		if (codigo != CONTEXTO){
 
 			log_info(loggerCPU, "...");
+			break; //-> es para que no haga la espera activa ahora que sabemos que hay
 
 		} else {
 
@@ -44,7 +45,7 @@ int main(/*int argc, char** argv*/) {
 
 				log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
 
-				instr = fetch (&contextoRecibido);
+				instr = fetch (contextoRecibido);
 
 				/*
 						nuevaInstr = decode (&instr);
