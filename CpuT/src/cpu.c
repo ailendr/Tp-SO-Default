@@ -19,8 +19,8 @@ int main(/*int argc, char** argv*/) {
 	t_instruccion* nuevaInstr = NULL;
 	void* buffer = NULL;
 	int tamanio = 0;
-	t_paquete* paqueteI = NULL;
-	t_paquete* paqueteC = NULL;
+	t_paquete* paqueteI;
+	t_paquete* paqueteC;
 
 	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
@@ -41,12 +41,12 @@ int main(/*int argc, char** argv*/) {
 
 			log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
 			instr = fetch (contextoRecibido);
-			nuevaInstr = decode (&instr);
+			nuevaInstr = decode (instr);
 			execute (nuevaInstr, contextoRecibido);
 
 			paqueteC = serializarContexto(contextoRecibido);
 			enviar_paquete(paqueteC, cliente);
-			paqueteI = serializarInstrucciones (nuevaInstr);
+			paqueteI = serializarInstruccion(nuevaInstr);
 			enviar_paquete(paqueteI, servidorCpu);
 
 		} else {
