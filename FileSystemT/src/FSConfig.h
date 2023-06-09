@@ -9,6 +9,7 @@
 #define SRC_FSCONFIG_H_
 
 #include <utils/modulo.h>
+#include "estructurasfs.h"
 
 extern t_log* loggerFS;
 extern t_config* configFS;

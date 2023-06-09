@@ -3,7 +3,7 @@
 #include "FileSystem.h"
 
 int main(void) {
-
+    // agregar argc?
 	printf("Hola soy FileSystem y soy servidor de Kernel y me conecto a Memoria \n ");
 
 	loggerFS = log_create("FileSystem.log", "FS",1,LOG_LEVEL_DEBUG);
@@ -14,15 +14,18 @@ int main(void) {
     int servidorFS = 0;
 
 	configFS = config_create("../FileSystemT/filesystem.config");
+
 	if(verificarConfig (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
+
+	iniciarEstructuras();
 
 	char* puerto = puertoEscucha();
 	char* ip = IP_Escucha();
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
-
-	log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
-	char* ipM = IP_Memoria();
+ /*
+	//log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
+	//char* ipM = IP_Memoria();
 	char* puertoM = puertoMemoria();
 
 	int socketMemoria = iniciarCliente(ipM, puertoM, loggerFS);
@@ -53,7 +56,7 @@ int main(void) {
 	terminarModulo(cliente, loggerFS, configFS);
 	close (socketMemoria);
 	close (servidorFS);
-
+*/
 	printf ("\n Finalizo File System correctamente\n ");
 
 	return EXIT_SUCCESS;

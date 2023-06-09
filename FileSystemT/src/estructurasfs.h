@@ -34,8 +34,8 @@ typedef struct{
 typedef struct{
 	char* nombreDeArchivo;
 	uint32_t tamanioArchivo;
-	uint32_t punteroDirecto;  //porque es un numero
-	uint32_t punteroIndirecto; //porque es un numero
+	uint32_t punteroDirecto;
+	uint32_t punteroIndirecto;
 }t_fcb;
 
 
