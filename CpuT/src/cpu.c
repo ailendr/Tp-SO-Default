@@ -14,7 +14,7 @@ int main(/*int argc, char** argv*/) {
 	}
 	*/
 
-	t_contextoEjec* contextoRecibido = NULL;
+	t_contextoEjec* contextoRecibido;
 	char* instr;
 	t_instruccion* nuevaInstr = NULL;
 	void* buffer = NULL;
@@ -28,11 +28,6 @@ int main(/*int argc, char** argv*/) {
 
 		int codigo = recibir_operacion(cliente);
 
-		if (cliente == 0){
-			log_info(loggerCPU, "Kernel se acaba de desconectar");
-			break;
-		}
-
 		if (codigo != CONTEXTO){
 			log_info(loggerCPU, "No se recibio un contexto");
 			break;
@@ -41,33 +36,24 @@ int main(/*int argc, char** argv*/) {
 		log_info(loggerCPU, "Se recibio el buffer del contexto");
 		buffer = recibir_buffer(&tamanio, cliente);
 		contextoRecibido = deserializarContexto(buffer, tamanio);
-		log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
 
-		instr = fetch (contextoRecibido);
-		nuevaInstr = decode (&instr);
+		if (contextoRecibido->pid != -1){
 
-				/*
+			log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
+			instr = fetch (contextoRecibido);
+			nuevaInstr = decode (&instr);
+			execute (nuevaInstr, contextoRecibido);
 
-						execute (&nuevaInstr, contextoRecibido);
+			paqueteC = serializarContexto(contextoRecibido);
+			enviar_paquete(paqueteC, cliente);
+			paqueteI = serializarInstrucciones (nuevaInstr);
+			enviar_paquete(paqueteI, servidorCpu);
 
-
-				paqueteC = serializarContexto(contextoRecibido);
-				enviar_paquete(paqueteC, cliente);
-
-
-						if (nuevaInstr->nombre != SET && nuevaInstr->nombre != MOV_IN && nuevaInstr->nombre != MOV_OUT){
-							paqueteI = serializarInstrucciones (nuevaInstr);
-							enviar_paquete(paqueteI, servidorCpu);
-						}
-*/
-
+		} else {
+			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
+		}
 
 	}
-
-
-
-
-
 
 	free(buffer);
 
