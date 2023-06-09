@@ -53,6 +53,8 @@ void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion);
 void bloquearHilo(int* tiempo);
 
+void loggearListaDeIntrucciones(t_list* instrucciones);
+
 
 
 

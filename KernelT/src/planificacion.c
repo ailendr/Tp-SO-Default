@@ -292,6 +292,7 @@ void generarProceso(int *socket_cliente) {
 		close(consolaNueva);//cierro la conexion con esa consola
 	}
 	else{
+	loggearListaDeIntrucciones(instrucciones);
 	pthread_mutex_lock(&mutexPID);
 	t_pcb *procesoNuevo = crearPcb(instrucciones, pid, consolaNueva);
 	pid++;
@@ -299,7 +300,7 @@ void generarProceso(int *socket_cliente) {
 	agregarAEstadoNew(procesoNuevo);
 	log_info(loggerKernel, "Se crea el proceso %d en New",
 			procesoNuevo->contexto->pid);
-	log_info(loggerKernel,"%s",list_get(instrucciones,0));
+
 	//Cerrando recursos
 	//close(consolaNueva);//Ver si esta demas esto o nos romperia
 	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
@@ -372,4 +373,14 @@ void bloquearHilo(int* tiempo){
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(ultimoEjecutado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
+}
+
+//Logueo de las instrucciones para verificar que esta todo ok//
+void loggearListaDeIntrucciones(t_list* instrucciones){
+	int tamanioListaInstrucciones = list_size(instrucciones);
+	log_info(loggerKernel, "La lista de instrucciones del proceso es:");
+		for (int i = 0; i < tamanioListaInstrucciones; i++){
+			 char* instruccion= list_get(instrucciones,i);
+			 log_info(loggerKernel, "%s", instruccion);
+		}
 }
