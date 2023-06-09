@@ -153,7 +153,7 @@ void eliminar_paquete(t_paquete* paquete)
 }
 
 ///Mensaje de protocolo//
-int enviarProtocolo(int conexion,uint32_t handshake,t_log* logger){
+int enviarProtocolo(int conexion,t_handshake handshake,t_log* logger){
 	uint32_t protocolo = handshake;
 	uint32_t resultado = 0;//Lo inicialice asi para verificar que funcione el recv en los hilos
 	int returnSend = send(conexion, &protocolo, sizeof(uint32_t), 0);
@@ -310,7 +310,7 @@ void recibirProtocolo (int* socket_cliente){
 	//free(socket_cliente);
 }
 
-void recibirHandshake(int socket_cliente,uint32_t handshake,t_log* logger){
+void recibirHandshake(int socket_cliente,t_handshake handshake,t_log* logger){
 	log_info(logger, "Esperando mensaje del cliente ");
 
 		uint32_t protocolo;

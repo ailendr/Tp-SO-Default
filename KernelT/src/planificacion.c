@@ -115,13 +115,15 @@ void cortoPlazo() {
 
 void instruccionAEjecutar() {
 		int tamanio = 0;
+//Recepcion del contexto//
 		t_contextoEjec *contextoActualizado;
+		int codigoContexto = recibir_operacion(socketCPU); //Solo lo recibo porq cuando envian el paquete lo primero q llega es un op_code si no tengo un recv para guardar eso me queda inconsistente, iwal PREGuNTAR
 		void *buffer = recibir_buffer(&tamanio, socketCPU);
 		log_info(loggerKernel, "Se recibio el buffer del contexto");
 		contextoActualizado = deserializarContexto(buffer, tamanio);
 		ultimoEjecutado->contexto = contextoActualizado;
 		free(buffer);
-
+//Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
 		switch(codigo){
 			case EXIT:
@@ -136,16 +138,23 @@ void instruccionAEjecutar() {
 				break;
 
 			case WAIT:
-				char* recursoAConsumir = "recurso"; //= deserializarInstruccion(); Supongamos que recibimos el parametro. Hay q ver como serializa dany
+				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU);
+				char* recursoAConsumir = instruccionWait->param1;
+				free(instruccionWait); //Hay q liberar puntero
 				implementacionWyS(recursoAConsumir, 1);
 				break;
 			case SIGNAL:
-				char* recursoALiberar = "recurso"; // = deserializarInstruccion();
+				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU);
+				char* recursoALiberar = instruccionSignal->param1;
+				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
 				implementacionWyS(recursoALiberar, 2);
 				procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
 				break;
 			case IO:
-				int tiempoDeIO = 1000; //en microsegundos tendriamos q deserializarInstruccion y seria el primer parametro
+				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU);
+				char* tiempo = instruccionIO->param1;
+				int tiempoDeIO = atoi(tiempo);//en microsegundos
+				free(instruccionIO);//Hay q liberar puntero
 				pthread_t hiloDeBloqueo; //crear hilo
 				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
 				pthread_detach(hiloDeBloqueo);
@@ -163,6 +172,19 @@ void instruccionAEjecutar() {
 				break;
 			case DELETE_SEGMENT:
 				break;
+			case F_OPEN:
+				break;
+			case F_CLOSE:
+				break;
+			case F_SEEK:
+				break;
+			case F_READ:
+				break;
+			case F_WRITE:
+				break;
+			case F_TRUNCATE:
+				break;
+
 			default:
 				break;
 		}
@@ -236,11 +258,17 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 
 }
 
-//////////////////////INSTRUCCIONES Y PROCESOS////////////////////////////
+//////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
+t_instruccion* obtenerInstruccion(int socket){
+	int tamanio = 0;
+	void *buffer = recibir_buffer(&tamanio, socketCPU);
+	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer);
+	return instruccionNueva;
+}
 
 t_list* obtenerInstrucciones(int socket_cliente) {
 	int codigoOp = recibir_operacion(socket_cliente);
-	t_list *listaDeInstrucciones; //Recordar liberar esto cuando terminemos->se libera cuando termina el pcb
+	t_list *listaDeInstrucciones; //Se libera cuando termina el pcb
 	uint32_t recepcion = 1;
 	if (codigoOp == PAQUETE) { //Ver si lo aplicamos o sacamos
 		listaDeInstrucciones = recibir_paquete(socket_cliente);

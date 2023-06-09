@@ -130,14 +130,17 @@ t_paquete* serializarInstruccion(t_instruccion* instruc){
 	t_paquete* pInstruc = malloc(sizeof(t_paquete));
 	pInstruc->codigo_operacion = instruc->nombre;
 	pInstruc->buffer = malloc(sizeof(t_buffer));
-	pInstruc->buffer->size = sizeof(uint32_t)*4 + strlen(instruc->param1) + strlen(instruc->param2) + strlen(instruc->param3);
+	pInstruc->buffer->size = sizeof(uint32_t)*4+ sizeof(op_code) + strlen(instruc->param1) + strlen(instruc->param2) + strlen(instruc->param3);
 	pInstruc->buffer->stream = malloc(pInstruc->buffer->size); //Agrego esto porq es necesario reservarle memoria al stream
 
 	int offset = 0;
 
 	memcpy(pInstruc->buffer->stream +offset, &(instruc->pid), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
-
+//creo que deberiamos pasarle el nombre porq sino no estariamos enviandole la instruccion completa//
+	memcpy(pInstruc->buffer->stream +offset, &(instruc->nombre), sizeof(op_code));
+	offset += sizeof(op_code);
+//
 	serializacionParametros (pInstruc, offset, instruc, 1);
 
 	return pInstruc;
@@ -176,7 +179,10 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer){
 
 	memcpy(&(instruccion->pid), stream+desplazamiento, sizeof(uint32_t));
 	desplazamiento+=sizeof(uint32_t);
-
+//agrego esto por haberle enviado el nombre al serializar//
+	memcpy(&(instruccion->nombre), stream+desplazamiento, sizeof(op_code));
+	desplazamiento+= sizeof(op_code);
+//
 	memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
 	desplazamiento+= sizeof(uint32_t);
 	memcpy(&(instruccion->param1), stream+desplazamiento,tamParam);
