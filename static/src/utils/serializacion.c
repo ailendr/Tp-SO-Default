@@ -70,15 +70,6 @@ t_contextoEjec* deserializarContexto(void *buffer, int tamanio) {
 	return contexto;
 }
 
-int bytesListaInstrucciones(t_list* instrucciones){
-	int tamanioInstrucciones = list_size(instrucciones);
-	int bytesAcumulados = 0;
-		for (int i = 0; i < tamanioInstrucciones; i++) {
-			char* instruccion = list_get(instrucciones, i);
-			bytesAcumulados += strlen(instruccion)+1;
-		}
-		return bytesAcumulados;
-}
 
 t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad pone todo en un paquete
 	////----SERIALIZACION DE CONTEXTO------///
@@ -86,7 +77,6 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad 
 	t_paquete *paqueteContexto = malloc(sizeof(t_paquete));
 	paqueteContexto->codigo_operacion = CONTEXTO;
 	paqueteContexto->buffer = malloc(sizeof(t_buffer));
-	int bytesLista = bytesListaInstrucciones(procesoAEjecutar->instrucciones);
 	paqueteContexto->buffer->size = sizeof(uint32_t)*2+ 4*4+8*4+16*4; //Nota: cuando serializa la lista de instrucciones pide memoria con realloc
 	paqueteContexto->buffer->stream = malloc(paqueteContexto->buffer->size);
 	int offset = 0;
@@ -135,13 +125,13 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad 
 }
 
 // SERIALIZAR ESTRUCTURA INTRUCCION -------------------------------------------------------------------------------------------------------
-t_paquete* serializarInstrucciones(t_instruccion* instruc){
+t_paquete* serializarInstruccion(t_instruccion* instruc){
 
 	t_paquete* pInstruc = malloc(sizeof(t_paquete));
 	pInstruc->codigo_operacion = instruc->nombre;
 	pInstruc->buffer = malloc(sizeof(t_buffer));
 	pInstruc->buffer->size = sizeof(uint32_t)*4 + strlen(instruc->param1) + strlen(instruc->param2) + strlen(instruc->param3);
-	pInstruc->buffer->stream = NULL;
+	pInstruc->buffer->stream = malloc(pInstruc->buffer->size); //Agrego esto porq es necesario reservarle memoria al stream
 
 	int offset = 0;
 
@@ -163,20 +153,20 @@ t_paquete* serializacionParametros (t_paquete* pInstruc, int offset, t_instrucci
 	if (param == 2) cargar = instruc->param2;
 	if (param == 3) cargar = instruc->param3;
 
+
 	if (cargar == NULL) cargar = "";
 
-	tamParam = strlen(cargar);
+	tamParam = strlen(cargar)+1;
 
 	memcpy(pInstruc->buffer->stream +offset, &(tamParam), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
-	memcpy(pInstruc->buffer->stream +offset, &(cargar), sizeof(strlen(cargar)));
-	offset += sizeof(strlen(cargar));
-	serializacionParametros(pInstruc, offset, instruc, param++);
-
+	memcpy(pInstruc->buffer->stream +offset, &(cargar), sizeof(strlen(cargar)+1));
+	offset += sizeof(strlen(cargar)+1);
+	if (param < 3) serializacionParametros(pInstruc, offset, instruc, param++);
 	return pInstruc;
 }
 
-t_instruccion* deserializarInstruccionEstructura (void* buffer/*, int tamanio*/){
+t_instruccion* deserializarInstruccionEstructura (void* buffer){
 
 	t_instruccion* instruccion = malloc(sizeof(t_instruccion));
 
