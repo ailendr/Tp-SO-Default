@@ -7,6 +7,11 @@
 
 #include "./utilsCpu.h"
 
+int servidorCpu;
+int socketMemoria;
+int cliente;
+
+
 int iniciarCpu (char* pathConfig){
 
 	servidorCpu = 0;
@@ -31,89 +36,49 @@ int iniciarCpu (char* pathConfig){
 
 }
 
-char* fetch (t_contextoEjec* cont) {
 
-	char* proxInstr = list_get(cont->instrucciones, cont->PC);
-    log_info(loggerCPU, "FETCH: PCB <ID %d>", cont->pid);
-    log_info(loggerCPU, "Instruccion: %s", proxInstr);
-    cont->PC+=1;
-
-    char** token = string_split(proxInstr, " ");
-    uint32_t pos = 0;
-
-    while (token[pos] != NULL){
-    	log_info(loggerCPU,"%s", token[pos]);
-    	pos++;
-    }
-
-    return proxInstr;
-}
-
-t_instruccion* decode (char* instruccion) {
-
-	t_instruccion* nuevaInstruccion;
-
-	//Separa instruccion y guardarlo
-
-	if (nuevaInstruccion->nombre == SET){
-		sleep(retardo());
-	}
-
-	if (nuevaInstruccion->nombre == MOV_IN){
-		//TODO traduccion
-	}
-
-	if (nuevaInstruccion->nombre == MOV_OUT){
-		//TODO traduccion
-	}
-
-	return nuevaInstruccion;
-
-}
-
-void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
-
-	switch (instruccion->nombre){
-		case SET:
-			set (instruccion, contexto);
-		    log_info(loggerCPU, "Recibio un SET");
-			break;
-		case MOV_IN:
-			//TODO lo que se deba, la traduccion se hace, borrarlo aca
-			break;
-		case MOV_OUT:
-			//TODO lo que se deba, la traduccion se hace, borrarlo aca
-			break;
-		default:
-			log_error(loggerCPU, "Error con instruccion");
-	}
-
-}
-
-//PRUEBAS UNITARIAS -----------------------------------------------------
-
-void funcionPrueba (){
-	t_contextoEjec* contextoRecibido;
-	char* instr;
-	t_instruccion* nuevaInstr = NULL;
-
-	loggerCPU = log_create("cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
-
-	preparandoContexto (&contextoRecibido);
-
-	instr = fetch (&contextoRecibido);
+int iniciarSocketsCpu(){
 	/*
-		nuevaInstr = decode (&instr);
-		execute (&nuevaInstr, contextoRecibido);
+	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
+	log_info(loggerCPU, "Realizando Conexion con Memoria");
+	socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerCPU);
+	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ){
+		close (servidorCpu);
+		close(cliente);
+		return 1;
+	}
+	log_info(loggerCPU, "Enviando mensaje a Memoria para corroborar conexion \n");
+	if(enviarProtocolo(socketMemoria,HANDSHAKE_Cpu, loggerCPU) == -1){
+		log_info(loggerCPU, "Failed -> Conexion Memoria");
+		terminarModulo(socketMemoria,loggerCPU, configCPU);
+		close (servidorCpu);
+		close(cliente);
+	    return 1;
+	}
+	log_info(loggerCPU, "Ok -> Conexion Memoria");
 	*/
+	// CONEXION CON KERNEL -----------------------------------------------------------------------------
+    log_info(loggerCPU, "---------------------------------------------------------------------------");
+    log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel...");
+	servidorCpu = iniciarServidor(IP_Escucha(), puertoEscucha());
+	if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ){
+		close(socketMemoria);
+		close(cliente);
+	    return 1;
+	}
+	log_info(loggerCPU, "Ok -> Servidor para Kernel");
+
+	log_info(loggerCPU ,"Esperando un Cliente ... \n");
+	cliente = esperar_cliente(servidorCpu, loggerCPU);
+	if(verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
+		close(servidorCpu);
+	    close(socketMemoria);
+	    return 1;
+	}
+	recibirHandshake(cliente, HANDSHAKE_Kernel, loggerCPU);
+	log_info(loggerCPU, "Ok -> Conexion Kernel");
+
+	return 0;
 }
 
-void preparandoContexto (t_contextoEjec* contexto){
 
-	contexto->pid = 0;
-	contexto->PC = 0;
-	contexto->instrucciones = list_create();
-
-	list_add(contexto->instrucciones, "SET AX AAAA");
-
-}

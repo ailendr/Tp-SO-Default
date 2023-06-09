@@ -14,7 +14,7 @@ int main(/*int argc, char** argv*/) {
 	}
 	*/
 
-	t_contextoEjec* contextoRecibido = NULL;
+	t_contextoEjec* contextoRecibido;
 	char* instr;
 	t_instruccion* nuevaInstr = NULL;
 	void* buffer = NULL;
@@ -22,68 +22,40 @@ int main(/*int argc, char** argv*/) {
 	t_paquete* paqueteI = NULL;
 	t_paquete* paqueteC = NULL;
 
-	funcionPrueba();
-
-
 	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
 	while (1){
 
 		int codigo = recibir_operacion(cliente);
-		 if (codigo != CONTEXTO){
-			log_info(loggerCPU, "...");
+
+		if (codigo != CONTEXTO){
+			log_info(loggerCPU, "No se recibio un contexto");
+			break;
+		}
+
+		log_info(loggerCPU, "Se recibio el buffer del contexto");
+		buffer = recibir_buffer(&tamanio, cliente);
+		contextoRecibido = deserializarContexto(buffer, tamanio);
+
+		if (contextoRecibido->pid != -1){
+
+			log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
+			instr = fetch (contextoRecibido);
+			nuevaInstr = decode (&instr);
+			execute (nuevaInstr, contextoRecibido);
+
+			paqueteC = serializarContexto(contextoRecibido);
+			enviar_paquete(paqueteC, cliente);
+			paqueteI = serializarInstrucciones (nuevaInstr);
+			enviar_paquete(paqueteI, servidorCpu);
 
 		} else {
-
-
-
-		buffer = recibir_buffer(&tamanio, cliente);
-			contextoRecibido = deserializarContexto(buffer, tamanio);
-			if (contextoRecibido->pid != NULL){
-				log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
-
-				instr = fetch (&contextoRecibido);}
+			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
 		}
-				/*
-						nuevaInstr = decode (&instr);
-						execute (&nuevaInstr, contextoRecibido);
 
-
-				paqueteC = serializarContexto(contextoRecibido);
-				enviar_paquete(paqueteC, cliente);
-
-
-						if (nuevaInstr->nombre != SET && nuevaInstr->nombre != MOV_IN && nuevaInstr->nombre != MOV_OUT){
-							paqueteI = serializarInstrucciones (nuevaInstr);
-							enviar_paquete(paqueteI, servidorCpu);
-						}
-
-
-			} else {
-				log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
-			}}
-			*/
-		//}
-
-
-
-
-
+	}
 
 	free(buffer);
-		}
-
-    /*
-     ----------------------------------------------------
-     TODO
-     Decode()
-     Execute()
-
-     Traducir direcciones logicas a fisicas
-
-     Actualizando el contexto de ejecucion
-     ----------------------------------------------------
-     */
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);
@@ -95,4 +67,7 @@ int main(/*int argc, char** argv*/) {
 	return EXIT_SUCCESS;
 
 }
+
+
+
 

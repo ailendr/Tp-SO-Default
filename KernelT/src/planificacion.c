@@ -102,12 +102,13 @@ void cortoPlazo() {
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
 		}
-		if (strcmp(algoritmo, "HRRN")==0){
+		else if (strcmp(algoritmo, "HRRN")==0){
 			algoritmoHRRN();
 		}else{
 			log_info(loggerKernel, "El algoritmo obtenido por archivo de config no es válido");
 			exit(1);
 		}
+
 		instruccionAEjecutar();
 	}
 }

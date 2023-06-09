@@ -12,10 +12,12 @@
 
 int iniciarCpu (char* pathConfig);
 
-char* fetch(t_contextoEjec* cont);
-t_instruccion* decode (char* instruccion);
-void execute (t_instruccion* instruccion, t_contextoEjec* contexto);
+extern int servidorCpu;
+extern int socketMemoria;
+extern int cliente;
 
-void funcionPrueba();
+int iniciarSocketsCpu();
+
+
 
 #endif /* SRC_UTILSCPU_H_ */
