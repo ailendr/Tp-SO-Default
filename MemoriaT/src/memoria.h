@@ -8,9 +8,10 @@
 #ifndef SRC_MEMORIA_H_
 #define SRC_MEMORIA_H_
 
-#include "memoriaConfig.h"
 #include <utils/sockets.h>
 #include "memoriaConexiones.h"
+#include "memoriaEstructuras.h"
+
 
 
 

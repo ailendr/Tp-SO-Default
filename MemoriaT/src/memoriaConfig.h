@@ -18,6 +18,7 @@ extern t_config* configMemoria;
 char* puertoEscucha();
 char* ipEscucha();
 int tam_memoria();
+int tam_segmento();
 int cantSegmentos();
 int retardoMemoria();
 int retardoCompactacion();

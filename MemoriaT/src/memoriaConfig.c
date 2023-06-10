@@ -18,7 +18,9 @@ int tam_memoria(){
 int cantSegmentos(){
 	return config_get_int_value(configMemoria, "CANT_SEGMENTOS");
 }
-
+int tam_segmento(){
+	return config_get_int_value(configMemoria, "TAM_SEGMENTO");
+}
 int retardoMemoria(){
 	return config_get_int_value(configMemoria, "RETARDO_MEMORIA");
 }

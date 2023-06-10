@@ -90,12 +90,12 @@ typedef struct{
 
 
 
-/*
-Lo dejo así ya queda a futuro, pero por ahora que quede comentado
+
+
 typedef struct{
 	uint32_t ID;
-	uint32_t tamSegmento;
-	char* dirBase;
-}segmento;
- * */
+	uint32_t limite;
+	uint32_t base;
+}t_segmento;
+
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */
