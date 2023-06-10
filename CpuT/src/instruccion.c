@@ -21,7 +21,7 @@ char* fetch (t_contextoEjec* cont) {
 
 t_instruccion* decode (char* instruccion) {
 
-	t_instruccion* nuevaInstruccion;
+	t_instruccion* nuevaInstruccion = malloc (sizeof(t_instruccion));
 
 	char** token = string_split(instruccion, " ");
 

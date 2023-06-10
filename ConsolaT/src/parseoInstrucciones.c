@@ -49,7 +49,7 @@ t_paquete* parseoDeInstrucciones(char *pathPseudo){
 			   int j = 0;
 			   while (vectorInstrucciones[j] != NULL){
 				   list_add(listaDeInstrucciones, vectorInstrucciones[j]);
-				   printf(vectorInstrucciones [j]);
+				   printf("%s \n", vectorInstrucciones [j]);
 				   j++;
 			   }
 
