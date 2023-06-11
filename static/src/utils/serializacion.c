@@ -130,7 +130,7 @@ t_paquete* serializarInstruccion(t_instruccion* instruc){
 	t_paquete* pInstruc = malloc(sizeof(t_paquete));
 	pInstruc->codigo_operacion = instruc->nombre;
 	pInstruc->buffer = malloc(sizeof(t_buffer));
-	pInstruc->buffer->size = sizeof(uint32_t)*4+ sizeof(uint8_t) + strlen(instruc->param1)+ 1 + strlen(instruc->param2) + 1 + strlen(instruc->param3) + 1;
+	pInstruc->buffer->size = sizeof(uint32_t)*4+ sizeof(uint8_t) + strlen(instruc->param1)+ 1 + strlen(instruc->param2) + 1 ; ////strlen(instruc->param3); VISTO EN SOPORTE: ROMPE STRLEN CUANDO HAY ALGO VACIO->NO ENVIAR COSAS VACIAS
 	pInstruc->buffer->stream = malloc(pInstruc->buffer->size); //Agrego esto porq es necesario reservarle memoria al stream
 
 	int offset = 0;
