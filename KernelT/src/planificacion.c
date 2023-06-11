@@ -116,11 +116,12 @@ void cortoPlazo() {
 void instruccionAEjecutar() {
 		int tamanio = 0;
 //Recepcion del contexto//
-		t_contextoEjec *contextoActualizado;
-		int codigoContexto = recibir_operacion(socketCPU); //Solo lo recibo porq cuando envian el paquete lo primero q llega es un op_code si no tengo un recv para guardar eso me queda inconsistente, iwal PREGuNTAR
+		int codContexto = recibir_operacion(socketCPU);
+		t_contextoEjec *contextoActualizado; //PROBADO: TIENE QUE IR SI O SI POR EL ORDEN EN EL QUE SE ENVIAN LAS COSAS
 		void *buffer = recibir_buffer(&tamanio, socketCPU);
-		log_info(loggerKernel, "Se recibio el buffer del contexto");
+		log_info(loggerKernel, "Se recibio el buffer del Contexto");
 		contextoActualizado = deserializarContexto(buffer, tamanio);
+		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);
 		ultimoEjecutado->contexto = contextoActualizado;
 		free(buffer);
 //Recepcion de una instruccion//
@@ -365,14 +366,15 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 
 ////---Funcion de IO---///
 void bloquearHilo(int* tiempo){
-    sem_post(&planiCortoPlazo);//Lo primero es liberar la cpu
 	int tiempoDeBloqueo = *tiempo;
-	ultimoEjecutado->estadoPcb= BLOCK;
-	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", ultimoEjecutado->contexto->pid);
-    logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+	t_pcb* procesoBloqueado = ultimoEjecutado;//Agrego esta variable porq sino cuando corto plazo ejecute paralelamente estaria modificando al ultimoEjecutado y tendriamos algo inconsistente
+	procesoBloqueado->estadoPcb= BLOCK;
+	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
+    logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
+    sem_post(&planiCortoPlazo);
 	usleep(tiempoDeBloqueo);
-	agregarAEstadoReady(ultimoEjecutado); //Agrega a la cola y cambia el estado del pcb
-	logCambioDeEstado(ultimoEjecutado, "BLOCK", "READY");
+	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
+	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
 }
 
 //Logueo de las instrucciones para verificar que esta todo ok//

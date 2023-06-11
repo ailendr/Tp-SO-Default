@@ -204,6 +204,13 @@ int iniciarServidor(char*  ip, char* puerto)
 			                 servinfo->ai_socktype,
 							 servinfo->ai_protocol);
 
+	//Agrego configuracion para no esperar al matar y levantar los servidores//
+
+	if (setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0)
+	    perror("setsockopt(SO_REUSEADDR) failed");
+	/*int reuse = 1;
+	    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
+	        perror("setsockopt(SO_REUSEADDR) failed");*/
 	// Asociamos el socket a un puerto
 	/* USAMOS BIND QUE ES EL PEGAMENTO A UN PUERTO*/
 	bind(socket_servidor, servinfo-> ai_addr, servinfo->ai_addrlen);
