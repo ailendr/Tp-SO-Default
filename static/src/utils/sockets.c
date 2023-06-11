@@ -126,21 +126,28 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente)
 	free(a_enviar);
 }
 
-int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger)
+int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger,char* nombrePaq)
 {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
 	int returnSend=send(socket_cliente, a_enviar, bytes, 0);
 	if(returnSend == -1){
-			log_info(logger, "Error al enviar el Paquete");
+			log_info(logger, "Error al enviar el Paquete de %s:", nombrePaq);
 			return -1;
 		}
 		else{
-			log_info(logger, "He podido enviar el Paquete" );
+			log_info(logger, "He podido enviar el Paquete de %s", nombrePaq );
 		}
 	return 0;
 	free(a_enviar);
+}
+void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger,t_config* config, char* nombrePaq){
+	if(enviarPaquete(paquete, socket_cliente, logger, nombrePaq) == -1){
+			log_info(logger, "Fallo la conexion. Terminando Modulo");
+			terminarModulo(socket_cliente, logger, config);
+			exit(1);
+		}
 }
 
 

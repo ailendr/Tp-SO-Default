@@ -64,12 +64,7 @@ void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
 
 	t_paquete *paqueteDeContexto = serializarContexto(procesoAEjecutar); // "Pone el contexto en un paquete"
 	log_info(loggerKernel, "Paquete de Contexto creado con exito");
-	if(enviarPaquete(paqueteDeContexto, socketCPU, loggerKernel) == -1){
-		log_info(loggerKernel, "Fallo la conexion con Cpu ");
-		terminarModulo(socketCPU, loggerKernel, configKernel);
-		exit(1);
-	}
-	else{log_info(loggerKernel, "Contexto enviado a CPU");}
+	validarEnvioDePaquete(paqueteDeContexto, socketCPU, loggerKernel, configKernel, "Contexto");
 }
 
 void largoPlazo() {
@@ -139,20 +134,20 @@ void instruccionAEjecutar() {
 				break;
 
 			case WAIT:
-				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU);
+				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
 				char* recursoAConsumir = instruccionWait->param1;
 				free(instruccionWait); //Hay q liberar puntero
 				implementacionWyS(recursoAConsumir, 1);
 				break;
 			case SIGNAL:
-				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU);
+				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
 				char* recursoALiberar = instruccionSignal->param1;
 				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
 				implementacionWyS(recursoALiberar, 2);
 				procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
 				break;
 			case IO:
-				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU);
+				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
 				int tiempoDeIO = atoi(tiempo);//en microsegundos
 				free(instruccionIO);//Hay q liberar puntero
@@ -260,10 +255,10 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 }
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
-t_instruccion* obtenerInstruccion(int socket){
+t_instruccion* obtenerInstruccion(int socket, int cantParam){
 	int tamanio = 0;
 	void *buffer = recibir_buffer(&tamanio, socketCPU);
-	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer);
+	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer, cantParam);
 	return instruccionNueva;
 }
 

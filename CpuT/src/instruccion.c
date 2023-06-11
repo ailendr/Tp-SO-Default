@@ -38,7 +38,7 @@ t_instruccion* decode (char* instruccion) {
 	}
 
 	if (nuevaInstruccion->nombre == SET){
-		sleep(retardo());
+		//sleep(retardo());
 		log_info(loggerCPU, "Entre en el SET");
 	}
 

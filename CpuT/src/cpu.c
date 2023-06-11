@@ -45,9 +45,9 @@ int main(/*int argc, char** argv*/) {
 			execute (nuevaInstr, contextoRecibido);
 
 			paqueteC = serializarContexto(contextoRecibido);
-			enviar_paquete(paqueteC, cliente);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//rnvia y valida
 			paqueteI = serializarInstruccion(nuevaInstr);
-			enviar_paquete(paqueteI, servidorCpu);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
 
 		} else {
 			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");

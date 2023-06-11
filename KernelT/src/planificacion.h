@@ -47,7 +47,7 @@ void tiempoEnCPU(t_pcb* proceso);
 void generarProceso(int* socket_cliente);
 void finalizarProceso(t_pcb* procesoAFinalizar, char* motivoDeFin);
 t_list*  obtenerInstrucciones(int socket_cliente);
-t_instruccion* obtenerInstruccion(int socket);
+t_instruccion* obtenerInstruccion(int socket, int cantParam);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion);
