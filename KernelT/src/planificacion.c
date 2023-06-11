@@ -116,11 +116,12 @@ void cortoPlazo() {
 void instruccionAEjecutar() {
 		int tamanio = 0;
 //Recepcion del contexto//
-		t_contextoEjec *contextoActualizado;
-		int codigoContexto = recibir_operacion(socketCPU); //Solo lo recibo porq cuando envian el paquete lo primero q llega es un op_code si no tengo un recv para guardar eso me queda inconsistente, iwal PREGuNTAR
-		void *buffer = recibir_buffer(&tamanio, socketCPU);
-		log_info(loggerKernel, "Se recibio el buffer del contexto");
+		int codContexto = recibir_operacion(socketCPU);
+		t_contextoEjec *contextoActualizado; //PROBADO: TIENE QUE IR SI O SI POR EL ORDEN EN EL QUE SE ENVIAN LAS COSAS
+		void *buffer = recibir_buffer(&tamanio, socketCPU);//chequeado q puede recibir el buffer sin tener el
+		log_info(loggerKernel, "Se recibio el buffer del Contexto");
 		contextoActualizado = deserializarContexto(buffer, tamanio);
+		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);
 		ultimoEjecutado->contexto = contextoActualizado;
 		free(buffer);
 //Recepcion de una instruccion//

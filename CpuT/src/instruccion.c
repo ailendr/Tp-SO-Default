@@ -25,7 +25,7 @@ t_instruccion* decode (char* instruccion) {
 
 	char** token = string_split(instruccion, " ");
 
-	nuevaInstruccion->nombre = asignarNombre (token[0]);
+	nuevaInstruccion->nombre = asignarNombre(token[0]);
 
 	if (token[1] != NULL) {
 		nuevaInstruccion->param1 = token[1];
@@ -77,22 +77,22 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 }
 
 op_code asignarNombre (char* nombre){
-	if (strcmp(nombre, "YIELD")) return YIELD;
-	if (strcmp(nombre, "CREATE_SEGMENT")) return CREATE_SEGMENT;
-	if (strcmp(nombre, "DELETE_SEGMENT")) return DELETE_SEGMENT;
-	if (strcmp(nombre, "EXIT")) return EXIT;
-	if (strcmp(nombre, "SET")) return SET;
-	if (strcmp(nombre, "MOV_IN")) return MOV_IN;
-	if (strcmp(nombre, "MOV_OUT")) return MOV_OUT;
-	if (strcmp(nombre, "IO")) return IO;
-	if (strcmp(nombre, "F_OPEN")) return F_OPEN;
-	if (strcmp(nombre, "F_CLOSE")) return F_CLOSE;
-	if (strcmp(nombre, "F_SEEK")) return F_SEEK;
-	if (strcmp(nombre, "F_READ")) return F_READ;
-	if (strcmp(nombre, "F_WRITE")) return F_WRITE;
-	if (strcmp(nombre, "F_TRUNCATE")) return F_TRUNCATE;
-	if (strcmp(nombre, "WAIT")) return WAIT;
-	if (strcmp(nombre, "SIGNAL")) return SIGNAL;
+	if (strcmp(nombre, "YIELD")==0) return YIELD;
+	if (strcmp(nombre, "CREATE_SEGMENT")==0) return CREATE_SEGMENT;
+	if (strcmp(nombre, "DELETE_SEGMENT")==0) return DELETE_SEGMENT;
+	if (strcmp(nombre, "EXIT")==0) return EXIT;
+	if (strcmp(nombre, "SET")==0) return SET;
+	if (strcmp(nombre, "MOV_IN")==0) return MOV_IN;
+	if (strcmp(nombre, "MOV_OUT")==0) return MOV_OUT;
+	if (strcmp(nombre, "IO")==0) return IO;
+	if (strcmp(nombre, "F_OPEN")==0) return F_OPEN;
+	if (strcmp(nombre, "F_CLOSE")==0) return F_CLOSE;
+	if (strcmp(nombre, "F_SEEK")==0) return F_SEEK;
+	if (strcmp(nombre, "F_READ")==0) return F_READ;
+	if (strcmp(nombre, "F_WRITE")==0) return F_WRITE;
+	if (strcmp(nombre, "F_TRUNCATE")==0) return F_TRUNCATE;
+	if (strcmp(nombre, "WAIT")==0) return WAIT;
+	if (strcmp(nombre, "SIGNAL")==0) return SIGNAL;
 }
 
 
