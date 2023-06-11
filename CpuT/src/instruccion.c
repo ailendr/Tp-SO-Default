@@ -62,7 +62,7 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 	switch (instruccion->nombre){
 		case SET:
 			set (instruccion, contexto);
-		    log_info(loggerCPU, "Recibio un SET");
+		    log_info(loggerCPU, "Instruccion SET finalizada");
 			break;
 		case MOV_IN:
 			//TODO lo que se deba, la traduccion se hace, borrarlo aca
@@ -99,18 +99,18 @@ op_code asignarNombre (char* nombre){
 // UTILS DE LAS INSTRUCCIONES --------------------------------------------------------------
 void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 
-	if (strcmp(instruccion->param1, "AX")) strcpy(contexto->AX, instruccion->param2);
-	if (strcmp(instruccion->param1, "BX")) strcpy(contexto->BX, instruccion->param2);
-	if (strcmp(instruccion->param1, "CX")) strcpy(contexto->CX, instruccion->param2);
-	if (strcmp(instruccion->param1, "DX")) strcpy(contexto->DX, instruccion->param2);
-	if (strcmp(instruccion->param1, "EAX")) strcpy(contexto->EAX, instruccion->param2);
-	if (strcmp(instruccion->param1, "EBX")) strcpy(contexto->EBX, instruccion->param2);
-	if (strcmp(instruccion->param1, "ECX")) strcpy(contexto->ECX, instruccion->param2);
-	if (strcmp(instruccion->param1, "EDX")) strcpy(contexto->EDX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RAX")) strcpy(contexto->RAX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RBX")) strcpy(contexto->RBX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RCX")) strcpy(contexto->RCX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RDX")) strcpy(contexto->RDX, instruccion->param2);
+	if (strcmp(instruccion->param1, "AX")==0) strcpy(contexto->AX, instruccion->param2);
+	if (strcmp(instruccion->param1, "BX")==0) strcpy(contexto->BX, instruccion->param2);
+	if (strcmp(instruccion->param1, "CX")==0) strcpy(contexto->CX, instruccion->param2);
+	if (strcmp(instruccion->param1, "DX")==0) strcpy(contexto->DX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EAX")==0) strcpy(contexto->EAX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EBX")==0) strcpy(contexto->EBX, instruccion->param2);
+	if (strcmp(instruccion->param1, "ECX")==0) strcpy(contexto->ECX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EDX")==0) strcpy(contexto->EDX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RAX")==0) strcpy(contexto->RAX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RBX")==0) strcpy(contexto->RBX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RCX")==0) strcpy(contexto->RCX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RDX")==0) strcpy(contexto->RDX, instruccion->param2);
 
 }
 
