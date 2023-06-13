@@ -77,23 +77,26 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 }
 
 op_code asignarNombre (char* nombre){
-	if (strcmp(nombre, "YIELD")==0) return YIELD;
-	if (strcmp(nombre, "CREATE_SEGMENT")==0) return CREATE_SEGMENT;
-	if (strcmp(nombre, "DELETE_SEGMENT")==0) return DELETE_SEGMENT;
-	if (strcmp(nombre, "EXIT")==0) return EXIT;
-	if (strcmp(nombre, "SET")==0) return SET;
-	if (strcmp(nombre, "MOV_IN")==0) return MOV_IN;
-	if (strcmp(nombre, "MOV_OUT")==0) return MOV_OUT;
-	if (strcmp(nombre, "IO")==0) return IO;
-	if (strcmp(nombre, "F_OPEN")==0) return F_OPEN;
-	if (strcmp(nombre, "F_CLOSE")==0) return F_CLOSE;
-	if (strcmp(nombre, "F_SEEK")==0) return F_SEEK;
-	if (strcmp(nombre, "F_READ")==0) return F_READ;
-	if (strcmp(nombre, "F_WRITE")==0) return F_WRITE;
-	if (strcmp(nombre, "F_TRUNCATE")==0) return F_TRUNCATE;
-	if (strcmp(nombre, "WAIT")==0) return WAIT;
-	if (strcmp(nombre, "SIGNAL")==0) return SIGNAL;
+	op_code instruccion;
+	if (strcmp(nombre, "YIELD")==0) instruccion = YIELD;
+	if (strcmp(nombre, "CREATE_SEGMENT")==0) instruccion =CREATE_SEGMENT;
+	if (strcmp(nombre, "DELETE_SEGMENT")==0) instruccion =DELETE_SEGMENT;
+	if (strcmp(nombre, "EXIT")==0) instruccion = EXIT;
+	if (strcmp(nombre, "SET")==0) instruccion =SET;
+	if (strcmp(nombre, "MOV_IN")==0) instruccion = MOV_IN;
+	if (strcmp(nombre, "MOV_OUT")==0) instruccion = MOV_OUT;
+	if (strcmp(nombre, "IO")==0) instruccion =IO;
+	if (strcmp(nombre, "F_OPEN")==0) instruccion = F_OPEN;
+	if (strcmp(nombre, "F_CLOSE")==0) instruccion = F_CLOSE;
+	if (strcmp(nombre, "F_SEEK")==0) instruccion = F_SEEK;
+	if (strcmp(nombre, "F_READ")==0) instruccion =F_READ;
+	if (strcmp(nombre, "F_WRITE")==0) instruccion = F_WRITE;
+	if (strcmp(nombre, "F_TRUNCATE")==0) instruccion = F_TRUNCATE;
+	if (strcmp(nombre, "WAIT")==0) instruccion = WAIT;
+	if (strcmp(nombre, "SIGNAL")==0) instruccion = SIGNAL;
+return instruccion;
 }
+
 
 
 // UTILS DE LAS INSTRUCCIONES --------------------------------------------------------------

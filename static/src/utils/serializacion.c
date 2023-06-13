@@ -180,18 +180,18 @@ void agregarParametros (t_paquete* pInstruc, t_instruccion* instruc, int param){
 
 void agregarParametro1(t_paquete* pInstruc,t_instruccion* instruc){
 		 char*parametro = instruc->param1;
-		 uint32_t tamParam = strlen(parametro)+1;
+		 int tamParam = strlen(parametro)+1;
 		 agregar_a_paquete(pInstruc, parametro, tamParam);
 
 	}
 void agregarParametro2(t_paquete* pInstruc,t_instruccion* instruc){
 		 char* parametro = instruc->param2;
-		 uint32_t tamParam = strlen(parametro)+1;
+		 int tamParam = strlen(parametro)+1;
 		 agregar_a_paquete(pInstruc, parametro, tamParam);
 	}
 void agregarParametro3(t_paquete* pInstruc,t_instruccion* instruc){
 		char* parametro = instruc->param3;
-		 uint32_t tamParam = strlen(parametro)+1;
+		int tamParam = strlen(parametro)+1;
 		 agregar_a_paquete(pInstruc, parametro, tamParam);
 	}
 
@@ -212,35 +212,43 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam){
 	desplazamiento+= sizeof(uint8_t);
 //---Hermosa repeticion de codigo pero toy cansada--//
 	if(cantParam == 1){
-	memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-	desplazamiento+= sizeof(uint32_t);
-	memcpy(&(instruccion->param1), stream+desplazamiento,tamParam);
+	memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+	desplazamiento+= sizeof(int);
+   	instruccion -> param1 = malloc(tamParam);
+	memcpy(instruccion->param1, stream+desplazamiento,tamParam);
 	}
    if(cantParam == 2){
-	   memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-	   	desplazamiento+= sizeof(uint32_t);
-	   	memcpy(&(instruccion->param1), stream+desplazamiento,tamParam);
+	   memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+	   	desplazamiento+= sizeof(int);
+	   	instruccion -> param1 = malloc(tamParam);
+	   	memcpy(instruccion->param1, stream+desplazamiento,tamParam);
 	   	desplazamiento+= tamParam;
 
-	   	memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-		desplazamiento+= sizeof(uint32_t);
-		memcpy(&(instruccion->param2), stream+desplazamiento,tamParam);
+	   	memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+		desplazamiento+= sizeof(int);
+		instruccion->param2 = malloc(tamParam);
+		memcpy(instruccion->param2, stream+desplazamiento,tamParam);
 		desplazamiento+= tamParam;
    }
    if(cantParam == 3){
-	   memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-		desplazamiento+= sizeof(uint32_t);
-		memcpy(&(instruccion->param1), stream+desplazamiento,tamParam);
+	   memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+		desplazamiento+= sizeof(int);
+	   	instruccion -> param1 = malloc(tamParam);
+		memcpy(instruccion->param1, stream+desplazamiento,tamParam);
 		desplazamiento+= tamParam;
 
-		memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-		desplazamiento+= sizeof(uint32_t);
-		memcpy(&(instruccion->param2), stream+desplazamiento,tamParam);
+		memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+		desplazamiento+= sizeof(int);
+		instruccion->param2 = malloc(tamParam);
+		memcpy(instruccion->param2, stream+desplazamiento,tamParam);
 		desplazamiento+= tamParam;
-	   memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-	   	desplazamiento+= sizeof(uint32_t);
-	   	memcpy(&(instruccion->param3), stream+desplazamiento,tamParam);
-	   	desplazamiento+= tamParam;
+	   memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+	   	desplazamiento+= sizeof(int);
+	   	instruccion->param3 = malloc(tamParam);
+	   	memcpy(instruccion->param3, stream+desplazamiento,tamParam);
+
    }
 	return instruccion;
 }
+
+

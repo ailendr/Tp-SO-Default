@@ -134,10 +134,12 @@ void instruccionAEjecutar() {
 				break;
 
 			case WAIT:
+				log_info(loggerKernel, "Intruccion WAIT");
 				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
+				log_info(loggerKernel, "Recurso a consumir : %s", instruccionWait->param1);
 				char* recursoAConsumir = instruccionWait->param1;
-				free(instruccionWait); //Hay q liberar puntero
 				implementacionWyS(recursoAConsumir, 1);
+				free(instruccionWait);
 				break;
 			case SIGNAL:
 				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
