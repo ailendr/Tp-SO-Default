@@ -29,16 +29,4 @@ int verificarConfig (int socket, t_log* logger, t_config* config){
 	return 0;
 }
 
-void terminarModulo(int conexion, t_log* logger, t_config* config)
-{
 
-	if(logger != NULL){
-		log_destroy(logger);
-	}
-
-	if(config != NULL){
-		config_destroy(config);
-	}
-
-	close (conexion);
-}

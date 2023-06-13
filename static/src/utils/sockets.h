@@ -19,7 +19,7 @@
 #include <commons/collections/list.h>
 #include <commons/log.h>
 #include <commons/config.h>
-#include "modulo.h"
+//#include "modulo.h"
 #include "estructuras.h"
 
 typedef struct
@@ -72,5 +72,7 @@ void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger
 
 void liberar_conexion(int socket);
 
+//-----Funcion de modulo porq se estaban llamando modulo.h y sockets.h de forma circulas----//
+void terminarModulo(int conexion,t_log* log , t_config* config);
 
 #endif /* SRC_UTILS_SOCKETS_H_ */

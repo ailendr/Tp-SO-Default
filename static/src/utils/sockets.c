@@ -349,3 +349,17 @@ void recibirHandshake(int socket_cliente,t_handshake handshake,t_log* logger){
 			}
 }
 
+//---------Terminar Modulo------///
+void terminarModulo(int conexion, t_log* logger, t_config* config)
+{
+
+	if(logger != NULL){
+		log_destroy(logger);
+	}
+
+	if(config != NULL){
+		config_destroy(config);
+	}
+
+	close (conexion);
+}
