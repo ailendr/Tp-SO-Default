@@ -301,7 +301,7 @@ void generarProceso(int *socket_cliente) {
 
 	//Cerrando recursos
 	//close(consolaNueva);//Ver si esta demas esto o nos romperia
-	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
+	//free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
 	sem_post(&planiLargoPlazo);
 	}
 }
@@ -312,15 +312,16 @@ void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
 }
 
 void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
+
+	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
+			procesoAFinalizar->contexto->pid, motivoDeFin);
+	int terminar = -1;
+	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
 	free(procesoAFinalizar->contexto->instrucciones);
 	free(procesoAFinalizar->contexto);
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
-	int terminar = -1;
-	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
-	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
-			procesoAFinalizar->contexto->pid, motivoDeFin);
 	sem_post(&planiCortoPlazo);
 
 }
@@ -334,7 +335,8 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 			finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 		}
 		else{
-			int valor = *(int*)list_get(listaDeInstancias,posicionRecurso);
+			int* pvalor = list_get(listaDeInstancias,posicionRecurso);
+			int valor = *pvalor;
 			switch (nombreInstruccion){
 			case 1: //1=WAIT
 				valor --;

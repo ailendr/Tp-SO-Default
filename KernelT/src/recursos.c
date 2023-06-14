@@ -37,7 +37,8 @@ t_list* crearListaDeInstancias(){
 	while(instanciasDeRecursos[i] != NULL){
 		char* stringCantidad = instanciasDeRecursos[i];
 		int cantidad = atoi(stringCantidad); // se puede usar tambien strtol(stringCantidad, NULL, 10)
-		int* cant = &cantidad;
+		int* cant = malloc(sizeof(int));
+		*cant = cantidad;
 		list_add(listaDeInstancias, (void*)cant);
 
 		i++;
