@@ -50,7 +50,7 @@ t_list*  obtenerInstrucciones(int socket_cliente);
 t_instruccion* obtenerInstruccion(int socket, int cantParam);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion);
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
 void bloquearHilo(int* tiempo);
 
 void loggearListaDeIntrucciones(t_list* instrucciones);

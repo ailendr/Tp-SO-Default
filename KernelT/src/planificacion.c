@@ -138,23 +138,24 @@ void instruccionAEjecutar() {
 				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
 				log_info(loggerKernel, "Recurso a consumir : %s", instruccionWait->param1);
 				char* recursoAConsumir = instruccionWait->param1;
-				implementacionWyS(recursoAConsumir, 1);
+				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
 				free(instruccionWait);
 				break;
 			case SIGNAL:
 				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
 				char* recursoALiberar = instruccionSignal->param1;
 				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
-				implementacionWyS(recursoALiberar, 2);
-				procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
+				implementacionWyS(recursoALiberar, 2, contextoActualizado);
+
 				break;
 			case IO:
 				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
-				int tiempoDeIO = atoi(tiempo);//en microsegundos
+				int* tiempoDeIO = malloc(sizeof(int));
+				*tiempoDeIO = atoi(tiempo);//en microsegundos
 				free(instruccionIO);//Hay q liberar puntero
 				pthread_t hiloDeBloqueo; //crear hilo
-				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
+				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)tiempoDeIO);
 				pthread_detach(hiloDeBloqueo);
 				break;
 			case MOV_IN:
@@ -327,7 +328,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado){
 	/*1ero buscar el recurso: si no está finaliza el proceso
 	 -----------                         si esta decrementa o incrementa la instancia*/
 	int posicionRecurso = recursoDisponible(nombreRecurso);
@@ -358,6 +359,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
+				procesoAEjecutar(contextoActualizado);
 				break;
 			 }
 			}
