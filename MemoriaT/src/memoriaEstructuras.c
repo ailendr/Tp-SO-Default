@@ -24,6 +24,23 @@ void crearEspacioMemoria (){
 
 }
 
+////NO VI QUE ESTABA CREADA ESTA RAMA Y EMPECE EN OTRA JAJAJA, LO DEJO PARA QUE CHARLEMOS LO DE SEGMENTOCERO
+/*
+void iniciarMemoria(){
+uint32_t opTamSegmento= HANDSHAKE_TamSegmento;
+int tamSegmentoMaxCpu;
+int tamMemoria= tam_memoria();
+//Este send y recv lo dejo así para tener la idea, pero creo que debería estar en MemoriaConexion
+//Igual esto va una vez que se levantan todas las conexiones, así que no estoy segura
+send(socketCpu,&opTamSegmento,sizeof(uint32_t),0 );
+recv(socketCpu, &tamSegmentoMaxCpu, sizeof(uint32_t), MSG_WAITALL);
+if(tamMemoria<= tamSegmentoMaxCpu){
+	segmentoCero = malloc(tamMemoria);
+}else{
+	segmentoCero=malloc(tamSegmentoMaxCpu);
+}
+}*/
+
 void crearTablasDeSegmentos(){
 	//Preguntar si cada tabla se crea a medida q kernel acepta procesos o directamente la cant de tablas sale del gr de multiprog q acepta la memoria
 	int i;
