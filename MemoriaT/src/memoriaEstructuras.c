@@ -29,18 +29,19 @@ void crearEspacioMemoria (){
 void iniciarMemoria(){
 uint32_t opTamSegmento= HANDSHAKE_TamSegmento;
 int tamSegmentoMaxCpu;
-int tamMemoria= tam_memoria();
+int tamSegmento= tam_segmento_cero();
 //Este send y recv lo dejo así para tener la idea, pero creo que debería estar en MemoriaConexion
 //Igual esto va una vez que se levantan todas las conexiones, así que no estoy segura
 send(socketCpu,&opTamSegmento,sizeof(uint32_t),0 );
 recv(socketCpu, &tamSegmentoMaxCpu, sizeof(uint32_t), MSG_WAITALL);
-if(tamMemoria<= tamSegmentoMaxCpu){
+if(tamSegmento<= tamSegmentoMaxCpu){
 	segmentoCero = malloc(tamMemoria);
 }else{
 	segmentoCero=malloc(tamSegmentoMaxCpu);
 }
 }*/
 
+//Esto deberia devolver la tabla de segmentos del proceso, no? O es para crear segmentos?
 void crearTablasDeSegmentos(){
 	//Preguntar si cada tabla se crea a medida q kernel acepta procesos o directamente la cant de tablas sale del gr de multiprog q acepta la memoria
 	int i;

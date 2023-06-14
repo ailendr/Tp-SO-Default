@@ -28,7 +28,18 @@ void atenderPeticionesKernel(int socket){
 			}
 			else{
 				   send(socket, &resultado_error, sizeof(uint32_t), 0);
-				}
+	/*			}
+	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
+	switch(protocolo){
+		case CREATE_SEGMENT:
+			break;
+		case DELETE_SEGMENT:
+			break;
+		case HANDSHAKE_PedirMemoria:
+			t_segmento* tablaDeSegmentos;
+			tablaDeSegmentos = crearTablasDeSegmentos();
+			//y hacer el send. Habria que serializar la tabla.
+	}*/
 }
 
 
