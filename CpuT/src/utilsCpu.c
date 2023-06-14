@@ -7,9 +7,7 @@
 
 #include "./utilsCpu.h"
 
-int servidorCpu;
-int socketMemoria;
-int cliente;
+
 
 
 int iniciarCpu (char* pathConfig){

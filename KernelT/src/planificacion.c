@@ -92,7 +92,7 @@ void cortoPlazo() {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
-
+        sem_wait(&cpuLibre);
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
@@ -130,7 +130,7 @@ void instruccionAEjecutar() {
 					tiempoEnCPU(ultimoEjecutado);
 				}
 				agregarAEstadoReady(ultimoEjecutado);
-				sem_post(&planiCortoPlazo);
+				sem_post(&cpuLibre);
 				break;
 
 			case WAIT:
@@ -157,15 +157,6 @@ void instruccionAEjecutar() {
 				pthread_t hiloDeBloqueo; //crear hilo
 				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)tiempoDeIO);
 				pthread_detach(hiloDeBloqueo);
-				break;
-			case MOV_IN:
-				log_info(loggerKernel, "Se está ejecutando MOV_IN en CPU");
-				break;
-			case MOV_OUT:
-				log_info(loggerKernel, "Se está ejecutando MOV_OUT en CPU");
-				break;
-			case SET:
-				log_info(loggerKernel, "Se está ejecutando SET en CPU");
 				break;
 			case CREATE_SEGMENT:
 				break;
@@ -323,8 +314,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
-	sem_post(&planiCortoPlazo);
-
+	sem_post(&cpuLibre);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
@@ -349,8 +339,9 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				ultimoEjecutado->estadoPcb = BLOCK;
 				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
-				sem_post(&planiCortoPlazo);
+				sem_post(&cpuLibre);
 				 }
+				 else{procesoAEjecutar(contextoActualizado);} //En el caso de estar disponible el recurso supongo q cpu sigue ejecutando las demas instrucciones de este contexto
 				break;
 			case 2://2=SIGNAL
 				valor ++;
@@ -372,7 +363,7 @@ void bloquearHilo(int* tiempo){
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
     logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
-    sem_post(&planiCortoPlazo);
+    sem_post(&cpuLibre);
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");

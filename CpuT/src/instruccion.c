@@ -5,8 +5,13 @@
  *      Author: utnso
  */
 #include "instruccion.h"
+t_contextoEjec* contextoRecibido;
+int servidorCpu;
+int socketMemoria;
+int cliente;
 
 // INTERPRETACION DE LAS INSTRUCCIONES -----------------------------------------------------
+
 
 char* fetch (t_contextoEjec* cont) {
 
@@ -58,11 +63,34 @@ t_instruccion* decode (char* instruccion) {
 }
 
 void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
+	t_paquete* paqueteI;
+	t_paquete* paqueteC;
+	op_code nombreI=instruccion->nombre;
 
-	switch (instruccion->nombre){
+	if(nombreI == WAIT ||nombreI==SIGNAL|| nombreI==IO||nombreI == YIELD || nombreI==EXIT){
+		paqueteC = serializarContexto(contextoRecibido);
+		validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+		paqueteI = serializarInstruccion(instruccion);
+		validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+	}
+	if(nombreI==SET){
+		set (instruccion, contexto);
+		log_info(loggerCPU, "Instruccion SET finalizada");
+	 //Repetir ciclo porq no tiene sentido enviarle un contexto a kernel al menos q sea por lo dicho en el tp
+		char* proxInstruccion = fetch(contexto);
+		t_instruccion* instruccionActual = decode(proxInstruccion);
+		execute(instruccionActual, contexto);
+	}
+	//usar if o switch qsy
+	/*
+	switch (nombreI){
 		case SET:
 			set (instruccion, contexto);
 		    log_info(loggerCPU, "Instruccion SET finalizada");
+		 //Repetir ciclo porq no tiene sentido enviarle un contexto a kernel al menos q sea por lo dicho en el tp
+            char* proxInstruccion = fetch(contexto);
+            t_instruccion* instruccionActual = decode(proxInstruccion);
+            execute(instruccionActual, contexto);
 			break;
 		case MOV_IN:
 			//TODO lo que se deba, la traduccion se hace, borrarlo aca
@@ -70,9 +98,41 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 		case MOV_OUT:
 			//TODO lo que se deba, la traduccion se hace, borrarlo aca
 			break;
+
+		case WAIT:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+
+		    break;
+		case SIGNAL:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
+		case YIELD:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
+		case EXIT:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
+		case IO:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
 		default:
 			log_error(loggerCPU, "Error con instruccion");
-	}
+	*/
 
 }
 
