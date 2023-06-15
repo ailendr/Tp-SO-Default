@@ -149,6 +149,7 @@ void instruccionAEjecutar() {
 
 				break;
 			case IO:
+				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
 				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
 				int* tiempoDeIO = malloc(sizeof(int));

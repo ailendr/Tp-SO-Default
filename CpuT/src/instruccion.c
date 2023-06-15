@@ -5,7 +5,8 @@
  *      Author: utnso
  */
 #include "instruccion.h"
-t_contextoEjec* contextoRecibido;
+
+t_contextoEjec* contextoRecibido; //al pedo haberlo puesto como global : puede quedar asi o no
 int servidorCpu;
 int socketMemoria;
 int cliente;
@@ -68,7 +69,7 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 	op_code nombreI=instruccion->nombre;
 
 	if(nombreI == WAIT ||nombreI==SIGNAL|| nombreI==IO||nombreI == YIELD || nombreI==EXIT){
-		paqueteC = serializarContexto(contextoRecibido);
+		paqueteC = serializarContexto(contexto);
 		validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
 		paqueteI = serializarInstruccion(instruccion);
 		validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
