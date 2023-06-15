@@ -16,9 +16,11 @@
 
 extern void* memoriaContigua;
 extern t_segmento* segmentoCero;
+extern t_list * listaDeTablas;
+
 void iniciarEstructuras();
 void crearTablasDeSegmentos();
-
+void crearSegmentoCero();
 
 
 #endif /* SRC_MEMORIAESTRUCTURAS_H_ */

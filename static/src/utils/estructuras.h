@@ -93,6 +93,7 @@ typedef struct{
 
 
 typedef struct{
+	uint32_t PID;
 	uint32_t ID;
 	uint32_t limite;
 	uint32_t base;

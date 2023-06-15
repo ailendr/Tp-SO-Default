@@ -8,19 +8,17 @@
 
 void* memoriaContigua; //GLOBAL
 t_segmento* segmentoCero;
+t_list * listaDeTablas;
 void crearEspacioMemoria (){
 	int tamanioMemoria = tam_memoria();
 	memoriaContigua = malloc(tamanioMemoria);
+}
 
-	//toy quemada pero creo q maso seria asi//
+void crearSegmentoCero(){
 	segmentoCero = malloc(sizeof(t_segmento));
 	segmentoCero->ID=0;
 	segmentoCero->base=0;
 	segmentoCero->limite = tam_segmento();
-
-//Para mi deberiamos llenar la memoria solo con los tamaños de los segmentos porq no se si la cant de bytes q dan es para almacenar IDS , uint32_t de la base y etc
-/*	 int offset=0; o genericamente offset = segmento->base
-	 memcpy(memoriaContigua+offset,segmentoCero, sizeof(t_segmento));*/
 
 }
 
@@ -40,26 +38,25 @@ if(tamSegmento<= tamSegmentoMaxCpu){
 	segmentoCero=malloc(tamSegmentoMaxCpu);
 }
 }*/
+void crearListaDeTablas(){
+listaDeTablas = list_create();
 
-//Esto deberia devolver la tabla de segmentos del proceso, no? O es para crear segmentos?
-void crearTablasDeSegmentos(){
-	//Preguntar si cada tabla se crea a medida q kernel acepta procesos o directamente la cant de tablas sale del gr de multiprog q acepta la memoria
-	int i;
-	for(i = 0; i< 4/* multiProgramacion*/; i++){
-	t_list* tablaDeSegmentos = list_create();
-	list_add(tablaDeSegmentos,i); //me gustaria q la tabla tenga un identiicador por PID
-	list_add(tablaDeSegmentos, segmentoCero);
-	 for(int j=1; j<cantSegmentos()+1; j++){ //asi arranca creando el segmento 1 para cada proceso
-	//Preguntar si inicialmente le crea a cada proceso los 16 segmentos sin tamaño o solo le da una tabla con el segmentoCero
-		 t_segmento* segmento = malloc(sizeof(t_segmento));
-		 segmento->ID = j;
-		 list_add(tablaDeSegmentos, segmento);
-	 }
-	}
 }
+
+t_list* crearTablaDeSegmento(uint32_t pid){
+
+	t_list* tablaDeSegmentos = list_create();
+	list_add(tablaDeSegmentos, segmentoCero);
+	list_add_in_index(tablaDeSegmentos,pid, tablaDeSegmentos);
+	return tablaDeSegmentos;
+	 }
+
 void iniciarEstructuras(){
 	crearEspacioMemoria();
-	crearTablasDeSegmentos();
+	crearSegmentoCero();
 
 
 }
+
+//Hacer una funcion crearSegmento que la invocamos cuando recibamos el op_code CreateSegment
+
