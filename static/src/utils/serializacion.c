@@ -126,50 +126,78 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad 
 
 // SERIALIZAR ESTRUCTURA INTRUCCION -------------------------------------------------------------------------------------------------------
 t_paquete* serializarInstruccion(t_instruccion* instruc){
-
+    int cantParametros = cantidadDeParametros(instruc->nombre);
 	t_paquete* pInstruc = malloc(sizeof(t_paquete));
 	pInstruc->codigo_operacion = instruc->nombre;
 	pInstruc->buffer = malloc(sizeof(t_buffer));
-	pInstruc->buffer->size = sizeof(uint32_t)*4+ sizeof(uint8_t) + strlen(instruc->param1)+ 1 + strlen(instruc->param2) + 1 ; ////strlen(instruc->param3); VISTO EN SOPORTE: ROMPE STRLEN CUANDO HAY ALGO VACIO->NO ENVIAR COSAS VACIAS
+	pInstruc->buffer->size = sizeof(uint32_t)+ sizeof(uint8_t);
 	pInstruc->buffer->stream = malloc(pInstruc->buffer->size); //Agrego esto porq es necesario reservarle memoria al stream
 
 	int offset = 0;
 
 	memcpy(pInstruc->buffer->stream +offset, &(instruc->pid), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
-//creo que deberiamos pasarle el nombre porq sino no estariamos enviandole la instruccion completa//
+
 	memcpy(pInstruc->buffer->stream +offset, &(instruc->nombre), sizeof(uint8_t));
 	offset += sizeof(uint8_t);
-//
-	serializacionParametros (pInstruc, offset, instruc, 1);
+
+	agregarParametros(pInstruc, instruc, cantParametros);
 
 	return pInstruc;
 
 }
 
-t_paquete* serializacionParametros (t_paquete* pInstruc, int offset, t_instruccion* instruc, int param){
 
-	char* cargar;
-	uint32_t tamParam = 0;
+int cantidadDeParametros(op_code instruccion){
+	int cantidad = 0;
+	if(instruccion == EXIT|| instruccion==YIELD) cantidad =0;
+	if(instruccion == IO || instruccion == WAIT || instruccion == SIGNAL || instruccion == DELETE_SEGMENT) cantidad =1;
+	if(instruccion == SET || instruccion == MOV_IN||instruccion == MOV_OUT||instruccion == F_OPEN|| instruccion == F_CLOSE || instruccion == F_SEEK || instruccion == F_TRUNCATE|| instruccion == CREATE_SEGMENT) cantidad = 2;
+	if(instruccion== F_READ || instruccion == F_WRITE) cantidad =3;
+	return cantidad;
 
-	if (param == 1) cargar = instruc->param1;
-	if (param == 2) cargar = instruc->param2;
-	if (param == 3) cargar = instruc->param3;
+}
+void agregarParametros (t_paquete* pInstruc, t_instruccion* instruc, int param){
 
 
-	if (cargar == NULL) cargar = "";
+	if(param== 1){
+		agregarParametro1(pInstruc, instruc);
+	}
+	if(param==2){
+		agregarParametro1(pInstruc, instruc);
+		agregarParametro2(pInstruc, instruc);
+	}
+	if(param == 3){
+		agregarParametro1(pInstruc, instruc);
+		agregarParametro2(pInstruc, instruc);
+		agregarParametro3(pInstruc, instruc);
+	}
 
-	tamParam = strlen(cargar)+1;
-
-	memcpy(pInstruc->buffer->stream +offset, &(tamParam), sizeof(uint32_t));
-	offset += sizeof(uint32_t);
-	memcpy(pInstruc->buffer->stream +offset, &(cargar), sizeof(strlen(cargar)+1));
-	offset += sizeof(strlen(cargar)+1);
-	if (param < 3) serializacionParametros(pInstruc, offset, instruc, param++);
-	return pInstruc;
 }
 
-t_instruccion* deserializarInstruccionEstructura (void* buffer){
+
+
+
+void agregarParametro1(t_paquete* pInstruc,t_instruccion* instruc){
+		 char*parametro = instruc->param1;
+		 int tamParam = strlen(parametro)+1;
+		 agregar_a_paquete(pInstruc, parametro, tamParam);
+
+	}
+void agregarParametro2(t_paquete* pInstruc,t_instruccion* instruc){
+		 char* parametro = instruc->param2;
+		 int tamParam = strlen(parametro)+1;
+		 agregar_a_paquete(pInstruc, parametro, tamParam);
+	}
+void agregarParametro3(t_paquete* pInstruc,t_instruccion* instruc){
+		char* parametro = instruc->param3;
+		int tamParam = strlen(parametro)+1;
+		 agregar_a_paquete(pInstruc, parametro, tamParam);
+	}
+
+
+
+t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam){
 
 	t_instruccion* instruccion = malloc(sizeof(t_instruccion));
 
@@ -180,25 +208,47 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer){
 	memcpy(&(instruccion->pid), stream+desplazamiento, sizeof(uint32_t));
 	desplazamiento+=sizeof(uint32_t);
 //agrego esto por haberle enviado el nombre al serializar//
-	memcpy(&(instruccion->nombre), stream+desplazamiento, sizeof(op_code));
-	desplazamiento+= sizeof(op_code);
-//
-	memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-	desplazamiento+= sizeof(uint32_t);
-	memcpy(&(instruccion->param1), stream+desplazamiento,tamParam);
-	desplazamiento+= tamParam;
+	memcpy(&(instruccion->nombre), stream+desplazamiento, sizeof(uint8_t));
+	desplazamiento+= sizeof(uint8_t);
+//---Hermosa repeticion de codigo pero toy cansada--//
+	if(cantParam == 1){
+	memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+	desplazamiento+= sizeof(int);
+   	instruccion -> param1 = malloc(tamParam);
+	memcpy(instruccion->param1, stream+desplazamiento,tamParam);
+	}
+   if(cantParam == 2){
+	   memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+	   	desplazamiento+= sizeof(int);
+	   	instruccion -> param1 = malloc(tamParam);
+	   	memcpy(instruccion->param1, stream+desplazamiento,tamParam);
+	   	desplazamiento+= tamParam;
 
-	memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-	desplazamiento+= sizeof(uint32_t);
-	memcpy(&(instruccion->param2), stream+desplazamiento,tamParam);
-	desplazamiento+= tamParam;
+	   	memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+		desplazamiento+= sizeof(int);
+		instruccion->param2 = malloc(tamParam);
+		memcpy(instruccion->param2, stream+desplazamiento,tamParam);
+		desplazamiento+= tamParam;
+   }
+   if(cantParam == 3){
+	   memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+		desplazamiento+= sizeof(int);
+	   	instruccion -> param1 = malloc(tamParam);
+		memcpy(instruccion->param1, stream+desplazamiento,tamParam);
+		desplazamiento+= tamParam;
 
-	memcpy(&(tamParam), stream+desplazamiento,sizeof(uint32_t));
-	desplazamiento+= sizeof(uint32_t);
-	memcpy(&(instruccion->param3), stream+desplazamiento,tamParam);
-	desplazamiento+= tamParam;
+		memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+		desplazamiento+= sizeof(int);
+		instruccion->param2 = malloc(tamParam);
+		memcpy(instruccion->param2, stream+desplazamiento,tamParam);
+		desplazamiento+= tamParam;
+	   memcpy(&(tamParam), stream+desplazamiento,sizeof(int));
+	   	desplazamiento+= sizeof(int);
+	   	instruccion->param3 = malloc(tamParam);
+	   	memcpy(instruccion->param3, stream+desplazamiento,tamParam);
 
-
+   }
 	return instruccion;
-
 }
+
+

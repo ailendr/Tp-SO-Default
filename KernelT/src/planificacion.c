@@ -64,12 +64,7 @@ void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
 
 	t_paquete *paqueteDeContexto = serializarContexto(procesoAEjecutar); // "Pone el contexto en un paquete"
 	log_info(loggerKernel, "Paquete de Contexto creado con exito");
-	if(enviarPaquete(paqueteDeContexto, socketCPU, loggerKernel) == -1){
-		log_info(loggerKernel, "Fallo la conexion con Cpu ");
-		terminarModulo(socketCPU, loggerKernel, configKernel);
-		exit(1);
-	}
-	else{log_info(loggerKernel, "Contexto enviado a CPU");}
+	validarEnvioDePaquete(paqueteDeContexto, socketCPU, loggerKernel, configKernel, "Contexto");
 }
 
 void largoPlazo() {
@@ -97,7 +92,7 @@ void cortoPlazo() {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
-
+        sem_wait(&cpuLibre);
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
@@ -135,39 +130,33 @@ void instruccionAEjecutar() {
 					tiempoEnCPU(ultimoEjecutado);
 				}
 				agregarAEstadoReady(ultimoEjecutado);
-				sem_post(&planiCortoPlazo);
+				sem_post(&cpuLibre);
 				break;
 
 			case WAIT:
-				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU);
+				log_info(loggerKernel, "Intruccion WAIT");
+				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
+				log_info(loggerKernel, "Recurso a consumir : %s", instruccionWait->param1);
 				char* recursoAConsumir = instruccionWait->param1;
-				free(instruccionWait); //Hay q liberar puntero
-				implementacionWyS(recursoAConsumir, 1);
+				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
+				free(instruccionWait);
 				break;
 			case SIGNAL:
-				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU);
+				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
 				char* recursoALiberar = instruccionSignal->param1;
 				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
-				implementacionWyS(recursoALiberar, 2);
-				procesoAEjecutar(contextoActualizado); //vuelve a enviar el contexto a ejecucion
+				implementacionWyS(recursoALiberar, 2, contextoActualizado);
+
 				break;
 			case IO:
-				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU);
+				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
-				int tiempoDeIO = atoi(tiempo);//en microsegundos
+				int* tiempoDeIO = malloc(sizeof(int));
+				*tiempoDeIO = atoi(tiempo);//en microsegundos
 				free(instruccionIO);//Hay q liberar puntero
 				pthread_t hiloDeBloqueo; //crear hilo
-				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*) &tiempoDeIO);
+				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)tiempoDeIO);
 				pthread_detach(hiloDeBloqueo);
-				break;
-			case MOV_IN:
-				log_info(loggerKernel, "Se está ejecutando MOV_IN en CPU");
-				break;
-			case MOV_OUT:
-				log_info(loggerKernel, "Se está ejecutando MOV_OUT en CPU");
-				break;
-			case SET:
-				log_info(loggerKernel, "Se está ejecutando SET en CPU");
 				break;
 			case CREATE_SEGMENT:
 				break;
@@ -260,10 +249,10 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 }
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
-t_instruccion* obtenerInstruccion(int socket){
+t_instruccion* obtenerInstruccion(int socket, int cantParam){
 	int tamanio = 0;
 	void *buffer = recibir_buffer(&tamanio, socketCPU);
-	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer);
+	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer, cantParam);
 	return instruccionNueva;
 }
 
@@ -304,7 +293,7 @@ void generarProceso(int *socket_cliente) {
 
 	//Cerrando recursos
 	//close(consolaNueva);//Ver si esta demas esto o nos romperia
-	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
+	//free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
 	sem_post(&planiLargoPlazo);
 	}
 }
@@ -315,21 +304,21 @@ void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
 }
 
 void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
+
+	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
+			procesoAFinalizar->contexto->pid, motivoDeFin);
+	int terminar = -1;
+	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
 	free(procesoAFinalizar->contexto->instrucciones);
 	free(procesoAFinalizar->contexto);
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
-	int terminar = -1;
-	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
-	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
-			procesoAFinalizar->contexto->pid, motivoDeFin);
-	sem_post(&planiCortoPlazo);
-
+	sem_post(&cpuLibre);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado){
 	/*1ero buscar el recurso: si no está finaliza el proceso
 	 -----------                         si esta decrementa o incrementa la instancia*/
 	int posicionRecurso = recursoDisponible(nombreRecurso);
@@ -337,7 +326,8 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 			finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 		}
 		else{
-			int valor = *(int*)list_get(listaDeInstancias,posicionRecurso);
+			int* pvalor = list_get(listaDeInstancias,posicionRecurso);
+			int valor = *pvalor;
 			switch (nombreInstruccion){
 			case 1: //1=WAIT
 				valor --;
@@ -349,8 +339,9 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				ultimoEjecutado->estadoPcb = BLOCK;
 				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
-				sem_post(&planiCortoPlazo);
+				sem_post(&cpuLibre);
 				 }
+				 else{procesoAEjecutar(contextoActualizado);} //En el caso de estar disponible el recurso supongo q cpu sigue ejecutando las demas instrucciones de este contexto
 				break;
 			case 2://2=SIGNAL
 				valor ++;
@@ -359,6 +350,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion){
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
+				procesoAEjecutar(contextoActualizado);
 				break;
 			 }
 			}
@@ -371,7 +363,7 @@ void bloquearHilo(int* tiempo){
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
     logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
-    sem_post(&planiCortoPlazo);
+    sem_post(&cpuLibre);
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");

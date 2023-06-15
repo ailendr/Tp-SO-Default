@@ -1,5 +1,6 @@
 #include "./cpu.h"
 
+
 int main(/*int argc, char** argv*/) {
 
 	/*
@@ -14,13 +15,13 @@ int main(/*int argc, char** argv*/) {
 	}
 	*/
 
-	t_contextoEjec* contextoRecibido;
+
 	char* instr;
+
 	t_instruccion* nuevaInstr = NULL;
 	void* buffer = NULL;
 	int tamanio = 0;
-	t_paquete* paqueteI;
-	t_paquete* paqueteC;
+
 
 	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
@@ -43,13 +44,8 @@ int main(/*int argc, char** argv*/) {
 			instr = fetch (contextoRecibido);
 			nuevaInstr = decode (instr);
 			execute (nuevaInstr, contextoRecibido);
-
-			paqueteC = serializarContexto(contextoRecibido);
-			enviar_paquete(paqueteC, cliente);
-			paqueteI = serializarInstruccion(nuevaInstr);
-			enviar_paquete(paqueteI, servidorCpu);
-
-		} else {
+		}
+		else {
 			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
 		}
 

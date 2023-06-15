@@ -18,6 +18,8 @@
 #include <netdb.h>
 #include <commons/collections/list.h>
 #include <commons/log.h>
+#include <commons/config.h>
+//#include "modulo.h"
 #include "estructuras.h"
 
 typedef struct
@@ -62,13 +64,15 @@ void crear_buffer(t_paquete* paquete);
 t_paquete* crear_paquete(void);
 void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
-int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger);
+int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger, char* nombrePaq);
 void eliminar_paquete(t_paquete* paquete);
 
 
-
+void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger,t_config* config, char* nombrePaq);
 
 void liberar_conexion(int socket);
 
+//-----Funcion de modulo porq se estaban llamando modulo.h y sockets.h de forma circulas----//
+void terminarModulo(int conexion,t_log* log , t_config* config);
 
 #endif /* SRC_UTILS_SOCKETS_H_ */

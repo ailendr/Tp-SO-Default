@@ -65,7 +65,8 @@ int main(int argc, char** argv) {
 	int finalizar;
 	recv(conexionConKernel, &finalizar, sizeof(int), MSG_WAITALL);
 
-	if(finalizar != -1){
+	if(finalizar == -1){
+		log_info(loggerConsola, "Finalizando Consola por aviso de Kernel");
 		terminarModulo(conexionConKernel, loggerConsola, configConsola);
 		return EXIT_FAILURE;
 	}

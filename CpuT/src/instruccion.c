@@ -5,8 +5,13 @@
  *      Author: utnso
  */
 #include "instruccion.h"
+t_contextoEjec* contextoRecibido;
+int servidorCpu;
+int socketMemoria;
+int cliente;
 
 // INTERPRETACION DE LAS INSTRUCCIONES -----------------------------------------------------
+
 
 char* fetch (t_contextoEjec* cont) {
 
@@ -38,7 +43,7 @@ t_instruccion* decode (char* instruccion) {
 	}
 
 	if (nuevaInstruccion->nombre == SET){
-		sleep(retardo());
+		//sleep(retardo());
 		log_info(loggerCPU, "Entre en el SET");
 	}
 
@@ -58,11 +63,34 @@ t_instruccion* decode (char* instruccion) {
 }
 
 void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
+	t_paquete* paqueteI;
+	t_paquete* paqueteC;
+	op_code nombreI=instruccion->nombre;
 
-	switch (instruccion->nombre){
+	if(nombreI == WAIT ||nombreI==SIGNAL|| nombreI==IO||nombreI == YIELD || nombreI==EXIT){
+		paqueteC = serializarContexto(contextoRecibido);
+		validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+		paqueteI = serializarInstruccion(instruccion);
+		validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+	}
+	if(nombreI==SET){
+		set (instruccion, contexto);
+		log_info(loggerCPU, "Instruccion SET finalizada");
+	 //Repetir ciclo porq no tiene sentido enviarle un contexto a kernel al menos q sea por lo dicho en el tp
+		char* proxInstruccion = fetch(contexto);
+		t_instruccion* instruccionActual = decode(proxInstruccion);
+		execute(instruccionActual, contexto);
+	}
+	//usar if o switch qsy
+	/*
+	switch (nombreI){
 		case SET:
 			set (instruccion, contexto);
 		    log_info(loggerCPU, "Instruccion SET finalizada");
+		 //Repetir ciclo porq no tiene sentido enviarle un contexto a kernel al menos q sea por lo dicho en el tp
+            char* proxInstruccion = fetch(contexto);
+            t_instruccion* instruccionActual = decode(proxInstruccion);
+            execute(instruccionActual, contexto);
 			break;
 		case MOV_IN:
 			//TODO lo que se deba, la traduccion se hace, borrarlo aca
@@ -70,30 +98,65 @@ void execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 		case MOV_OUT:
 			//TODO lo que se deba, la traduccion se hace, borrarlo aca
 			break;
+
+		case WAIT:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+
+		    break;
+		case SIGNAL:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
+		case YIELD:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
+		case EXIT:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
+		case IO:
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			paqueteI = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			break;
 		default:
 			log_error(loggerCPU, "Error con instruccion");
-	}
+	*/
 
 }
 
 op_code asignarNombre (char* nombre){
-	if (strcmp(nombre, "YIELD")==0) return YIELD;
-	if (strcmp(nombre, "CREATE_SEGMENT")==0) return CREATE_SEGMENT;
-	if (strcmp(nombre, "DELETE_SEGMENT")==0) return DELETE_SEGMENT;
-	if (strcmp(nombre, "EXIT")==0) return EXIT;
-	if (strcmp(nombre, "SET")==0) return SET;
-	if (strcmp(nombre, "MOV_IN")==0) return MOV_IN;
-	if (strcmp(nombre, "MOV_OUT")==0) return MOV_OUT;
-	if (strcmp(nombre, "IO")==0) return IO;
-	if (strcmp(nombre, "F_OPEN")==0) return F_OPEN;
-	if (strcmp(nombre, "F_CLOSE")==0) return F_CLOSE;
-	if (strcmp(nombre, "F_SEEK")==0) return F_SEEK;
-	if (strcmp(nombre, "F_READ")==0) return F_READ;
-	if (strcmp(nombre, "F_WRITE")==0) return F_WRITE;
-	if (strcmp(nombre, "F_TRUNCATE")==0) return F_TRUNCATE;
-	if (strcmp(nombre, "WAIT")==0) return WAIT;
-	if (strcmp(nombre, "SIGNAL")==0) return SIGNAL;
+	op_code instruccion;
+	if (strcmp(nombre, "YIELD")==0) instruccion = YIELD;
+	if (strcmp(nombre, "CREATE_SEGMENT")==0) instruccion =CREATE_SEGMENT;
+	if (strcmp(nombre, "DELETE_SEGMENT")==0) instruccion =DELETE_SEGMENT;
+	if (strcmp(nombre, "EXIT")==0) instruccion = EXIT;
+	if (strcmp(nombre, "SET")==0) instruccion =SET;
+	if (strcmp(nombre, "MOV_IN")==0) instruccion = MOV_IN;
+	if (strcmp(nombre, "MOV_OUT")==0) instruccion = MOV_OUT;
+	if (strcmp(nombre, "IO")==0) instruccion =IO;
+	if (strcmp(nombre, "F_OPEN")==0) instruccion = F_OPEN;
+	if (strcmp(nombre, "F_CLOSE")==0) instruccion = F_CLOSE;
+	if (strcmp(nombre, "F_SEEK")==0) instruccion = F_SEEK;
+	if (strcmp(nombre, "F_READ")==0) instruccion =F_READ;
+	if (strcmp(nombre, "F_WRITE")==0) instruccion = F_WRITE;
+	if (strcmp(nombre, "F_TRUNCATE")==0) instruccion = F_TRUNCATE;
+	if (strcmp(nombre, "WAIT")==0) instruccion = WAIT;
+	if (strcmp(nombre, "SIGNAL")==0) instruccion = SIGNAL;
+return instruccion;
 }
+
 
 
 // UTILS DE LAS INSTRUCCIONES --------------------------------------------------------------
