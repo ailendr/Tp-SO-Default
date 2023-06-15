@@ -12,9 +12,6 @@
 
 int iniciarCpu (char* pathConfig);
 
-extern int servidorCpu;
-extern int socketMemoria;
-extern int cliente;
 
 int iniciarSocketsCpu();
 

@@ -15,6 +15,5 @@
 int verificarSocket (int socket, t_log* logger, t_config* config);
 int verificarConfig (int socket, t_log* logger, t_config* config);
 
-void terminarModulo(int conexion,t_log* log , t_config* config);
 
 #endif /* SRC_UTILS_MODULO_H_ */

@@ -9,6 +9,10 @@
 #define SRC_INSTRUCCION_H_
 
 #include "./cpuConfig.h"
+extern t_contextoEjec* contextoRecibido;
+extern int servidorCpu;
+extern int socketMemoria;
+extern int cliente;
 
 char* fetch(t_contextoEjec* cont);
 t_instruccion* decode (char* instruccion);
