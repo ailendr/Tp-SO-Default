@@ -40,6 +40,7 @@ void atenderPeticionesKernel(int socket){
 			tablaDeSegmentos = crearTablasDeSegmentos();
 			//y hacer el send. Habria que serializar la tabla.
 	}*/
+			}
 }
 
 
@@ -47,7 +48,7 @@ void atenderPeticionesKernel(int socket){
 
 
 void atenderModulos(int socket_servidor){
-	/* NOTA: Podemos esperar el cliente y hacer el handshake tambien dentro de la func del hilo o antes*/
+	//NOTA: Podemos esperar el cliente y hacer el handshake tambien dentro de la func del hilo o antes
 	///---CLIENTE CPU---///
 	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
 	int socketCpu = esperar_cliente(socket_servidor, loggerMemoria);
@@ -64,7 +65,7 @@ void atenderModulos(int socket_servidor){
 
 
 	///---CLIENTE FILE SYSTEM---///
-	/*1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO*/
+	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
 
 	int socketFs= esperar_cliente(socket_servidor, loggerMemoria);
 	if(verificarSocket(socketFs, loggerMemoria, configMemoria) == 1) {
@@ -73,7 +74,7 @@ void atenderModulos(int socket_servidor){
 				   exit(1);
 			   }
 	recibirHandshake(socketFs, HANDSHAKE_Fs, loggerMemoria);
-	/*2)LEVANTO HILO PARA ATENDER LAS PETICIONES DE CADA MODULO*/
+	//2)LEVANTO HILO PARA ATENDER LAS PETICIONES DE CADA MODULO
 
 	pthread_t servidorDeFs;
 	pthread_create(&servidorDeFs, NULL, (void*)atenderPeticionesFs, (void*)&socketFs);
@@ -95,8 +96,8 @@ void atenderModulos(int socket_servidor){
 
 }
 
-
-/*while (1) {
+/*
+while (1) {
 	  pthread_t hiloServidor;
 	   int *socket_cliente = malloc(sizeof(int));
 	   *socket_cliente = esperar_cliente(socket_servidor, loggerMemoria);
@@ -110,5 +111,5 @@ void atenderModulos(int socket_servidor){
 	                   (void*) recibirProtocolo,
 	                   (void*)socket_cliente);
 	   pthread_detach(hiloServidor);
-}
-*/
+}*/
+
