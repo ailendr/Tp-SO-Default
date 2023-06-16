@@ -86,24 +86,38 @@ void largoPlazo() {
 		sem_post(&planiCortoPlazo);
 	}
 }
+void ordenarReady(){
+	if (strcmp(Algoritmo(), "HRRN")==0){
+		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
+		list_iterate(colaReady, (void*) calcularNuevaEstimacion);
+		list_iterate(colaReady, (void*) calcularRR);
+		list_sort(colaReady, (void*)comparadorRR);
+	}
+	else {
+		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
+}
+
+void enviarContextoACpu(){
+		t_pcb* procesoAEjec=extraerDeReady();
+		log_info(loggerKernel, "%s: Obtengo un proceso de ready", Algoritmo());
+		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
+		procesoAEjecutar(contextoAEjec);
+		procesoAEjec->estadoPcb = EXEC;
+		logCambioDeEstado(procesoAEjec, "READY", "EXEC");
+		if(strcmp(Algoritmo(), "HRRN")==0){
+		clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
+		}
+		ultimoEjecutado = procesoAEjec;
+}
 
 void cortoPlazo() {
 	while (1) {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
+		ordenarReady();
         sem_wait(&cpuLibre);
-		char *algoritmo = Algoritmo();
-		if (strcmp(algoritmo, "FIFO") == 0) {
-			algoritmoFIFO();
-		}
-		else if (strcmp(algoritmo, "HRRN")==0){
-			algoritmoHRRN();
-		}else{
-			log_info(loggerKernel, "El algoritmo obtenido por archivo de config no es válido");
-			exit(1);
-		}
-
+        enviarContextoACpu();
 		instruccionAEjecutar();
 	}
 }
@@ -123,25 +137,30 @@ void instruccionAEjecutar() {
 		int codigo = recibir_operacion(socketCPU);
 		switch(codigo){
 			case EXIT:
+				log_info(loggerKernel, "Intruccion EXIT");
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				break;
 			case YIELD:
+				log_info(loggerKernel, "Intruccion YIELD");
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
+				sem_post(&planiCortoPlazo);
 				sem_post(&cpuLibre);
 				break;
 
 			case WAIT:
 				log_info(loggerKernel, "Intruccion WAIT");
 				tiempoEnCPU(ultimoEjecutado);
-				sem_post(&cpuLibre);
 				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
 				log_info(loggerKernel, "Recurso a consumir : %s", instruccionWait->param1);
 				char* recursoAConsumir = instruccionWait->param1;
 				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
 				free(instruccionWait);
+				sem_post(&planiCortoPlazo);
+				sem_post(&cpuLibre);
 				break;
 			case SIGNAL:
+				log_info(loggerKernel, "Intruccion SIGNAL");
 				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
 				char* recursoALiberar = instruccionSignal->param1;
 				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
@@ -149,6 +168,7 @@ void instruccionAEjecutar() {
 
 				break;
 			case IO:
+				log_info(loggerKernel, "Intruccion IO");
 				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
 				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
@@ -181,7 +201,7 @@ void instruccionAEjecutar() {
 		}
 	}
 
-
+/*
 void algoritmoFIFO() {
 	log_info(loggerKernel, "Empieza algoritmo FIFO");
 	t_pcb *procesoAEjec = extraerDeReady();
@@ -210,7 +230,7 @@ void algoritmoHRRN(){
 	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
 	ultimoEjecutado = procesoAEjec;
 }
-
+*/
 void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
     double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
@@ -368,10 +388,12 @@ void bloquearHilo(int* tiempo){
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
     logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
-    sem_post(&cpuLibre);
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
+	sem_post(&planiCortoPlazo);
+    sem_post(&cpuLibre);
+
 }
 
 //Logueo de las instrucciones para verificar que esta todo ok//
