@@ -92,7 +92,7 @@ void cortoPlazo() {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
-        sem_wait(&cpuLibre);
+        //sem_wait(&cpuLibre);
 		char *algoritmo = Algoritmo();
 		if (strcmp(algoritmo, "FIFO") == 0) {
 			algoritmoFIFO();
@@ -123,12 +123,16 @@ void instruccionAEjecutar() {
 		int codigo = recibir_operacion(socketCPU);
 		switch(codigo){
 			case EXIT:
+				log_info(loggerKernel, "Intruccion EXIT");
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				break;
 			case YIELD:
+				log_info(loggerKernel, "Intruccion YIELD");
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
-				sem_post(&cpuLibre);
+				//sem_post(&cpuLibre);
+				sem_post(&planiCortoPlazo);
+
 				break;
 
 			case WAIT:
@@ -316,7 +320,8 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
-	sem_post(&cpuLibre);
+	//sem_post(&cpuLibre);
+	sem_post(&planiCortoPlazo);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
