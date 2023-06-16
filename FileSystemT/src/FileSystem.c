@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "FileSystem.h"
 
+
 int main(void) {
     // agregar argc?
 	printf("Hola soy FileSystem y soy servidor de Kernel y me conecto a Memoria \n ");
@@ -17,12 +18,14 @@ int main(void) {
 
 	if(verificarConfig (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
-	iniciarEstructuras();
+	//iniciarEstructuras();
 
 	char* puerto = puertoEscucha();
 	char* ip = IP_Escucha();
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+
+	iniciarEstructuras();
  /*
 	//log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
 	//char* ipM = IP_Memoria();

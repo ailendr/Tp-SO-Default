@@ -27,7 +27,6 @@ typedef struct{
 typedef struct{
    uint32_t blockSize;
    uint32_t blockCount;
-   //t_bitarray* bitmap; //va ahi el bitmap
 }t_superbloque;
 
 
