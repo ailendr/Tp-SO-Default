@@ -61,7 +61,7 @@ int iniciarSocketsCpu(){
 
 	int tamSeg = tamSegmento();
 
-	send(socketMemoria, tamSegs, sizeof(int), 0);
+	send(socketMemoria, &tamSegs, sizeof(int), 0);
 	*/
 	// CONEXION CON KERNEL -----------------------------------------------------------------------------
     log_info(loggerCPU, "---------------------------------------------------------------------------");
