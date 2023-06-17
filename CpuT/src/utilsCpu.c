@@ -87,3 +87,12 @@ int iniciarSocketsCpu(){
 	return 0;
 }
 
+char* mmu (char* direccionLogica){
+	char* direccionFisica;
+
+
+
+	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
+	return direccionFisica;
+}
+

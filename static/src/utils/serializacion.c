@@ -150,9 +150,9 @@ t_paquete* serializarInstruccion(t_instruccion* instruc){
 
 int cantidadDeParametros(op_code instruccion){
 	int cantidad = 0;
-	if(instruccion == EXIT|| instruccion==YIELD) cantidad =0;
-	if(instruccion == IO || instruccion == WAIT || instruccion == SIGNAL || instruccion == DELETE_SEGMENT) cantidad =1;
-	if(instruccion == SET || instruccion == MOV_IN||instruccion == MOV_OUT||instruccion == F_OPEN|| instruccion == F_CLOSE || instruccion == F_SEEK || instruccion == F_TRUNCATE|| instruccion == CREATE_SEGMENT) cantidad = 2;
+	if(instruccion == EXIT|| instruccion == YIELD) cantidad = 0;
+	if(instruccion == IO || instruccion == WAIT || instruccion == SIGNAL || instruccion == DELETE_SEGMENT) cantidad = 1;
+	if(instruccion == SET || instruccion == MOV_IN || instruccion == MOV_OUT || instruccion == F_OPEN|| instruccion == F_CLOSE || instruccion == F_SEEK || instruccion == F_TRUNCATE|| instruccion == CREATE_SEGMENT) cantidad = 2;
 	if(instruccion== F_READ || instruccion == F_WRITE) cantidad =3;
 	return cantidad;
 

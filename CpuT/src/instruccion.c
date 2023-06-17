@@ -37,17 +37,23 @@ t_instruccion* decode (char* instruccion) {
 		}
 	}
 
-	if (nuevaInstruccion->nombre == SET){
+	op_code nombreI = nuevaInstruccion->nombre;
+
+	if (nombreI == SET){
 		//sleep(retardo());
-		log_info(loggerCPU, "Entre en el SET");
+		log_info(loggerCPU, "Realizando el retardo en el SET");
 	}
 
-	if (nuevaInstruccion->nombre == MOV_IN){
-		//TODO traduccion
+	char* aux;
+
+	if (nombreI == MOV_IN || nombreI == F_READ || nombreI == F_WRITE){
+		aux = nuevaInstruccion->param2;
+		//nuevaInstruccion->param2 = mmu(aux);
 	}
 
-	if (nuevaInstruccion->nombre == MOV_OUT){
-		//TODO traduccion
+	if (nombreI == MOV_OUT){
+		aux = nuevaInstruccion->param1;
+		//nuevaInstruccion->param1 = mmu(aux);
 	}
 
 
@@ -75,7 +81,7 @@ int execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
 
 	if (nombreI == MOV_OUT){
 		moveOut (instruccion, contexto);
-		log_info(loggerCPU, "Instruccion MOVE_IN finalizada");
+		log_info(loggerCPU, "Instruccion MOVE_OUT finalizada");
 		return 0;
 	}
 
@@ -101,25 +107,25 @@ op_code asignarNombre (char* nombre){
 	if (strcmp(nombre, "F_TRUNCATE") == 0) instruccion = F_TRUNCATE;
 	if (strcmp(nombre, "WAIT") == 0) instruccion = WAIT;
 	if (strcmp(nombre, "SIGNAL") == 0) instruccion = SIGNAL;
-return instruccion;
+	return instruccion;
 }
 
 
 // UTILS DE LAS INSTRUCCIONES --------------------------------------------------------------
 void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 
-	if (strcmp(instruccion->param1, "AX")==0) strcpy(contexto->AX, instruccion->param2);
-	if (strcmp(instruccion->param1, "BX")==0) strcpy(contexto->BX, instruccion->param2);
-	if (strcmp(instruccion->param1, "CX")==0) strcpy(contexto->CX, instruccion->param2);
-	if (strcmp(instruccion->param1, "DX")==0) strcpy(contexto->DX, instruccion->param2);
-	if (strcmp(instruccion->param1, "EAX")==0) strcpy(contexto->EAX, instruccion->param2);
-	if (strcmp(instruccion->param1, "EBX")==0) strcpy(contexto->EBX, instruccion->param2);
-	if (strcmp(instruccion->param1, "ECX")==0) strcpy(contexto->ECX, instruccion->param2);
-	if (strcmp(instruccion->param1, "EDX")==0) strcpy(contexto->EDX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RAX")==0) strcpy(contexto->RAX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RBX")==0) strcpy(contexto->RBX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RCX")==0) strcpy(contexto->RCX, instruccion->param2);
-	if (strcmp(instruccion->param1, "RDX")==0) strcpy(contexto->RDX, instruccion->param2);
+	if (strcmp(instruccion->param1, "AX") == 0) strcpy(contexto->AX, instruccion->param2);
+	if (strcmp(instruccion->param1, "BX") == 0) strcpy(contexto->BX, instruccion->param2);
+	if (strcmp(instruccion->param1, "CX") == 0) strcpy(contexto->CX, instruccion->param2);
+	if (strcmp(instruccion->param1, "DX") == 0) strcpy(contexto->DX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EAX") == 0) strcpy(contexto->EAX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EBX") == 0) strcpy(contexto->EBX, instruccion->param2);
+	if (strcmp(instruccion->param1, "ECX") == 0) strcpy(contexto->ECX, instruccion->param2);
+	if (strcmp(instruccion->param1, "EDX") == 0) strcpy(contexto->EDX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RAX") == 0) strcpy(contexto->RAX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RBX") == 0) strcpy(contexto->RBX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RCX") == 0) strcpy(contexto->RCX, instruccion->param2);
+	if (strcmp(instruccion->param1, "RDX") == 0) strcpy(contexto->RDX, instruccion->param2);
 
 }
 
@@ -130,5 +136,3 @@ void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 void moveOut (t_instruccion* instruccion, t_contextoEjec* contexto){
 
 }
-
-

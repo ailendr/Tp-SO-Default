@@ -55,7 +55,7 @@ int main(/*int argc, char** argv*/) {
 			}
 
 			paqueteC = serializarContexto(contextoRecibido);
-			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");//envia y valida
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
 			paqueteI = serializarInstruccion(nuevaInstr);
 			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
 

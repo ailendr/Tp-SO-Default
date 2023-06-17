@@ -254,7 +254,6 @@ int recibir_operacion(int socket_cliente)
 {
 	int cod_op;
 	int recvNum = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
-	printf("recv %d", recvNum);
 	if(recvNum > 0)
 		return cod_op;
 	else
