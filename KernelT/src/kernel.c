@@ -3,7 +3,12 @@
 #include "kernel.h"
 
 
-int main(void) {
+/*int main(int argc, char** argv) {
+	if(argc < 2){
+			return EXIT_FAILURE;
+		}
+	char* pathConfig = argv[1];*/
+int main(){
 
 	printf ("Hola soy kernel y estoy queriendo recibir mensajes\n ");
 
@@ -15,7 +20,7 @@ int main(void) {
 
 	int server_fd = 0;
 
-	configKernel = config_create("../KernelT/kernel.config");
+	configKernel = config_create("/home/utnso/tp-2023-1c-Default-2.0/KernelT/kernel.config");
 
 	if(verificarConfig (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
@@ -28,15 +33,34 @@ int main(void) {
 
 	///Funcion para inicializar las conexiones con FS,CPU y MEMORIA//
 		//Por el momento deje las funciones enviarMensaje adentro pero no deberian//
-  //  iniciarConexionesDeKernel();
+   iniciarConexionesDeKernel();
+
+
+    crearEstados();
+    crearEstructurasDeRecursos();
+	inicializarSemaforos();
+
 
     ///------Kernel como Servidor------//
 
+	log_info(loggerKernel, "---------------------------------------------------------------------------");
     log_info(loggerKernel, "Iniciando Servidor ... \n");
-    	server_fd = iniciarServidor(ip, puerto);
-    	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
-    	log_info(loggerKernel, "Servidor listo para recibir al cliente");
-         atenderConsolas(server_fd);
+	server_fd = iniciarServidor(ip, puerto);
+	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
+	log_info(loggerKernel, "Servidor listo para recibir al cliente");
+
+    //----Creando Hilos Planificadores---///
+    //USAR SEMAFOROS BINARIOS///
+
+
+     pthread_t  hiloCortoPlazo, hiloLargoPlazo;
+	 pthread_create(&hiloLargoPlazo,NULL,(void*)largoPlazo,NULL);
+	 pthread_create(&hiloCortoPlazo,NULL,(void*)cortoPlazo,NULL);
+
+	 pthread_detach(hiloLargoPlazo);
+	 pthread_detach(hiloCortoPlazo);
+
+	 atenderConsolas(server_fd);//Recibe las instrucciones de consola, crea el pcb y agrega a new
 
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
@@ -45,6 +69,8 @@ int main(void) {
 	close (socketFs);
 	close (socketMemoria);
 	close (socketCPU);
+	eliminarEstados();//finaliza estructuras de ready y new
+	finalizarSemaforos();
 
 	printf ("\n Finalizo Kernel correctamente\n ");
 

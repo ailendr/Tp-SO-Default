@@ -10,9 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <commons/string.h>
 #include <utils/sockets.h>
 #include <utils/modulo.h>
 #include "ConsolaConfig.h"
+#include "parseoInstrucciones.h"
 
 //Para mostrar el git add /ConsolaT
 

@@ -10,6 +10,32 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <commons/collections/list.h>
+#include <time.h>
+#include <stddef.h>
+
+
+typedef enum
+{
+	MENSAJE,
+	PAQUETE,
+	CONTEXTO,
+	YIELD,
+	CREATE_SEGMENT,
+	DELETE_SEGMENT,
+	EXIT,
+	SET,
+	MOV_IN,
+	MOV_OUT,
+	IO,
+	F_OPEN,
+	F_CLOSE,
+	F_SEEK,
+	F_READ,
+	F_WRITE,
+	F_TRUNCATE,
+	WAIT,
+	SIGNAL
+}op_code;
 
 typedef struct{
 	uint32_t pid;
@@ -29,8 +55,9 @@ typedef struct{
     char RDX[16];
 }t_contextoEjec;
 
+
 typedef struct {
-	char* nombre;
+	op_code nombre;
 	uint32_t pid;
 	char* param1;
 	char* param2;
@@ -40,18 +67,27 @@ typedef struct {
 typedef enum{
 	NEW,
 	READY,
-	BLOCK
+	BLOCK,
+	EXEC
 	} estadoPcb;
 
 typedef struct{
 	uint32_t PID;
+	int socketConsola;
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;
 	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
-	uint32_t estimadoReady;//estimadorafaga
-	uint32_t llegadaAReady;//timestamp
+	double estimadoReady;//estimadorafaga
 	t_list* archAbiertos;
+
+	struct timespec llegadaACPU;//timestamp
+	struct timespec llegadaAReady;//timestamp
+	double tiempoDeEspera;
+	double ultimaRafagaEjecutada;
+	double RR;
 }t_pcb;
+
+
 
 
 /*
@@ -62,5 +98,4 @@ typedef struct{
 	char* dirBase;
 }segmento;
  * */
-
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */
