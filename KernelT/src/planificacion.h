@@ -34,6 +34,9 @@ void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado);
 //lo pongo aca porq largo plazo los usa//
 void largoPlazo();
 void cortoPlazo();
+//Nuevos//
+void ordenarReady();
+void enviarContextoACpu();
 void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void instruccionAEjecutar();
