@@ -38,10 +38,11 @@ void cortoPlazo();
 void ordenarReady();
 void enviarContextoACpu();
 void algoritmoFIFO();
+
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void instruccionAEjecutar();
 //PARA HRRN
-void algoritmoHRRN();
+//void algoritmoHRRN();
 void calcularNuevaEstimacion(t_pcb* proceso);
 void calcularRR(t_pcb* proceso);
 bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);

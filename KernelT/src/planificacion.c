@@ -116,7 +116,7 @@ void cortoPlazo() {
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		ordenarReady();
-        enviarContextoACpu();
+    enviarContextoACpu();
 		instruccionAEjecutar();
 	}
 }
@@ -149,7 +149,6 @@ void instruccionAEjecutar() {
 				agregarAEstadoReady(ultimoEjecutado);
 				//sem_post(&cpuLibre);
 				sem_post(&planiCortoPlazo);
-
 				break;
 
 			case WAIT:
@@ -203,7 +202,7 @@ void instruccionAEjecutar() {
 		}
 	}
 
-
+/*
 void algoritmoFIFO() {
 	log_info(loggerKernel, "Empieza algoritmo FIFO");
 	t_pcb *procesoAEjec = extraerDeReady();
@@ -232,7 +231,7 @@ void algoritmoHRRN(){
 	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
 	ultimoEjecutado = procesoAEjec;
 }
-
+*/
 void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
     double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
