@@ -104,13 +104,14 @@ int tamanioSegmento(t_segmento* segmento){
 	return tamanio;
 }
 
+//Ver si lo descartamos o q la idea de la tabla de segmentos sea una t_list q tenga segmentos//
 t_tablaDeSegmentos* crearTablaDeSegmentos(uint32_t pid){
 	t_tablaDeSegmentos* tablaDeSegmentos;
 	tablaDeSegmentos->segmentos=list_create();
 	tablaDeSegmentos->pid = pid;
 	list_add(tablaDeSegmentos->segmentos, segmentoCero);
-	list_add(listaDeSegmentos, tablaDeSegmentos);
-	//memoriaOcupada+= tamanioSegmento(segmentoCero);
+	list_add(listaDeTablas, tablaDeSegmentos);
+	list_add(listaDeSegmentos, tablaDeSegmentos->segmentos);//memoriaOcupada+= tamanioSegmento(segmentoCero);
 	return tablaDeSegmentos;
 	}
 
@@ -132,25 +133,26 @@ int memoriaDisponible(){
 }
 
 void liberarTablaDeSegmentos(uint32_t pid){
-	t_tablaDeSegmentos* tablaALiberar=buscarTabla(pid);
+	t_tablaDeSegmentos* tablaALiberar= list_get(listaDeTablas, pid);
 	free(tablaALiberar->segmentos);
 	list_remove(listaDeTablas, tablaALiberar);
 	log_info(loggerMemoria, "Finalizo el proceso: %d", pid);
 }
 
-t_tablaDeSegmentos* buscarTabla(uint32_t pid){
+/* t_tablaDeSegmentos* buscarTabla(uint32_t pid){
 	int tamLista = list_size(listaDeTablas);
 	int i=0;
-	t_tablaDeSegmentos* tabla = list_get(listaDeTablas, i);
-	while(i<=tamLista && tabla->pid != pid){
+	t_tablaDeSegmentos* tabla = list_get(listaDeTablas, i);//aca ya se obtiene la tabla, no entiendo el while
+	/*while(i<=tamLista && tabla->pid != pid){
 		i++;
 	tabla=list_get(listaDeTablas, i);
 	}
 	return tabla;
 }
+*/
 /*
-//O seria que llega el id del segmento?
-void deleteSegment(t_segmento* segmentoAEliminar, uint32_t pid){
+//O seria que llega el id del segmento? ----------> le podemos enviar el id
+ * void deleteSegment(t_segmento* segmentoAEliminar, uint32_t pid){
 	t_list* tablaDeSegmentos = buscarTabla(pid);
 	int idSegmento = segmentoAEliminar->id;
 	tablaDeSegmentos->segmentos=
