@@ -5,7 +5,7 @@
  *      Author: utnso
  */
 
-
+t_superbloque superBloque;
 
 void abrirArchivo(char* nombreArchivo){
     //verificar existencia de FCB
@@ -22,7 +22,7 @@ void abrirArchivo(char* nombreArchivo){
 
 }
 //Crear Archivo: “Crear Archivo: <NOMBRE_ARCHIVO>”
-void crearArchivo(nombreDelArchivo){
+void crearArchivo(char* nombreDelArchivo){
     //hacer malloc para el fcb nuevo??
     //malloc(sizeof(t_fcb));
     //crear un archivo FCB
@@ -39,7 +39,7 @@ void crearArchivo(nombreDelArchivo){
 
 }
 //Escritura de Archivo: “Escribir Archivo: <NOMBRE_ARCHIVO> - Puntero: <PUNTERO ARCHIVO> - Memoria: <DIRECCION MEMORIA> - Tamaño: <TAMAÑO>”
-void escribirArchivo(archivo){
+void escribirArchivo(char* archivo){
     //Se deberá solicitar a la Memoria la información que se encuentra a partir de la dirección física y
 //escribirlo en los bloques correspondientes del archivo a partir del puntero recibido.
 //El tamaño de la información a leer de la memoria y a escribir en los bloques también deberá recibirse
@@ -55,23 +55,46 @@ void leerArchivo(nombreArchivo, direccionFisica, puntero, tamanio){
 
 }
 //Truncate de Archivo: “Truncar Archivo: <NOMBRE_ARCHIVO> - Tamaño: <TAMAÑO>”
-void truncarArchivo(archivo, uint32_t tamanio){
-    //Ampliar el tamaño del archivo (se agregan '/0')
+void truncarArchivo(char* archivo, uint32_t tamanio){
 	t_fcb fcb;
-    if(fcb -> tamanioArchivo > tamanio){
-    	ftruncate(archivo, tamanio); //o usar truncate
-        fcb -> tamanioArchivo = tamanio; //Al ampliar actualizar el tamaño del archivo en el FCB
-        //se le deberán asignar tantos bloques como sea necesario para poder direccionar el nuevo tamaño.
-        asignarBloques();
+	ftruncate(archivo, tamanio); //o usar truncate
+	if(tamanio >  fcb -> tamanioArchivo){ //Ampliar el tamaño del archivo (se agregan '/0')
 
-    }else{//Reducir el tamaño del archivo
-    	ftruncate(archivo, tamanio); //o usar truncate
-        //Se deberá asignar el nuevo tamaño del archivo en el FCB
-        fcb -> tamanioArchivo = tamanio;
-        //deberán marcar como libres todos los bloques que ya no sean necesarios para direccionar el tamaño del archivo
-        //(descartando desde el final del archivo hacia el principio).
-        liberarBloque();//bitarray_clean_bit(bitMap, numeroBloque))
-    }
-    log_info(loggerFS, "Truncar Archivo: %s - Tamaño: %d", archivo, tamanio);
+		fcb -> tamanioArchivo = fcb -> tamanioArchivo + tamanio; //Al ampliar actualizar el tamaño del archivo en el FCB
+		//se le deberán asignar tantos bloques como sea necesario para poder direccionar el nuevo tamaño.
+	    uint32_t tamanioAAgregar = tamanio - fcb -> tamanioArchivo;
+	    int cantidadDeBloquesAsignar = cantidadBloques(tamanioAAgregar);
+	    asignarBloques();
 
-}
+	    }else{//Reducir el tamaño del archivo
+
+	        //asignar el nuevo tamaño del archivo en el FCB
+	        fcb -> tamanioArchivo = fcb -> tamanioArchivo - tamanio;
+	        int cantidadDeBloquesLiberar = cantidadBloques(tamanio);
+	        //deberán marcar como libres todos los bloques que ya no sean necesarios para direccionar el tamaño del archivo
+	        //(descartando desde el final del archivo hacia el principio).
+	        liberarBloque();//bitarray_clean_bit(bitMap, numeroBloque))
+	    }
+	    log_info(loggerFS, "Truncar Archivo: %s - Tamaño: %d", archivo, tamanio)
+
+	}
+
+cantidadBloques(uint32_t tamanio){
+	int cantidadDeBloques = 0;
+	t_superbloque superBloque;
+	   if (tamanio == superBloque -> blockSize || tamanio < superBloque -> blockSize){
+	        cantidadDeBloques = 1
+	   }else{ //evalua que sea tamanio > bloquesize???
+	        cantidadDeBloques = (tamanio / superBloque -> blockSize) + 1;
+	   }
+	return cantidadDeBloques;
+	}
+
+/*asignarBloques(tamanio){
+	int bloques = cantidadBloquesAsignar(uint32_t tamanio);
+
+	recorrer el archivo de bloques para seleccionar nuevos bloques verificar que los bloques esten libres con el bitmap
+	y luego haccer que nuevos punteros apunten a estos bloques
+*/
+
+
