@@ -14,10 +14,6 @@
 #include <commons/collections/list.h>
 #include <utils/estructuras.h>
 
-typedef struct{
-	t_list* segmentos;
-	uint32_t pid;
-}t_tablaDeSegmentos;
 
 extern t_list* listaDeSegmentos;
 extern t_list* listaHuecosLibres;
@@ -26,15 +22,13 @@ extern t_segmento* segmentoCero;
 extern t_list * listaDeTablas;
 
 void iniciarEstructuras();
-void crearTablasDeSegmentos();
+t_list* crearTablaDeSegmentos(uint32_t pid);
 void crearSegmentoCero();
 void crearListas();
 void crearEspacioMemoria ();
 int memoriaDisponible();
 int memoriaOcupada();
-int tamanioSegmento(t_segmento* segmento);
 void liberarTablaDeSegmentos(uint32_t pid);
-t_tablaDeSegmentos* buscarTabla(uint32_t pid);
 void firstFIT(t_segmento* nuevoSegmento);
 
 

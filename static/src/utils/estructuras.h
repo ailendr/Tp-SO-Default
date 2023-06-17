@@ -95,8 +95,10 @@ typedef struct{
 typedef struct{
 	uint32_t PID;
 	uint32_t ID;
-	uint32_t limite;
 	uint32_t base;
+	uint32_t tamanio;
+	uint32_t limite;
+	int estaEnMemoria;
 }t_segmento;
 
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */
