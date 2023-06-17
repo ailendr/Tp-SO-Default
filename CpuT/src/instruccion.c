@@ -6,6 +6,8 @@
  */
 #include "instruccion.h"
 
+
+
 // INTERPRETACION DE LAS INSTRUCCIONES -----------------------------------------------------
 
 char* fetch (t_contextoEjec* cont) {
@@ -64,6 +66,7 @@ t_instruccion* decode (char* instruccion) {
 }
 
 int execute (t_instruccion* instruccion, t_contextoEjec* contexto) {
+
 
 	op_code nombreI = instruccion->nombre;
 
