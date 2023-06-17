@@ -33,20 +33,20 @@ int iniciarCliente(char *ip, char* puerto, t_log* logger)
 	        return -1;
 	    }
 	    else{
-	    	log_info(logger, "\n Socket creado con exito en la ip %s y puerto %s ", ip, puerto);
+	    	log_info(logger, "Socket creado con exito en la ip %s y puerto %s ", ip, puerto);
 	    }
 
 
 	// Ahora que tenemos el socket, vamos a conectarlo
     int conexion = connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
       if(conexion  == -1){
-        	log_info(logger, "\n Error : fallo la conexion");
+    	  	log_info(logger, " Error : Fallo la conexion");
         	freeaddrinfo(server_info);
         	return -1;
         }
 
       else {
-        	log_info(logger, "\n La conexion es exitosa");
+    	  	log_info(logger, "La conexion es exitosa");
         }
 
     freeaddrinfo(server_info);
@@ -90,7 +90,6 @@ void* serializar_paquete(t_paquete* paquete, int bytes) // pone lo del paquete p
 
 	return magic;
 }
-
 void crear_buffer(t_paquete* paquete)
 {
 	paquete->buffer = malloc(sizeof(t_buffer));
@@ -123,8 +122,37 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente)
 
 	send(socket_cliente, a_enviar, bytes, 0);
 
+
 	free(a_enviar);
 }
+
+int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger,char* nombrePaq)
+{
+	int bytes = paquete->buffer->size + 2*sizeof(int);
+	printf("el tamaño de paquete %d \n", paquete->buffer->size );
+
+	void* a_enviar = serializar_paquete(paquete, bytes);
+
+	int returnSend=send(socket_cliente, a_enviar, bytes, 0);
+	free(a_enviar);
+
+	if(returnSend == -1){
+			log_info(logger, "Error al enviar el Paquete de %s:", nombrePaq);
+			return -1;
+		}
+		else{
+			log_info(logger, "He podido enviar el Paquete de %s", nombrePaq );
+		}
+	return 0;
+}
+void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger,t_config* config, char* nombrePaq){
+	if(enviarPaquete(paquete, socket_cliente, logger, nombrePaq) == -1){
+			log_info(logger, "Fallo la conexion. Terminando Modulo");
+			terminarModulo(socket_cliente, logger, config);
+			exit(1);
+		}
+}
+
 
 
 void eliminar_paquete(t_paquete* paquete)
@@ -135,13 +163,13 @@ void eliminar_paquete(t_paquete* paquete)
 }
 
 ///Mensaje de protocolo//
-int enviarProtocolo(int conexion, t_log* logger){
-	uint32_t handshake = 1;
-	uint32_t resultado = 2 ;//Lo inicialice asi para verificar que funcione el recv en los hilos
-	int returnSend = send(conexion, &handshake, sizeof(uint32_t), 0);
+int enviarProtocolo(int conexion,t_handshake handshake,t_log* logger){
+	uint32_t protocolo = handshake;
+	uint32_t resultado = 0;//Lo inicialice asi para verificar que funcione el recv en los hilos
+	int returnSend = send(conexion, &protocolo, sizeof(uint32_t), 0);
 
 	if(returnSend == -1){
-		log_info(logger, "Error al enviar el mensaje de protocolo");
+		log_info(logger, "Error al enviar el mensaje de protocolo ");
 		return -1;
 	}
 	else{
@@ -151,11 +179,11 @@ int enviarProtocolo(int conexion, t_log* logger){
 	recv(conexion, &resultado, sizeof(uint32_t), MSG_WAITALL);
 
 	if(resultado == -1){
-		log_info(logger,"No cumple el protocolo.Terminando la conexion");
+		log_info(logger,"Fallo el Protocolo de Comunicacion.Terminando la conexion");
 		return -1;
 	}
-	else if(resultado == 0){
-		log_info(logger, "El valor devuelto cumple con el protocolo");
+	else if(resultado == HANDSHAKE_Ok){
+		log_info(logger, "Protocolo de Comunicacion exitoso");
 	}
 
 	return 0;
@@ -186,6 +214,13 @@ int iniciarServidor(char*  ip, char* puerto)
 			                 servinfo->ai_socktype,
 							 servinfo->ai_protocol);
 
+	//Agrego configuracion para no esperar al matar y levantar los servidores//
+
+	if (setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0)
+	    perror("setsockopt(SO_REUSEADDR) failed");
+	/*int reuse = 1;
+	    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
+	        perror("setsockopt(SO_REUSEADDR) failed");*/
 	// Asociamos el socket a un puerto
 	/* USAMOS BIND QUE ES EL PEGAMENTO A UN PUERTO*/
 	bind(socket_servidor, servinfo-> ai_addr, servinfo->ai_addrlen);
@@ -220,8 +255,12 @@ int esperar_cliente(int socket_servidor, t_log* logger)
 int recibir_operacion(int socket_cliente)
 {
 	int cod_op;
-	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
+	int recvNum = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
+	printf("recv %d", recvNum);
+	if(recvNum > 0){
+		printf("el cod op es : %d", cod_op);
 		return cod_op;
+	}
 	else
 	{
 		close(socket_cliente);
@@ -243,6 +282,7 @@ void* recibir_buffer(int* size, int socket_cliente)
 
 	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
 	buffer = malloc(*size);
+	printf("el tamaño de size %d \n", &size);
 	recv(socket_cliente, buffer, *size, MSG_WAITALL);
 
 	return buffer;
@@ -271,36 +311,61 @@ t_list* recibir_paquete(int socket_cliente)
 }
 //Mensaje de protocolo: no tiene el log por parametro porq habria que pasarselo por el hilo y no puede pasarse multiples parametros al menos que sea un puntero a un struct pero paja//
 
+//Usando solo para kernel///
 void recibirProtocolo (int* socket_cliente){
 	int conexionNueva = *socket_cliente;
 	//printf("Hilo en curso: Esperando mensaje del socket con file descriptor %d", conexionNueva);
 
 	uint32_t handshake;
-	uint32_t resultado_ok = 0;
+	uint32_t resultado_ok = HANDSHAKE_Ok;
 	uint32_t resultado_error = - 1;
 
 	recv(conexionNueva, &handshake, sizeof(uint32_t), MSG_WAITALL);
-     if(handshake == 1)
+     if(handshake == HANDSHAKE_Consola)
 	   send(conexionNueva, &resultado_ok, sizeof(uint32_t), 0);
 	 else
 	   send(conexionNueva, &resultado_error, sizeof(uint32_t), 0);
 
-	close(conexionNueva);
-	free(socket_cliente);
+	//close(conexionNueva);
+	//free(socket_cliente);
 }
 
-void recibirHandshake(int socket_cliente){
-	printf("\n Esperando mensaje del socket con file descriptor %d", socket_cliente);
+void recibirHandshake(int socket_cliente,t_handshake handshake,t_log* logger){
+	log_info(logger, "Esperando mensaje del cliente ");
 
-		uint32_t handshake;
-		uint32_t resultado_ok = 0;
+		uint32_t protocolo;
+		uint32_t resultado_ok = HANDSHAKE_Ok;
 		uint32_t resultado_error = - 1;
 
-     recv(socket_cliente, &handshake, sizeof(uint32_t), MSG_WAITALL);
-		if(handshake == 1)
+        int returnRecv = recv(socket_cliente, &protocolo, sizeof(uint32_t), MSG_WAITALL);
+    	 if(returnRecv == -1){
+    		 log_info(logger, "Error al recibir el mensaje \n");
+    	 	 }
+    	 else if(returnRecv==0){
+    		 log_info(logger, "El cliente se ha desconectado \n");
+    	 	 }
+
+
+		if(protocolo == handshake){
 			   send(socket_cliente, &resultado_ok, sizeof(uint32_t), 0);
-			else
+				log_info(logger, "El cliente cumple con el Protocolo de Comunicacion");
+			}
+		else{
 			   send(socket_cliente, &resultado_error, sizeof(uint32_t), 0);
+			}
 }
 
+//---------Terminar Modulo------///
+void terminarModulo(int conexion, t_log* logger, t_config* config)
+{
 
+	if(logger != NULL){
+		log_destroy(logger);
+	}
+
+	if(config != NULL){
+		config_destroy(config);
+	}
+
+	close (conexion);
+}

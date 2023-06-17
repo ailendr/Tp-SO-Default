@@ -12,7 +12,7 @@ char* puertoMemoria(){
 }
 
 char* IP_Escucha(){
-	return config_get_string_value(configCPU, "IP_CPU");
+	return config_get_string_value(configCPU, "IP_ESCUCHA");
 }
 
 char* puertoEscucha(){

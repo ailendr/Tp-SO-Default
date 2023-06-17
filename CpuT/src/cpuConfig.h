@@ -9,6 +9,9 @@
 #define SRC_CPUCONFIG_H_
 
 #include <utils/modulo.h>
+#include <commons/string.h>
+#include <utils/sockets.h>
+#include <utils/serializacion.h>
 
 extern t_log* loggerCPU;
 extern t_config* configCPU;

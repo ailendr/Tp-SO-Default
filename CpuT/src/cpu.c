@@ -1,62 +1,60 @@
 #include "./cpu.h"
 
-int main(void) {
 
-	printf ("Hola soy cpu y estoy queriendo recibir mensajes\n ");
+int main(/*int argc, char** argv*/) {
 
-	loggerCPU = log_create("cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
+	/*
+	if(argc < 2){
+		printf ("Faltan argumentos para poder ejecutar CPU. Revisar el llamado");
+		return EXIT_FAILURE;
+	}
 
-	log_info(loggerCPU, "---------------------------------------------------------------------------");
+	if(argc > 2){
+		printf ("Se invoca a CPU con demasiados argumentos. Revisar el llamado");
+		return EXIT_FAILURE;
+	}
+	*/
 
-	log_info(loggerCPU, "Iniciando CPU...");
 
-	int servidorCpu = 0;
+	char* instr;
 
-	configCPU = config_create("../CpuT/cpu.config");
-	if(verificarConfig (servidorCpu, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+	t_instruccion* nuevaInstr = NULL;
+	void* buffer = NULL;
+	int tamanio = 0;
 
-	printf ("\n El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
-	log_info(loggerCPU, "Iniciando conexion con Memoria ... \n");
+	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
 
-	int socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerCPU);
-	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ) return EXIT_FAILURE;
+	while (1){
 
-	log_info(loggerCPU, "Enviando mensaje a Memoria para corroborar conexion \n");
-    if(enviarProtocolo(socketMemoria, loggerCPU) == -1){
-    	terminarModulo(socketMemoria,loggerCPU, configCPU);
-    	return EXIT_FAILURE;
-    }
+		int codigo = recibir_operacion(cliente);
+		if(codigo == -1) {
+			log_info(loggerCPU, "se cayo kernel");
+			break;
+		}
+		if (codigo != CONTEXTO){
+			log_info(loggerCPU, "No se recibio un contexto");
 
-    log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel... \n");
-    servidorCpu = iniciarServidor(IP_Escucha(), puertoEscucha());
-    if(verificarSocket (servidorCpu, loggerCPU, configCPU) == 1 ){
-    	close(socketMemoria);
-    	return EXIT_FAILURE;
-    }
-    log_info(loggerCPU, "Servidor listo para recibir al Kernel");
+		}
+		else{
+		log_info(loggerCPU, "Se recibio el buffer del contexto");
+		buffer = recibir_buffer(&tamanio, cliente);
+		contextoRecibido = deserializarContexto(buffer, tamanio);
 
- 	log_info(loggerCPU ,"Esperando un Cliente ... \n");
-    int cliente = esperar_cliente(servidorCpu, loggerCPU);
-    if( verificarSocket (cliente, loggerCPU, configCPU) == 1 ){
-    	close(servidorCpu);
-    	close(socketMemoria);
-        return EXIT_FAILURE;
-    }
-    recibirHandshake(cliente);
+		if (contextoRecibido->pid != -1){
 
-    /*
-     ----------------------------------------------------
-     TODO
-     fetch()
-     Decode()
-     Execute()
+			log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
+			instr = fetch (contextoRecibido);
+			nuevaInstr = decode (instr);
+			execute (nuevaInstr, contextoRecibido);
+		}
+		else {
+			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
+		}
+		}
+	}
 
-     Traducir direcciones logicas a fisicas
-
-     Actualizando el contexto de ejecucion
-     ----------------------------------------------------
-     */
+	free(buffer);
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);
@@ -68,4 +66,7 @@ int main(void) {
 	return EXIT_SUCCESS;
 
 }
+
+
+
 

@@ -1,4 +1,4 @@
-#include "KernelConfig.h"
+#include "kernelConfig.h"
 
 t_log* loggerKernel;
 t_config* configKernel;
@@ -34,11 +34,11 @@ char* Algoritmo(){
 	return config_get_string_value(configKernel, "ALGORITMO_PLANIFICACION");
 }
 
-int Estimacion(){
-	return config_get_int_value(configKernel, "ESTIMACION_INICIAL");
+double Estimacion(){
+	return config_get_double_value(configKernel, "ESTIMACION_INICIAL");
 }
 
-int Alfa(){
+double Alfa(){
 	return config_get_double_value(configKernel, "HRRN_ALFA");
 }
 

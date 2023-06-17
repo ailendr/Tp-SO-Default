@@ -9,9 +9,10 @@
 #define SRC_KERNEL_H_
 
 #include <utils/sockets.h>
-#include "KernelConfig.h"
-#include "KernelGlobales.h"
+#include "kernelConfig.h"
+#include "kernelGlobales.h"
 #include "planificacion.h"
+
 
 
 void iterator(char* value);
