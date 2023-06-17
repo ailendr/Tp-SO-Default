@@ -86,24 +86,37 @@ void largoPlazo() {
 		sem_post(&planiCortoPlazo);
 	}
 }
+void ordenarReady(){
+	if (strcmp(Algoritmo(), "HRRN")==0){
+		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
+		list_iterate(colaReady, (void*) calcularNuevaEstimacion);
+		list_iterate(colaReady, (void*) calcularRR);
+		list_sort(colaReady, (void*)comparadorRR);
+	}
+	else {
+		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
+}
+
+void enviarContextoACpu(){
+		t_pcb* procesoAEjec=extraerDeReady();
+		log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
+		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
+		procesoAEjecutar(contextoAEjec);
+		procesoAEjec->estadoPcb = EXEC;
+		logCambioDeEstado(procesoAEjec, "READY", "EXEC");
+		if(strcmp(Algoritmo(), "HRRN")==0){
+		clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
+		}
+		ultimoEjecutado = procesoAEjec;
+}
 
 void cortoPlazo() {
 	while (1) {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
-        sem_wait(&cpuLibre);
-		char *algoritmo = Algoritmo();
-		if (strcmp(algoritmo, "FIFO") == 0) {
-			algoritmoFIFO();
-		}
-		else if (strcmp(algoritmo, "HRRN")==0){
-			algoritmoHRRN();
-		}else{
-			log_info(loggerKernel, "El algoritmo obtenido por archivo de config no es válido");
-			exit(1);
-		}
-
+		ordenarReady();
+        enviarContextoACpu();
 		instruccionAEjecutar();
 	}
 }
@@ -123,14 +136,20 @@ void instruccionAEjecutar() {
 		int codigo = recibir_operacion(socketCPU);
 		switch(codigo){
 			case EXIT:
+				log_info(loggerKernel, "Intruccion EXIT");
+				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
+				free(instruccionExit);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				break;
 			case YIELD:
-				if(strcmp(Algoritmo(),"HRRN")==0){
-					tiempoEnCPU(ultimoEjecutado);
-				}
+				log_info(loggerKernel, "Intruccion YIELD");
+				t_instruccion* instruccionYield = obtenerInstruccion(socketCPU,0);
+				free(instruccionYield);
+				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
-				sem_post(&cpuLibre);
+				//sem_post(&cpuLibre);
+				sem_post(&planiCortoPlazo);
+
 				break;
 
 			case WAIT:
@@ -140,8 +159,10 @@ void instruccionAEjecutar() {
 				char* recursoAConsumir = instruccionWait->param1;
 				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
 				free(instruccionWait);
+				sem_post(&planiCortoPlazo);
 				break;
 			case SIGNAL:
+				log_info(loggerKernel, "Intruccion SIGNAL");
 				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
 				char* recursoALiberar = instruccionSignal->param1;
 				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
@@ -149,6 +170,8 @@ void instruccionAEjecutar() {
 
 				break;
 			case IO:
+				log_info(loggerKernel, "Intruccion IO");
+				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
 				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
 				int* tiempoDeIO = malloc(sizeof(int));
@@ -217,6 +240,7 @@ void calcularNuevaEstimacion(t_pcb* proceso) {
 }
 
 void tiempoEnCPU(t_pcb* proceso){
+	if(strcmp("HRRN", Algoritmo())==0){
     struct timespec end;
     clock_gettime(CLOCK_REALTIME, &end);
 
@@ -225,7 +249,7 @@ void tiempoEnCPU(t_pcb* proceso){
     double elapsed = seconds + nanoseconds*1e-9;
 
     proceso->ultimaRafagaEjecutada=elapsed;
-
+	}
 }
 
 void calcularRR(t_pcb* proceso) {
@@ -282,8 +306,8 @@ void generarProceso(int *socket_cliente) {
 		close(consolaNueva);//cierro la conexion con esa consola
 	}
 	else{
-	loggearListaDeIntrucciones(instrucciones);
 	pthread_mutex_lock(&mutexPID);
+	loggearListaDeIntrucciones(instrucciones);//Lo puse adentro porq muestra el pid
 	t_pcb *procesoNuevo = crearPcb(instrucciones, pid, consolaNueva);
 	pid++;
 	pthread_mutex_unlock(&mutexPID);
@@ -314,7 +338,8 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
-	sem_post(&cpuLibre);
+	//sem_post(&cpuLibre);
+	sem_post(&planiCortoPlazo);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
@@ -323,11 +348,12 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 	 -----------                         si esta decrementa o incrementa la instancia*/
 	int posicionRecurso = recursoDisponible(nombreRecurso);
 		if(posicionRecurso ==-1){
-			finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+			finalizarProceso(ultimoEjecutado, "Recurso No Existente");
 		}
 		else{
 			int* pvalor = list_get(listaDeInstancias,posicionRecurso);
 			int valor = *pvalor;
+			//free(pvalor); Preguntar como liberar una lista de punteross
 			switch (nombreInstruccion){
 			case 1: //1=WAIT
 				valor --;
@@ -339,9 +365,10 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				ultimoEjecutado->estadoPcb = BLOCK;
 				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
-				sem_post(&cpuLibre);
 				 }
-				 else{procesoAEjecutar(contextoActualizado);} //En el caso de estar disponible el recurso supongo q cpu sigue ejecutando las demas instrucciones de este contexto
+				 else{
+					 procesoAEjecutar(contextoActualizado); //Sigue en cpu
+					 }
 				break;
 			case 2://2=SIGNAL
 				valor ++;
@@ -350,7 +377,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
-				procesoAEjecutar(contextoActualizado);
+				procesoAEjecutar(contextoActualizado);//Sigue en cpu
 				break;
 			 }
 			}
@@ -359,20 +386,21 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 ////---Funcion de IO---///
 void bloquearHilo(int* tiempo){
 	int tiempoDeBloqueo = *tiempo;
-	t_pcb* procesoBloqueado = ultimoEjecutado;//Agrego esta variable porq sino cuando corto plazo ejecute paralelamente estaria modificando al ultimoEjecutado y tendriamos algo inconsistente
+	t_pcb* procesoBloqueado = ultimoEjecutado;
+	tiempoEnCPU(procesoBloqueado);
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
     logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
-    sem_post(&cpuLibre);
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
+	sem_post(&planiCortoPlazo);
 }
 
 //Logueo de las instrucciones para verificar que esta todo ok//
 void loggearListaDeIntrucciones(t_list* instrucciones){
 	int tamanioListaInstrucciones = list_size(instrucciones);
-	log_info(loggerKernel, "La lista de instrucciones del proceso es:");
+	log_info(loggerKernel, "La lista de instrucciones del proceso %d es:", pid);
 		for (int i = 0; i < tamanioListaInstrucciones; i++){
 			 char* instruccion= list_get(instrucciones,i);
 			 log_info(loggerKernel, "%s", instruccion);

@@ -4,6 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "./utilsCpu.h"
+#include "./instruccion.h"
 
 #endif
