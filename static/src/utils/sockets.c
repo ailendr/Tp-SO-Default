@@ -129,9 +129,13 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente)
 int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger,char* nombrePaq)
 {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
+	printf("el tamaño de paquete %d \n", paquete->buffer->size );
+
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
 	int returnSend=send(socket_cliente, a_enviar, bytes, 0);
+	free(a_enviar);
+
 	if(returnSend == -1){
 			log_info(logger, "Error al enviar el Paquete de %s:", nombrePaq);
 			return -1;
@@ -140,7 +144,6 @@ int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger,char* no
 			log_info(logger, "He podido enviar el Paquete de %s", nombrePaq );
 		}
 	return 0;
-	free(a_enviar);
 }
 void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger,t_config* config, char* nombrePaq){
 	if(enviarPaquete(paquete, socket_cliente, logger, nombrePaq) == -1){
@@ -254,8 +257,10 @@ int recibir_operacion(int socket_cliente)
 	int cod_op;
 	int recvNum = recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL);
 	printf("recv %d", recvNum);
-	if(recvNum > 0)
+	if(recvNum > 0){
+		printf("el cod op es : %d", cod_op);
 		return cod_op;
+	}
 	else
 	{
 		close(socket_cliente);
@@ -277,6 +282,7 @@ void* recibir_buffer(int* size, int socket_cliente)
 
 	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
 	buffer = malloc(*size);
+	printf("el tamaño de size %d \n", &size);
 	recv(socket_cliente, buffer, *size, MSG_WAITALL);
 
 	return buffer;

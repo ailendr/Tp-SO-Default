@@ -28,12 +28,15 @@ int main(/*int argc, char** argv*/) {
 	while (1){
 
 		int codigo = recibir_operacion(cliente);
-
-		if (codigo != CONTEXTO){
-			log_info(loggerCPU, "No se recibio un contexto");
+		if(codigo == -1) {
+			log_info(loggerCPU, "se cayo kernel");
 			break;
 		}
+		if (codigo != CONTEXTO){
+			log_info(loggerCPU, "No se recibio un contexto");
 
+		}
+		else{
 		log_info(loggerCPU, "Se recibio el buffer del contexto");
 		buffer = recibir_buffer(&tamanio, cliente);
 		contextoRecibido = deserializarContexto(buffer, tamanio);
@@ -48,7 +51,7 @@ int main(/*int argc, char** argv*/) {
 		else {
 			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
 		}
-
+		}
 	}
 
 	free(buffer);

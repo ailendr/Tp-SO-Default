@@ -116,7 +116,7 @@ void cortoPlazo() {
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		ordenarReady();
-        sem_wait(&cpuLibre);
+        //sem_wait(&cpuLibre);
         enviarContextoACpu();
 		instruccionAEjecutar();
 	}
@@ -138,14 +138,16 @@ void instruccionAEjecutar() {
 		switch(codigo){
 			case EXIT:
 				log_info(loggerKernel, "Intruccion EXIT");
+				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
+				t_instruccion* instruccionYield = obtenerInstruccion(socketCPU,0);
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
 				sem_post(&planiCortoPlazo);
-				sem_post(&cpuLibre);
+				//sem_post(&cpuLibre);
 				break;
 
 			case WAIT:
@@ -157,7 +159,7 @@ void instruccionAEjecutar() {
 				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
 				free(instruccionWait);
 				sem_post(&planiCortoPlazo);
-				sem_post(&cpuLibre);
+				//sem_post(&cpuLibre);
 				break;
 			case SIGNAL:
 				log_info(loggerKernel, "Intruccion SIGNAL");
@@ -336,7 +338,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
-	sem_post(&cpuLibre);
+	sem_post(&planiCortoPlazo);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
