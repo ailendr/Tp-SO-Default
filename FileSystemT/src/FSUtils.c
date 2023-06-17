@@ -9,6 +9,7 @@
 
 int servidorFS;
 int socketMemoria;
+int cliente;
 
 int iniciarMemoria (){
 	log_info(loggerFS, "Realizando Conexion con Memoria");
@@ -32,7 +33,7 @@ int iniciarMemoria (){
 	return 0;
 }
 
-int iniciarServidor (){
+int iniciarServKernel (){
 	log_info(loggerFS, "Creando Servidor para futuras peticiones");
 	servidorFS = iniciarServidor(IP_Escucha(), puertoEscucha());
 
@@ -40,6 +41,16 @@ int iniciarServidor (){
 		close (socketMemoria);
 		return EXIT_FAILURE;
 	}
+	log_info(loggerFS, "Esperando que se conecte Kernel");
+
+	cliente = esperar_cliente(servidorFS, loggerFS);
+	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
+	    close(servidorFS);
+	    close(cliente);
+	    return EXIT_FAILURE;
+	}
+
+	recibirHandshake(cliente);
 	log_info(loggerFS, "Ok -> Servidor de Peticiones");
 
 	return 0;

@@ -22,8 +22,11 @@ Notas de guia para File System
     - Archivo Bloque
     - Bitmap
 - Inicializar semaforos
+- Iniciar los dos hilos
+    - Atencion :ok:
+    - Ejecutor 
+        - Falta funcion
 - Atender peticiones
-    - Crear un hilo por cada peticion
     - Recibimos peticion nueva
     - Listar nueva peticion para tener un orden (lista de instrucciones)
     - Se realiza la accion pedida
@@ -37,3 +40,4 @@ Notas de guia para File System
     - Cerramos peticion
 - Finalizar y liberar todo 
     - Falta semaforos
+    - Falta hilos

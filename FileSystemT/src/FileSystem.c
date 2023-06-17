@@ -38,7 +38,7 @@ int main(/*int argc, char** argv*/) {
 
 	// REALIZAR LAS CONEXIONES CON EL CLIENTE Y EL SERVIDOR -----------------------------------------
 	iniciarMemoria ();
-	iniciarServidor ();
+	iniciarServKernel ();
 
 	// INICIALIZAR ESTRUCTURAS ----------------------------------------------------------------------
 	iniciarEstructuras();
@@ -46,6 +46,16 @@ int main(/*int argc, char** argv*/) {
 
 	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
 
+
+	// INICIALIZAR HILO  ----------------------------------------------------------------------------
+    pthread_t hiloEjecutor;
+    pthread_t hiloAtencion;
+
+	pthread_create(&hiloAtencion,NULL,(void*)atenderPeticiones,NULL);
+	pthread_create(&hiloEjecutor,NULL,(void*)ejecutarPeticiones,NULL);
+
+	pthread_detach(hiloAtencion);
+	pthread_detach(hiloEjecutor);
 
 	// ATENDER PETICIONES ---------------------------------------------------------------------------
 		//A medida que vayamos terminando las peticiones hay que terminar el cliente por eso no terminamos el cliente abajo
@@ -65,12 +75,7 @@ int main(/*int argc, char** argv*/) {
 
  /*
 
-    int cliente = esperar_cliente(servidorFS, loggerFS);
-    if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
-    	close(servidorFS);
-    	return EXIT_FAILURE;
-    }
-    recibirHandshake(cliente);
+
 
 
 

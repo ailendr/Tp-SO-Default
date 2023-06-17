@@ -12,8 +12,9 @@
 
 extern int servidorFS;
 extern int socketMemoria;
+extern int cliente;
 
 int iniciarMemoria ();
-int iniciarServidor ();
+int iniciarServKernel ();
 
 #endif /* SRC_FSUTILS_H_ */

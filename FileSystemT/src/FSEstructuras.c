@@ -9,6 +9,7 @@
 
 t_superbloque* superBloque;
 t_bitarray* bitMap;
+t_list peticiones;
 
 static t_superbloque* crearSuperbloque(uint32_t block_size, uint32_t block_count){
 	t_superbloque* sb;

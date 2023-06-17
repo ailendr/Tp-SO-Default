@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "bloques.h"
+#include "peticiones.h"
+
+//Creo que podriamos eliminar esto y dejar que llame directamente a peticiones
 
 #endif
