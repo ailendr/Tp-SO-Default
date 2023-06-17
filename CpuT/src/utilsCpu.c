@@ -7,8 +7,9 @@
 
 #include "./utilsCpu.h"
 
-
-
+int servidorCpu;
+int socketMemoria;
+int cliente;
 
 int iniciarCpu (char* pathConfig){
 
@@ -39,13 +40,16 @@ int iniciarSocketsCpu(){
 	/*
 	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
 	log_info(loggerCPU, "Realizando Conexion con Memoria");
+
 	socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerCPU);
 	if( verificarSocket (socketMemoria, loggerCPU, configCPU) == 1 ){
 		close (servidorCpu);
 		close(cliente);
 		return 1;
 	}
+
 	log_info(loggerCPU, "Enviando mensaje a Memoria para corroborar conexion \n");
+
 	if(enviarProtocolo(socketMemoria,HANDSHAKE_Cpu, loggerCPU) == -1){
 		log_info(loggerCPU, "Failed -> Conexion Memoria");
 		terminarModulo(socketMemoria,loggerCPU, configCPU);
@@ -54,6 +58,10 @@ int iniciarSocketsCpu(){
 	    return 1;
 	}
 	log_info(loggerCPU, "Ok -> Conexion Memoria");
+
+	int tamSeg = tamSegmento();
+
+	send(socketMemoria, tamSegs, sizeof(int), 0);
 	*/
 	// CONEXION CON KERNEL -----------------------------------------------------------------------------
     log_info(loggerCPU, "---------------------------------------------------------------------------");
@@ -78,5 +86,4 @@ int iniciarSocketsCpu(){
 
 	return 0;
 }
-
 
