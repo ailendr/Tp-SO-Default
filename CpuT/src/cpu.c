@@ -35,6 +35,8 @@ int main(/*int argc, char** argv*/) {
 
 		int codigo = recibir_operacion(cliente);
 
+
+
 		if (codigo != CONTEXTO){
 			log_info(loggerCPU, "No se recibio un contexto");
 			break;
@@ -53,6 +55,8 @@ int main(/*int argc, char** argv*/) {
 				nuevaInstr = decode (instr);
 				verificador = execute (nuevaInstr, contextoRecibido);
 			}
+
+			verificador = 0;
 
 			paqueteC = serializarContexto(contextoRecibido);
 			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
