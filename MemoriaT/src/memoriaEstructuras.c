@@ -35,8 +35,9 @@ void crearSegmentoCero(){
 	segmentoCero = malloc(sizeof(t_segmento));
 	segmentoCero->ID=0;
 	segmentoCero->base=0;
-	segmentoCero->limite = tam_segmento_cero();
+	segmentoCero->limite = tam_segmento_cero();//Es lo mismo que hacer base + tamanio en este caso
 	segmentoCero->tamanio=tam_segmento_cero();
+	segmentoCero->estaEnMemoria=1;
 	list_add(listaDeSegmentos, segmentoCero);
 
 }
@@ -105,11 +106,12 @@ void deleteSegment(t_segmento* segmentoAEliminar, int id){
   		i++;
   		segmento=list_get(listaDeSegmentos, i);
  	}
-	list_remove(listaDeSegmentos, i);
 	//Actualizo la tabla de segmentos del proceso
 	uint32_t pid = segmento->PID;
 	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
-	list_remove(tablaDeSegmentosAActualizar, i);
+	list_remove_element(tablaDeSegmentosAActualizar, segmento);
+	segmento->estaEnMemoria=0;
+	//Esto es por si usamos la lista de huecos libres
 	list_add(listaHuecosLibres, segmento);
 }
 
