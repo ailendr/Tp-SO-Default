@@ -5,15 +5,15 @@
  *      Author: utnso
  */
 
-#ifndef SRC_ESTRUCTURASFS_H_
-#define SRC_ESTRUCTURASFS_H_
+#ifndef SRC_FSESTRUCTURAS_H_
+#define SRC_FSESTRUCTURAS_H_
 
 #include <sys/mman.h>
-#include "FSConfig.h"
 #include <commons/bitarray.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "FSUtils.h"
 
 typedef enum{
 	BITMAP,
@@ -21,7 +21,9 @@ typedef enum{
 }estructura;
 
 typedef struct{
+	uint32_t numBloque;
 	uint32_t tamBloque;
+	char* datosBloque;
 }t_bloque;
 
 typedef struct{
@@ -64,4 +66,4 @@ mmap () crea una nueva asignación en el espacio de direcciones virtuales del
 
  */
 
-#endif /* SRC_ESTRUCTURASFS_H_ */
+#endif /* SRC_FSESTRUCTURAS_H_ */

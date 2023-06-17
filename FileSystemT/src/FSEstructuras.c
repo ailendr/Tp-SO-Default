@@ -5,7 +5,7 @@
  *      Author: utnso
  */
 
-#include "estructurasfs.h"
+#include "FSEstructuras.h"
 
 t_superbloque* superBloque;
 t_bitarray* bitMap;
@@ -76,11 +76,19 @@ void iniciarSuperBloque(){
 }
 
 void iniciarArchivoDeBloques(char* pathArch){
+
 	int cantidadBloques = superBloque -> blockCount;
+	int i = 0;
+
+	for(i; i<cantidadBloques; i++){
+
+	}
+
+
+
+	//--------------------------------------------------------------------------------------------------------
 	t_bloque* arrayBloques[cantidadBloques];
 
-	//uint32_t cantidadBloques = superBloque -> blockCount;
-	//crearBLoque(cantidadBloques);
 	//t_bloque* arrayBloques[cantidadBloques];
 	//log_info(loggerFS, "");
 	//t_bloque* bloque;

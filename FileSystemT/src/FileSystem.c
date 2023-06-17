@@ -3,8 +3,22 @@
 #include "FileSystem.h"
 
 
-int main(void) {
-    // agregar argc?
+int main(/*int argc, char** argv*/) {
+
+	// VERIFICAR QUE SE LLAMA CORRECTAMENTE A FILESYSTEM --------------------------------------------
+	/*
+	if(argc < 2){
+		printf ("Faltan argumentos para poder ejecutar FILE SYSTEM. Revisar el llamado");
+		return EXIT_FAILURE;
+	}
+
+	if(argc > 2){
+		printf ("Se invoca a FILE SYSTEM con demasiados argumentos. Revisar el llamado");
+		return EXIT_FAILURE;
+	}
+	*/
+
+	// CREACION DE LOGGER Y CONFIG ------------------------------------------------------------------
 	printf("Hola soy FileSystem y soy servidor de Kernel y me conecto a Memoria \n ");
 
 	loggerFS = log_create("FileSystem.log", "FS",1,LOG_LEVEL_DEBUG);
@@ -12,39 +26,45 @@ int main(void) {
 	log_info(loggerFS, "---------------------------------------------------------------------------");
 	log_info(loggerFS, "Iniciando FileSystem...");
 
-    int servidorFS = 0;
+    servidorFS = 0;
 
+    //configFS = config_create(argv[1]);
 	configFS = config_create("../FileSystemT/filesystem.config");
 
 	if(verificarConfig (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
-	//iniciarEstructuras();
+	printf ("El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
-	char* puerto = puertoEscucha();
-	char* ip = IP_Escucha();
 
-	printf ("El valor recuperado de la ip es %s con el puerto %s\n", ip, puerto);
+	// REALIZAR LAS CONEXIONES CON EL CLIENTE Y EL SERVIDOR -----------------------------------------
+	iniciarMemoria ();
+	iniciarServidor ();
 
+	// INICIALIZAR ESTRUCTURAS ----------------------------------------------------------------------
 	iniciarEstructuras();
+
+
+	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
+
+
+	// ATENDER PETICIONES ---------------------------------------------------------------------------
+		//A medida que vayamos terminando las peticiones hay que terminar el cliente por eso no terminamos el cliente abajo
+
+
+	// FINALIZAR MODULO -----------------------------------------------------------------------------
+	log_info(loggerFS, "Finalizando File System...\n");
+
+	//finalizar semaforos TODO
+	terminarModulo(servidorFS, loggerFS, configFS);
+	close (socketMemoria);
+
+	printf ("\n Finalizo File System correctamente\n ");
+
+	return EXIT_SUCCESS;
+}
+
  /*
-	//log_info(loggerFS, "Iniciando conexion con Memoria ... \n");
-	//char* ipM = IP_Memoria();
-	char* puertoM = puertoMemoria();
 
-	int socketMemoria = iniciarCliente(ipM, puertoM, loggerFS);
-	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
-
-	log_info(loggerFS, "Enviando mensaje \n");
-    if(enviarProtocolo(socketMemoria, loggerFS) == -1){
-        terminarModulo(socketMemoria,loggerFS, configFS);
-        return EXIT_FAILURE;
-    }
-
-    log_info(loggerFS, "Iniciando Servidor ... \n");
-    servidorFS = iniciarServidor(ip, puerto);
-    if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
-    log_info(loggerFS, "Servidor listo para recibir al cliente \n" );
-    log_info(loggerFS, "Esperando un Cliente ... \n");
     int cliente = esperar_cliente(servidorFS, loggerFS);
     if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
     	close(servidorFS);
@@ -54,14 +74,7 @@ int main(void) {
 
 
 
-	log_info(loggerFS, "Finalizando File System...\n");
 
-	terminarModulo(cliente, loggerFS, configFS);
-	close (socketMemoria);
-	close (servidorFS);
+
 */
-	printf ("\n Finalizo File System correctamente\n ");
-
-	return EXIT_SUCCESS;
-}
 

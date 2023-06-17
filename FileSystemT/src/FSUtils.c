@@ -1,0 +1,46 @@
+/*
+ * conexionFS.c
+ *
+ *  Created on: Jun 17, 2023
+ *      Author: utnso
+ */
+
+#include "FSUtils.h"
+
+int servidorFS;
+int socketMemoria;
+
+int iniciarMemoria (){
+	log_info(loggerFS, "Realizando Conexion con Memoria");
+
+	int socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerFS);
+	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) {
+		close (servidorFS);
+		return EXIT_FAILURE;
+	}
+
+	log_info(loggerFS, "Enviando mensaje \n");
+    if(enviarProtocolo(socketMemoria, loggerFS) == -1){
+		log_info(loggerFS, "Failed -> Conexion Memoria");
+        terminarModulo(socketMemoria,loggerFS, configFS);
+        close (servidorFS);
+        return EXIT_FAILURE;
+    }
+
+	log_info(loggerFS, "Ok -> Conexion Memoria");
+
+	return 0;
+}
+
+int iniciarServidor (){
+	log_info(loggerFS, "Creando Servidor para futuras peticiones");
+	servidorFS = iniciarServidor(IP_Escucha(), puertoEscucha());
+
+	if( verificarSocket (servidorFS, loggerFS, configFS) == 1 ){
+		close (socketMemoria);
+		return EXIT_FAILURE;
+	}
+	log_info(loggerFS, "Ok -> Servidor de Peticiones");
+
+	return 0;
+}

@@ -3,6 +3,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "FSConfig.h"
+#include "bloques.h"
 
 #endif

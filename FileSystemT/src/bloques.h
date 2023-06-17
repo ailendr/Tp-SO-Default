@@ -8,7 +8,7 @@
 #ifndef SRC_BLOQUES_H_
 #define SRC_BLOQUES_H_
 
-#include "estructurasfs.h"
+#include "FSEstructuras.h"
 
 extern pthread_mutex_t mutexBlocks;
 
