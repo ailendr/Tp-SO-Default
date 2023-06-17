@@ -37,8 +37,8 @@ void cortoPlazo();
 //Nuevos//
 void ordenarReady();
 void enviarContextoACpu();
+void algoritmoFIFO();
 
-//void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void instruccionAEjecutar();
 //PARA HRRN

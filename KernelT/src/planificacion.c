@@ -99,7 +99,7 @@ void ordenarReady(){
 
 void enviarContextoACpu(){
 		t_pcb* procesoAEjec=extraerDeReady();
-		log_info(loggerKernel, "%s: Obtengo un proceso de ready", Algoritmo());
+		log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 		procesoAEjecutar(contextoAEjec);
 		procesoAEjec->estadoPcb = EXEC;
@@ -116,8 +116,7 @@ void cortoPlazo() {
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		ordenarReady();
-        //sem_wait(&cpuLibre);
-        enviarContextoACpu();
+    enviarContextoACpu();
 		instruccionAEjecutar();
 	}
 }
@@ -139,27 +138,27 @@ void instruccionAEjecutar() {
 			case EXIT:
 				log_info(loggerKernel, "Intruccion EXIT");
 				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
+				free(instruccionExit);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
 				t_instruccion* instruccionYield = obtenerInstruccion(socketCPU,0);
+				free(instruccionYield);
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
-				sem_post(&planiCortoPlazo);
 				//sem_post(&cpuLibre);
+				sem_post(&planiCortoPlazo);
 				break;
 
 			case WAIT:
 				log_info(loggerKernel, "Intruccion WAIT");
-				tiempoEnCPU(ultimoEjecutado);
 				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
 				log_info(loggerKernel, "Recurso a consumir : %s", instruccionWait->param1);
 				char* recursoAConsumir = instruccionWait->param1;
 				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
 				free(instruccionWait);
 				sem_post(&planiCortoPlazo);
-				//sem_post(&cpuLibre);
 				break;
 			case SIGNAL:
 				log_info(loggerKernel, "Intruccion SIGNAL");
@@ -338,6 +337,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
+	//sem_post(&cpuLibre);
 	sem_post(&planiCortoPlazo);
 }
 
@@ -360,15 +360,14 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				 if(valor<0){
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				queue_push(colaDeBloqueo, ultimoEjecutado);
-				//tiempoEnCPU(ultimoEjecutado);
+				tiempoEnCPU(ultimoEjecutado);
 				ultimoEjecutado->estadoPcb = BLOCK;
 				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
 				 }
 				 else{
-				 /*Fue desalojado por Wait , si consume el recurso vuelve a Ready y sino se queda block
-				 Hay que ver si es necesario el loggeo a block porq inmediantamente consume el recurso y vuelve a ready*/
-					 agregarAEstadoReady(ultimoEjecutado);}
+					 procesoAEjecutar(contextoActualizado); //Sigue en cpu
+					 }
 				break;
 			case 2://2=SIGNAL
 				valor ++;
@@ -377,7 +376,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
-				procesoAEjecutar(contextoActualizado);
+				procesoAEjecutar(contextoActualizado);//Sigue en cpu
 				break;
 			 }
 			}
@@ -386,7 +385,8 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 ////---Funcion de IO---///
 void bloquearHilo(int* tiempo){
 	int tiempoDeBloqueo = *tiempo;
-	t_pcb* procesoBloqueado = ultimoEjecutado;//Agrego esta variable porq sino cuando corto plazo ejecute paralelamente estaria modificando al ultimoEjecutado y tendriamos algo inconsistente
+	t_pcb* procesoBloqueado = ultimoEjecutado;
+	tiempoEnCPU(procesoBloqueado);
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
     logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
@@ -394,8 +394,6 @@ void bloquearHilo(int* tiempo){
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
 	sem_post(&planiCortoPlazo);
-    sem_post(&cpuLibre);
-
 }
 
 //Logueo de las instrucciones para verificar que esta todo ok//

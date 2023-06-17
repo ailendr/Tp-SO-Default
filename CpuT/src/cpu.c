@@ -15,12 +15,18 @@ int main(/*int argc, char** argv*/) {
 	}
 	*/
 
-
 	char* instr;
-
 	t_instruccion* nuevaInstr = NULL;
+
 	void* buffer = NULL;
 	int tamanio = 0;
+
+	t_contextoEjec* contextoRecibido;
+
+	t_paquete* paqueteI;
+	t_paquete* paqueteC;
+
+	int verificador = 0;
 
 
 	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
@@ -28,10 +34,12 @@ int main(/*int argc, char** argv*/) {
 	while (1){
 
 		int codigo = recibir_operacion(cliente);
+
 		if(codigo == -1) {
 			log_info(loggerCPU, "se cayo kernel");
 			break;
 		}
+    
 		if (codigo != CONTEXTO){
 			log_info(loggerCPU, "No se recibio un contexto");
 
@@ -44,11 +52,21 @@ int main(/*int argc, char** argv*/) {
 		if (contextoRecibido->pid != -1){
 
 			log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
-			instr = fetch (contextoRecibido);
-			nuevaInstr = decode (instr);
-			execute (nuevaInstr, contextoRecibido);
-		}
-		else {
+
+			while (verificador == 0){
+				instr = fetch (contextoRecibido);
+				nuevaInstr = decode (instr);
+				verificador = execute (nuevaInstr, contextoRecibido);
+			}
+
+			verificador = 0;
+
+			paqueteC = serializarContexto(contextoRecibido);
+			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
+			paqueteI = serializarInstruccion(nuevaInstr);
+			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+
+		} else {
 			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
 		}
 		}
