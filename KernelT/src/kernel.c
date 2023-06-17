@@ -28,10 +28,10 @@ int main(void) {
 
 	///Funcion para inicializar las conexiones con FS,CPU y MEMORIA//
 		//Por el momento deje las funciones enviarMensaje adentro pero no deberian//
-   iniciarConexionesDeKernel();
+  //  iniciarConexionesDeKernel();
 
     ///------Kernel como Servidor------//
-	log_info(loggerKernel, "---------------------------------------------------------------------------");
+
     log_info(loggerKernel, "Iniciando Servidor ... \n");
     	server_fd = iniciarServidor(ip, puerto);
     	if(verificarSocket (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
