@@ -124,10 +124,12 @@ void instruccionAEjecutar() {
 		switch(codigo){
 			case EXIT:
 				log_info(loggerKernel, "Intruccion EXIT");
+				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
+				t_instruccion* instruccionYield = obtenerInstruccion(socketCPU,0);
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
 				//sem_post(&cpuLibre);
