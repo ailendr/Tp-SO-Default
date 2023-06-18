@@ -14,6 +14,11 @@
 #include <commons/collections/list.h>
 #include <utils/estructuras.h>
 
+typedef enum{
+	firstFit,
+	bestFit,
+	worstFit
+}algoritmoDeAsignacion;
 
 extern t_list* listaDeSegmentos;
 extern t_list* listaHuecosLibres;
@@ -27,10 +32,12 @@ void crearSegmentoCero();
 void crearListas();
 void crearEspacioMemoria ();
 int memoriaDisponible();
-int memoriaOcupada();
+int memoriaOcupada(t_list* lista);
 void liberarTablaDeSegmentos(uint32_t pid);
 bool huecoLibre(t_segmento* segmento);
-void deleteSegment(t_segmento* segmentoAEliminar, int id);
+int  buscarPosSegmento(uint32_t idSegmento, t_list* lista);
+void deleteSegment(uint32_t id);
+void compactar();
 
 
 #endif /* SRC_MEMORIAESTRUCTURAS_H_ */

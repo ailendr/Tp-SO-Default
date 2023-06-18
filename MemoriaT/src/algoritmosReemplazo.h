@@ -10,10 +10,11 @@
 
 #include "memoriaEstructuras.h"
 
-void asignarHuecoLibre(t_segmento* nuevoSegmento, t_segmento*(*algoritmo)(t_segmento* segmento, t_list* lista, int tam));
-t_segmento* firstFit(t_segmento* nuevoSegmento, t_list* listaHuecosLibres, int tamanioLista);
-t_segmento*bestFit(t_segmento* nuevoSegmento, t_list* listaHuecosLibres, int tamanioLista);
-t_segmento* worstFit(t_segmento* nuevoSegmento, t_list* listaHuecosLibres, int tamanioLista);
+void asignarHuecoLibre(t_segmento* nuevoSegmento, t_segmento*(*algoritmo)(uint32_t tamSegmento, t_list* lista, int tam));
+t_segmento* FirstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
+t_segmento* BestFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
+t_segmento* WorstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
+//void createSegment(uint32_t tamanio);
 
 
 #endif /* SRC_ALGORITMOSREEMPLAZO_H_ */

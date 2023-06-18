@@ -29,6 +29,6 @@ int retardoCompactacion(){
 	return config_get_int_value(configMemoria, "RETARDO_COMPACTACION");
 }
 
-char* algortimoAsignacion(){
+char* algoritmoAsignacion(){
 	return config_get_string_value(configMemoria, "ALGORITMO_ASIGNACION");
 }
