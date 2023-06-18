@@ -51,6 +51,9 @@ void atenderPeticiones(){
 
 		if (cantParam != 0) {
 			newInstr = deserializarInstruccionEstructura(buffer, cantParam);
+		    list_add(peticiones, newInstr);
+
+
 			//acá tenemos que agregarlo en la lista que ya esta creada pero no me acuerdo la función
 			//Es que estoy desde el celu
 			//AIUDAAAAAAAAAA CARLAAAAAAAAAAAAA
@@ -82,5 +85,12 @@ void atenderPeticiones(){
 }
 
 void ejecutarPeticiones(){
+	//sacar peticion de la lista
+	t_instruccion* instruccion;
+	int tamanioListaPeticiones = list_size (peticiones);
+	for(int i = 0; i < tamanioListaPeticiones; i++){
+		instruccion = list_get(peticiones, i);
+	}
+	//luego hay que verificar que las funciones de fs coincidan con las instrucciones mandadas por Kernel
 
 }
