@@ -432,6 +432,7 @@ void implementacionF(t_instruccion* instruccion){
 	ultimoEjecutado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", ultimoEjecutado->contexto->pid, instruccion->param1);
 	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+	tiempoEnCPU(ultimoEjecutado);
 	free(instruccion);
 }
 
