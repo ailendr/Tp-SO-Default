@@ -10,13 +10,17 @@ void* memoriaContigua; //GLOBAL
 t_segmento* segmentoCero;
 t_list * listaDeTablas;
 t_list* listaDeSegmentos;
-t_list* listaHuecosLibres;
+//t_list* listaHuecosLibres;
+
+/*Esto pense tenerlo como el hueco mas grande que va quedando cuando se va llenando la memoria para ver cuando empezar a aplicar
+los algoritmos de reemplazo
+t_segmento* segmentoLibre; */
 
 
 void crearListas(){
 	listaDeTablas = list_create();
 	listaDeSegmentos = list_create();
-	listaHuecosLibres = list_create();
+//	listaHuecosLibres = list_create();
 
 }
 
@@ -75,28 +79,26 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	free(tablaALiberar);
 	log_info(loggerMemoria, "Finalizo el proceso: %d", pid);
 }
-
-void firstFIT(t_segmento* nuevoSegmento){
-	int i = 0;
-	t_segmento* segmentoAnterior;
-	t_segmento* segmento=list_get(listaDeSegmentos, i);
-	while(segmento!=NULL){
-		segmentoAnterior=segmento;
-		i++;
-	}
-	nuevoSegmento->base = segmentoAnterior->limite +1;
-	list_add_in_index(listaDeSegmentos,i, nuevoSegmento);
+/*
+int buscarSegmento(uint32_t idSegmento){
+	//Esta funcion nos podria servir
 }
+*/
+bool huecoLibre(t_segmento* segmento){
+	return segmento->estaEnMemoria ==0;
+}
+
+
+
+////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
 
 /*
 void createSegment(){
 	if(memoriaDisponible()>=tamanioSegmento()){
-	//Aca tendría que hacer lo de aplicar el agoritmo de firstfit, bla bla
 }*/
 
 
 //O seria que llega el id del segmento? ----------> le podemos enviar el id --->
-
 
 void deleteSegment(t_segmento* segmentoAEliminar, int id){
 	int tamLista = list_size(listaDeSegmentos);
@@ -112,7 +114,7 @@ void deleteSegment(t_segmento* segmentoAEliminar, int id){
 	list_remove_element(tablaDeSegmentosAActualizar, segmento);
 	segmento->estaEnMemoria=0;
 	//Esto es por si usamos la lista de huecos libres
-	list_add(listaHuecosLibres, segmento);
+	//list_add(listaHuecosLibres, segmento);
 }
 
 

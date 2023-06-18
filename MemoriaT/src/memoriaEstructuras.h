@@ -29,7 +29,8 @@ void crearEspacioMemoria ();
 int memoriaDisponible();
 int memoriaOcupada();
 void liberarTablaDeSegmentos(uint32_t pid);
-void firstFIT(t_segmento* nuevoSegmento);
+bool huecoLibre(t_segmento* segmento);
+void deleteSegment(t_segmento* segmentoAEliminar, int id);
 
 
 #endif /* SRC_MEMORIAESTRUCTURAS_H_ */
