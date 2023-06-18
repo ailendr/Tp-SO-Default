@@ -52,6 +52,7 @@ t_list* crearTablaDeSegmentos(uint32_t pid){
 	segmentoCero->PID=pid;
 	list_add(tablaDeSegmentos, segmentoCero);
 	list_add_in_index(tablaDeSegmentos,pid, tablaDeSegmentos);
+	log_info(loggerMemoria, "Creacion de proceso: %d", pid);
 	return tablaDeSegmentos;
 	 }
 
@@ -77,7 +78,7 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	t_list* tablaALiberar= list_get(listaDeTablas, pid);
 	list_remove(listaDeTablas, pid);
 	free(tablaALiberar);
-	log_info(loggerMemoria, "Finalizo el proceso: %d", pid);
+	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 /*
 int buscarSegmento(uint32_t idSegmento){
@@ -113,6 +114,7 @@ void deleteSegment(t_segmento* segmentoAEliminar, int id){
 	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
 	list_remove_element(tablaDeSegmentosAActualizar, segmento);
 	segmento->estaEnMemoria=0;
+	log_info(loggerMemoria,"Eliminación de Segmento: “PID: <%d> - Eliminar Segmento: <%d> - Base: <%D> - TAMAÑO: <%d>",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
 	//Esto es por si usamos la lista de huecos libres
 	//list_add(listaHuecosLibres, segmento);
 }
