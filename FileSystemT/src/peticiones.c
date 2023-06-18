@@ -11,6 +11,9 @@ void atenderPeticiones(){
 
 	void* buffer = NULL;
 	int tamanio = 0;
+	int cantParam = 0;
+
+	t_instruccion* newInstr;
 
 	while (1){
 		int codigo = recibir_operacion(cliente);
@@ -23,6 +26,21 @@ void atenderPeticiones(){
 		log_info(loggerFS, "Se recibio una peticion");
 		buffer = recibir_buffer(&tamanio, cliente);
 
+		switch (codigo){
+			case F_READ:
+				cantParam = 3;
+				break;
+			case F_WRITE:
+				break;
+			case F_OPEN:
+				break;
+			case F_TRUNCATE:
+				break;
+			default:
+				log_info(loggerFS, "No comprendo la instruccion mandada. Revisar");
+		}
+
+		newInstr = deserializarInstruccionEstructura(buffer, cantParam);
 
 		/*
 		contextoRecibido = deserializarContexto(buffer, tamanio);
