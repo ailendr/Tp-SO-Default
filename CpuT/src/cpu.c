@@ -72,6 +72,9 @@ int main(/*int argc, char** argv*/) {
 		}
 	}
 
+	free (paqueteI);
+	free (paqueteC);
+	
 	free(buffer);
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
