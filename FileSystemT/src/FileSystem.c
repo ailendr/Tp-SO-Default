@@ -42,7 +42,7 @@ int main(/*int argc, char** argv*/) {
 
 	// INICIALIZAR ESTRUCTURAS ----------------------------------------------------------------------
 	iniciarEstructuras();
-
+	peticiones = list_create();
 
 	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
 

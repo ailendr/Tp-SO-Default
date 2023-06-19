@@ -5,7 +5,6 @@
  *      Author: utnso
  */
 
-t_superbloque superBloque;
 
 void abrirArchivo(char* nombreArchivo){
     //verificar existencia de FCB

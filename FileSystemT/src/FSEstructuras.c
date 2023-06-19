@@ -98,11 +98,6 @@ void iniciarArchivoDeBloques(char* pathArch){
 	//t_bloque* arrayBloques[superBloque->blockCount];
 }
 
-
-
-
-
-
 void iniciarBitMap(){
 	size_t bytes=superBloque->blockCount/8;
 	void* bitArray=malloc(bytes);
