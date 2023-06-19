@@ -135,7 +135,7 @@ void deleteSegment(uint32_t id, uint32_t pid){
 	segmentoAEliminar->estaEnMemoria=0;
 	//Actualizo en la lista de segmentos que ya no esta en memoria
 	list_replace(listaDeSegmentos, pos, segmentoAEliminar);
-	log_info(loggerMemoria,"Eliminación de Segmento: “PID: <%d> - Eliminar Segmento: <%d> - Base: <%d> - TAMAÑO: <%d>",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
+	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
 	//Esto es por si usamos la lista de huecos libres
 	//list_add(listaHuecosLibres, segmento);
 }

@@ -16,11 +16,13 @@ typedef enum{
 	worstFit
 }algAsignacion;
 
-int asignarHuecoLibre(t_segmento* nuevoSegmento, t_segmento*(*algoritmo)(uint32_t tamSegmento, t_list* lista, int tam));
+
 t_segmento* FirstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
-t_segmento* BestFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
-t_segmento* WorstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
+bool BestFit(t_segmento* segmento1, t_segmento* segmento2);
+bool WorstFit(t_segmento* segmento1, t_segmento* segmento2);
+t_segmento* WorstYBest(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista, bool(algoritmo)(t_segmento* seg1, t_segmento* seg2));
 algAsignacion asignarAlgoritmo();
+void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibre);
 void createSegment(t_segmento* nuevoSegmento, uint32_t tamanio);
 
 
