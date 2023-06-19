@@ -4,6 +4,9 @@
  *  Created on: Jun 15, 2023
  *      Author: utnso
  */
+
+#include "bloques.h"
+
 t_bitarray* bitMap;
 
 pthread_mutex_t mutexBlocks;
@@ -24,15 +27,13 @@ void escribirBloque (void* contenido, uint32_t sizeContenido, uint32_t numeroBlo
 
 void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t offset , uint32_t numeroBloque){
     if (sizeContenido + offset > superBloque -> blockSize){
-    log_warning(loggerFS, "Se quiso agregar %d bytes al bloque %d en el offset %d", sizeContenido,numeroBloque, offset);
-
+        log_warning(loggerFS, "Se quiso agregar %d bytes al bloque %d en el offset %d", sizeContenido,numeroBloque, offset);
+    }
     pthread_mutex_lock(&mutexBlocks);
     memcpy(superBloque -> blockSize + offset,contenido, sizeContenido);
     pthread_mutex_unlock(&mutexBlocks);
 
 }
-
-
 
 void liberarBloque(uint32_t numeroBloque){
    pthread_mutex_lock(&mutexBlocks);

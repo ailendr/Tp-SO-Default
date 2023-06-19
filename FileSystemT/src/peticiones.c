@@ -46,42 +46,17 @@ void atenderPeticiones(){
 				cantParam = 2; 
 				break;
 			default:
+				cantParam = -1;
 				log_info(loggerFS, "No comprendo la instruccion mandada. Revisar");
+				break;
 		}
 
-		if (cantParam != 0) {
+		if (cantParam != -1) {
 			newInstr = deserializarInstruccionEstructura(buffer, cantParam);
 		    list_add(peticiones, newInstr);
-		    //recuperar lista para pasarla a ejecutarPeticion()
-
-
-			//acá tenemos que agregarlo en la lista que ya esta creada pero no me acuerdo la función
-			//Es que estoy desde el celu
-			//AIUDAAAAAAAAAA CARLAAAAAAAAAAAAA
+		    //Activamos el semaforo debe ser contador
 		}
 
-		/*
-		contextoRecibido = deserializarContexto(buffer, tamanio);
-
-		if (contextoRecibido->pid != -1){
-
-		log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
-
-		while (verificador == 0){
-			instr = fetch (contextoRecibido);
-			nuevaInstr = decode (instr);
-			verificador = execute (nuevaInstr, contextoRecibido);
-		}
-
-		paqueteC = serializarContexto(contextoRecibido);
-		validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
-		paqueteI = serializarInstruccion(nuevaInstr);
-		validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
-
-		} else {
-			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
-		}
-		*/
 	}
 }
 
@@ -115,5 +90,6 @@ void ejecutarPeticiones(){
 		break;
     case F_SEEK:
 	}
-    //en este momento entran hilos?
+    paqueteI = serializarInstruccion(nuevaInstr);
+	validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
 }
