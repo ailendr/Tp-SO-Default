@@ -21,23 +21,24 @@ Notas de guia para File System
     - FCB
     - Archivo Bloque
     - Bitmap
-- Inicializar semaforos
+- Inicializar semaforos :ok:
 - Iniciar los dos hilos
     - Atencion :ok:
-    - Ejecutor 
+    - Ejecutor :ok:
         - Falta funcion
 - Atender peticiones
-    - Recibimos peticion nueva
-    - Listar nueva peticion para tener un orden (lista de instrucciones)
+    - Recibimos peticion nueva :ok:
+    - Listar nueva peticion para tener un orden (lista de instrucciones) :ok:
     - Se realiza la accion pedida
         - F_READ
         - F_WRITE
         - F_OPEN
         - F_CREATE
         - F_TRUNCATE
-    - Mandamos respuesta
-    - Liberamos lo que necesitamos
-    - Cerramos peticion
+    - Mandamos respuesta :ok:
+        - Falta que kernel la reciba
+    - Liberamos lo que necesitamos :ok:
+    - Cerramos peticion :ok:
 - Finalizar y liberar todo 
-    - Falta semaforos
-    - Falta hilos
+    - Falta semaforos :ok:
+    - Falta hilos -> DUDA ⁉️
