@@ -12,7 +12,7 @@
 t_paquete* parseoDeInstrucciones(char *pathPseudo){
 	t_list* listaDeInstrucciones = list_create();
 	t_paquete* paqueteConInstrucciones = crear_paquete();
-		FILE *pseudocodigo = fopen(pathPseudo, "r");
+	FILE *pseudocodigo = fopen(pathPseudo, "r");
 			if (pseudocodigo == NULL){
 				return NULL;
 			}

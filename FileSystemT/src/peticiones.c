@@ -52,6 +52,7 @@ void atenderPeticiones(){
 		if (cantParam != 0) {
 			newInstr = deserializarInstruccionEstructura(buffer, cantParam);
 		    list_add(peticiones, newInstr);
+		    //recuperar lista para pasarla a ejecutarPeticion()
 
 
 			//acá tenemos que agregarlo en la lista que ya esta creada pero no me acuerdo la función
@@ -91,6 +92,28 @@ void ejecutarPeticiones(){
 	for(int i = 0; i < tamanioListaPeticiones; i++){
 		instruccion = list_get(peticiones, i);
 	}
-	//luego hay que verificar que las funciones de fs coincidan con las instrucciones mandadas por Kernel
+	switch(instruccion){
+	//recuperar los parametros
+	case F_READ:
+		leerArchivo(archivo, direccionFisica, puntero, tamanio);
+		break;
+    case F_WRITE:
+    	escribirArchivo();
+    	break;
+	case F_OPEN:
+		if (/*si el archivo existe*/){
+		abrirArchivo(archivo);
+		}else{
+		crearArchivo(archivo);
+		}
+		break;
+	case F_TRUNCATE:
+	    truncarArchivo(archivo);
+	    break;
+	case F_CLOSE:
 
+		break;
+    case F_SEEK:
+	}
+    //en este momento entran hilos?
 }
