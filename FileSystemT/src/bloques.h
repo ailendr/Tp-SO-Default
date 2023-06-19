@@ -8,9 +8,6 @@
 #ifndef SRC_BLOQUES_H_
 #define SRC_BLOQUES_H_
 
-#include <commons/bitarray.h>
-#include <semaphore.h>
-#include <pthread.h>
 #include <stdint.h>
 
 #include "FSEstructuras.h"

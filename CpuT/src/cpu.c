@@ -71,6 +71,8 @@ int main(/*int argc, char** argv*/) {
 		}
 		}
 	}
+	free (paqueteI);
+	free (paqueteC);
 
 	free(buffer);
 

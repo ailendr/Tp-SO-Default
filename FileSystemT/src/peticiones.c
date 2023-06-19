@@ -7,6 +7,8 @@
 
 #include "peticiones.h"
 
+sem_t nuevoPedido;
+
 void atenderPeticiones(){
 
 	void* buffer = NULL;
@@ -23,8 +25,7 @@ void atenderPeticiones(){
 			newInstr->nombre = EXIT;
 			newInstr->pid = -1;
 			list_add(peticiones, newInstr);
-		    //Activamos el semaforo debe ser contador
-		    //signal del contador
+		    sem_post(&nuevoPedido);
 			break;
 		}
 
@@ -59,8 +60,7 @@ void atenderPeticiones(){
 		if (cantParam != -1) {
 			newInstr = deserializarInstruccionEstructura(buffer, cantParam);
 		    list_add(peticiones, newInstr);
-		    //Activamos el semaforo debe ser contador
-		    //signal del contador
+		    sem_post(&nuevoPedido);
 		}
 	}
 }
@@ -76,8 +76,8 @@ void ejecutarPeticiones(){
 	aEjecutar = list_create();
 
 	while(1){
-		//wait del contador
-		//sacar peticion de la lista
+
+		sem_wait(&nuevoPedido);
 
 		aEjecutar = list_take_and_remove(peticiones, 1);
 		instruccion = list_get(aEjecutar, 0);
@@ -114,8 +114,10 @@ void ejecutarPeticiones(){
 
 		paqueteI = serializarInstruccion(instruccion);
 		validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
-
+		//Ver que kernel lo reciba y empezar a trabajar desde ahi
 	}
+
+	free (paqueteI);
 
 	list_destroy(aEjecutar);
 
