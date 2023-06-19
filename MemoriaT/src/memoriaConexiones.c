@@ -18,29 +18,43 @@ void atenderPeticionesFs(int socket){
 void atenderPeticionesKernel(int socket){
 	//recibirHandshake(socket, HANDSHAKE_PedirMemoria);
 	uint32_t protocolo;
-			uint32_t resultado_ok = HANDSHAKE_Ok;
-			uint32_t resultado_error = - 1;
+	uint32_t resultado_ok = HANDSHAKE_Ok;
+	uint32_t resultado_error = - 1;
 
-	     recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
-			if(protocolo == HANDSHAKE_PedirMemoria){
-				   send(socket, &resultado_ok, sizeof(uint32_t), 0);
-			       log_info(loggerMemoria, "Se ha iniciado estructura en memoria para un Proceso");
-			}
-			else{
-				   send(socket, &resultado_error, sizeof(uint32_t), 0);
-	/*			}
 	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
+	if(protocolo == HANDSHAKE_PedirMemoria){
+		   send(socket, &resultado_ok, sizeof(uint32_t), 0);
+		   log_info(loggerMemoria, "Se ha iniciado estructura en memoria para un Proceso");
+	}
+	else{
+		   send(socket, &resultado_error, sizeof(uint32_t), 0);
+		}/*
+	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
+	//Falta agregar lo de como recibimos las cosas y las mandamos
 	switch(protocolo){
 		case CREATE_SEGMENT:
+	//Le actualizo aca el pid y el id al nuevo segmento
+	 	 t_segmento* nuevoSegmento;
+	 	 nuevoSegmento->pid = pid;
+	 	 nuevoSegmento->id = id;
+	 	 createSegment(nuevoSegmento);
+
 			break;
 		case DELETE_SEGMENT:
+			//recibimos el id del segmento a eliminar
+			 deleteSegment(id);
 			break;
 		case HANDSHAKE_PedirMemoria:
 			t_segmento* tablaDeSegmentos;
-			tablaDeSegmentos = crearTablasDeSegmentos();
+			tablaDeSegmentos = crearTablasDeSegmentos(pid);
 			//y hacer el send. Habria que serializar la tabla.
-	}*/
-			}
+	}	case EXIT:
+			liberarTablaDeSegmentos(pid);
+	}
+
+	*/
+
+
 }
 
 
