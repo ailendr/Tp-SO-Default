@@ -66,8 +66,10 @@ int main(/*int argc, char** argv*/) {
 	log_info(loggerFS, "Finalizando File System...\n");
 
 	//finalizar semaforos TODO
+	list_destroy(peticiones);
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
+	close (cliente);
 
 	printf ("\n Finalizo File System correctamente\n ");
 

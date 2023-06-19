@@ -5,14 +5,14 @@
  *      Author: utnso
  */
 
-
+#include "bloques.h"
+/*
 void abrirArchivo(char* nombreArchivo){
     //verificar existencia de FCB
     //pedir fcb a memoria?
 	t_fcb fcb;
-    if(fcb -> nombreDeArchivo == nombreArchivo){
+    if(fcb->nombreDeArchivo == nombreArchivo){
         log_info(loggerFS, "Abrir Archivo: %s", nombreArchivo);
-        return ok; //si existe devolver ok
     } else{
         //sino informar que el archivo no existe
         log_info(loggerFS, "No existe el archivo: %s ", nombreArchivo);
@@ -33,7 +33,6 @@ void crearArchivo(char* nombreDelArchivo){
     //se crea nuevo bloque
 
     log_info(loggerFS, "Crear Archivo: %s ", nombreDelArchivo);
-    return ok;
     //esta operación deberá devolver OK.
 
 }
@@ -87,7 +86,7 @@ cantidadBloques(uint32_t tamanio){
 	        cantidadDeBloques = (tamanio / superBloque -> blockSize) + 1;
 	   }
 	return cantidadDeBloques;
-	}
+}
 
 /*asignarBloques(tamanio){
 	int bloques = cantidadBloquesAsignar(uint32_t tamanio);

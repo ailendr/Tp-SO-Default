@@ -21,7 +21,7 @@ int iniciarMemoria (){
 	}
 
 	log_info(loggerFS, "Enviando mensaje \n");
-    if(enviarProtocolo(socketMemoria, loggerFS) == -1){
+    if(enviarProtocolo(socketMemoria, HANDSHAKE_Fs,loggerFS) == -1){
 		log_info(loggerFS, "Failed -> Conexion Memoria");
         terminarModulo(socketMemoria,loggerFS, configFS);
         close (servidorFS);
@@ -50,7 +50,7 @@ int iniciarServKernel (){
 	    return EXIT_FAILURE;
 	}
 
-	recibirHandshake(cliente);
+	recibirHandshake(cliente, HANDSHAKE_Kernel, loggerFS);
 	log_info(loggerFS, "Ok -> Servidor de Peticiones");
 
 	return 0;

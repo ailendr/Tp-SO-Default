@@ -91,20 +91,20 @@ void ejecutarPeticiones(){
 
 		switch(nombre){
 			case F_READ:
-				leerArchivo(archivo, direccionFisica, puntero, tamanio);
+				//leerArchivo(archivo, direccionFisica, puntero, tamanio);
 				break;
 			case F_WRITE:
-				escribirArchivo();
+				//escribirArchivo();
 				break;
 			case F_OPEN:
-				if (/*si el archivo existe*/){
-					abrirArchivo(archivo);
+				if (1 /*si el archivo existe*/){
+					//abrirArchivo(archivo);
 				}else{
-					crearArchivo(archivo);
+					//crearArchivo(archivo);
 				}
 				break;
 			case F_TRUNCATE:
-				truncarArchivo(archivo);
+				//truncarArchivo(archivo);
 				break;
 			case F_CLOSE:
 				break;
