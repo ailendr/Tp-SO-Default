@@ -14,6 +14,7 @@ t_list* listaDeSegmentos;
 /*Es para tener un hueco libre al principio cuando no hay segmentos y para cuando se compacte y queda contiguo el espacio libre*/
 t_segmento* segmentoLibre;
 
+///////////////////////////// ESTRUCTURAS DE MEMORIA/////////////////////////////////////////////////////////
 
 void crearListas(){
 	listaDeTablas = list_create();
@@ -44,17 +45,7 @@ void crearSegmentoCero(){
 
 }
 
-t_list* crearTablaDeSegmentos(uint32_t pid){
-
-	t_list* tablaDeSegmentos = list_create();
-	segmentoCero->PID=pid;
-	list_add(tablaDeSegmentos, segmentoCero);
-	list_add_in_index(tablaDeSegmentos,pid, tablaDeSegmentos);
-	log_info(loggerMemoria, "Creacion de proceso: %d", pid);
-	return tablaDeSegmentos;
-}
-
-
+//////////////////////////UTILS DE MEMORIA/////////////////////////////////////////////
 
 int memoriaOcupada(t_list* lista){
 	int tamLista=list_size(lista);
@@ -74,23 +65,6 @@ int memoriaDisponible(){
 	return memoriaDis;
 }
 
-void liberarTablaDeSegmentos(uint32_t pid){
-	t_list* tablaALiberar= list_get(listaDeTablas, pid);
-	int tamTabla = list_size(tablaALiberar);
-	//Marco como libres a los segmentos del proceso
-	for(int i=0;i<tamTabla;i++){
-		t_segmento* segmento= list_get(tablaALiberar, i);
-		//deleteSegment(segmento->ID, pid); No se si esta bien usar esta funcion
-		//Dejo esta otra opcion
-		int pos = buscarPosSegmento(segmento->ID, pid, listaDeSegmentos);
-		segmento->estaEnMemoria=0;
-		list_replace(listaDeSegmentos, pos, segmento);
-
-	}
-	list_remove(listaDeTablas, pid);
-	free(tablaALiberar);
-	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
-}
 
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista){
 	int tamLista = list_size(lista);
@@ -132,24 +106,6 @@ void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento)
 	free(listaAux);
 }
 
-////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
-
-
-void deleteSegment(uint32_t id, uint32_t pid){
-	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
-	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
-	//Actualizo la tabla de segmentos del proceso
-	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
-	list_remove_element(tablaDeSegmentosAActualizar, segmentoAEliminar);
-	segmentoAEliminar->estaEnMemoria=0;
-	//Actualizo en la lista de segmentos que ya no esta en memoria
-	list_replace(listaDeSegmentos, pos, segmentoAEliminar);
-	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
-	//Falta la parte de unir con segmentos aledaños si estan libres
-	unirHuecosAledanios(segmentoAEliminar);
-
-}
-
 void unirHuecosAledanios(t_segmento* segmento){
 	int pos = buscarPosSegmento(segmento->ID,segmento->PID, listaDeSegmentos);
 	t_segmento* segmentoAnterior =list_get(listaDeSegmentos, pos-1);
@@ -173,6 +129,52 @@ void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
 		list_replace(tablaDeSegmentos, i, segActualizado);
 	}
 }
+
+////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
+
+t_list* crearTablaDeSegmentos(uint32_t pid){
+
+	t_list* tablaDeSegmentos = list_create();
+	segmentoCero->PID=pid;
+	list_add(tablaDeSegmentos, segmentoCero);
+	list_add_in_index(tablaDeSegmentos,pid, tablaDeSegmentos);
+	log_info(loggerMemoria, "Creacion de proceso: %d", pid);
+	return tablaDeSegmentos;
+}
+
+void liberarTablaDeSegmentos(uint32_t pid){
+	t_list* tablaALiberar= list_get(listaDeTablas, pid);
+	int tamTabla = list_size(tablaALiberar);
+	//Marco como libres a los segmentos del proceso
+	for(int i=0;i<tamTabla;i++){
+		t_segmento* segmento= list_get(tablaALiberar, i);
+		//deleteSegment(segmento->ID, pid); No se si esta bien usar esta funcion
+		//Dejo esta otra opcion
+		int pos = buscarPosSegmento(segmento->ID, pid, listaDeSegmentos);
+		segmento->estaEnMemoria=0;
+		list_replace(listaDeSegmentos, pos, segmento);
+
+	}
+	list_remove(listaDeTablas, pid);
+	free(tablaALiberar);
+	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
+}
+
+void deleteSegment(uint32_t id, uint32_t pid){
+	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
+	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
+	//Actualizo la tabla de segmentos del proceso
+	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
+	list_remove_element(tablaDeSegmentosAActualizar, segmentoAEliminar);
+	segmentoAEliminar->estaEnMemoria=0;
+	//Actualizo en la lista de segmentos que ya no esta en memoria
+	list_replace(listaDeSegmentos, pos, segmentoAEliminar);
+	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
+	//Falta la parte de unir con segmentos aledaños si estan libres
+	unirHuecosAledanios(segmentoAEliminar);
+
+}
+
 
 void compactar(){
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
