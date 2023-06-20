@@ -122,6 +122,16 @@ void actualizarUltimoSegmentoLibre(){
 	list_add_in_index(listaDeSegmentos, ultimaPos+1,segmentoLibre);
 }
 
+void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento){
+	t_list* listaAux = list_create();
+	int tamLista = list_size(listaDeSegmentos);
+	int pos= buscarPosSegmento(nuevoSegmento->ID, nuevoSegmento->PID,listaDeSegmentos);
+	list_add(listaAux, segmento);
+	list_add_all(listaAux,list_slice_and_remove(listaDeSegmentos, pos+1, tamLista));
+	list_add_all(listaDeSegmentos, listaAux);
+	free(listaAux);
+}
+
 ////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
 
 
@@ -136,7 +146,22 @@ void deleteSegment(uint32_t id, uint32_t pid){
 	list_replace(listaDeSegmentos, pos, segmentoAEliminar);
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
 	//Falta la parte de unir con segmentos aledaños si estan libres
+	unirHuecosAledanios(segmentoAEliminar);
 
+}
+
+void unirHuecosAledanios(t_segmento* segmento){
+	int pos = buscarPosSegmento(segmento->ID,segmento->PID, listaDeSegmentos);
+	t_segmento* segmentoAnterior =list_get(listaDeSegmentos, pos-1);
+	t_segmento* segmentoSiguiente = list_get(listaDeSegmentos, pos+1);
+
+	//me dio fiaca seguir jeje
+	 if(huecoLibre(segmentoAnterior)){
+		 //que se junten hasta que no haya mas huecos libres contiguos antes
+
+	 }else if(huecoLibre(segmentoSiguiente)){
+		 //que se junten hasta que no haya mas huecos contiguos despues
+	 }
 }
 
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){

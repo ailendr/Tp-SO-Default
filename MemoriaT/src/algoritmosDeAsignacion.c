@@ -34,7 +34,10 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			segLibre->limite = segLibre->base + segLibre->tamanio;
 			//muevo de a un lugar la pos de los segmentos desde seglibre
 			actualizarListaDeSegmentos(nuevoSegmento, segLibre);
-			list_add_in_index(listaDeTablas, nuevoSegmento->PID , nuevoSegmento);
+
+			//Actualizo tabla de segmentos
+			t_list* tablaDeSegmentos = list_get(listaDeTablas, nuevoSegmento->PID);
+			list_add(tablaDeSegmentos, nuevoSegmento);
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);
 
@@ -49,15 +52,6 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 		return HANDSHAKE_OutOfMemory;
 
 	}
-}
-void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento){
-	t_list* listaAux = list_create();
-	int tamLista = list_size(listaDeSegmentos);
-	int pos= buscarPosSegmento(nuevoSegmento->ID, nuevoSegmento->PID,listaDeSegmentos);
-	list_add(listaAux, segmento);
-	list_add_all(listaAux,list_slice_and_remove(listaDeSegmentos, pos+1, tamLista));
-	list_add_all(listaDeSegmentos, listaAux);
-	free(listaAux);
 }
 
 /*

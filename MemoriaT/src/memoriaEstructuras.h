@@ -21,6 +21,7 @@ extern t_segmento* segmentoCero;
 extern t_list * listaDeTablas;
 extern t_segmento* segmentoLibre;
 
+//ESTRUCTURAS Y UTILS DE MEMORIA
 void iniciarEstructuras();
 t_list* crearTablaDeSegmentos(uint32_t pid);
 void crearSegmentoCero();
@@ -30,9 +31,14 @@ int memoriaDisponible();
 int memoriaOcupada(t_list* lista);
 void liberarTablaDeSegmentos(uint32_t pid);
 bool huecoLibre(t_segmento* segmento);
+bool segmentoOcupado(t_segmento* segmento);
 void actualizarUltimoSegmentoLibre();
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista);
+void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibre);
+
+//FUNCIONES DE MEMORIA
 void deleteSegment(uint32_t id, uint32_t pid);
+void unirHuecosAledanios(t_segmento* segmento);
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos);
 void compactar();
 
