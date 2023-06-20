@@ -111,12 +111,15 @@ void unirHuecosAledanios(t_segmento* segmento){
 	t_segmento* segmentoAnterior =list_get(listaDeSegmentos, pos-1);
 	t_segmento* segmentoSiguiente = list_get(listaDeSegmentos, pos+1);
 
-	//me dio fiaca seguir jeje
 	 if(huecoLibre(segmentoAnterior)){
-		 //que se junten hasta que no haya mas huecos libres contiguos antes
+		 segmento->base=segmentoAnterior->base;
+		 segmento->tamanio = segmento->tamanio + segmentoAnterior->tamanio;
+		 list_remove(listaDeSegmentos, pos-1);
 
 	 }else if(huecoLibre(segmentoSiguiente)){
-		 //que se junten hasta que no haya mas huecos contiguos despues
+		 segmento->tamanio += segmentoSiguiente->tamanio;
+		 segmento->limite=segmentoSiguiente->limite;
+		 list_remove(listaDeSegmentos, pos + 1);
 	 }
 }
 
@@ -127,6 +130,16 @@ void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
 		int posListaSeg = buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
 		t_segmento* segActualizado = list_get(listaDeSegmentos, posListaSeg);
 		list_replace(tablaDeSegmentos, i, segActualizado);
+	}
+}
+
+void logearListaDeSegmentos(char* mensaje){
+	int tamLista = list_size(listaDeSegmentos);
+	log_info(loggerMemoria, "Lista de segmentos %c: ", mensaje);
+	for(int i =0; i<tamLista; i++){
+		t_segmento* segmento = list_get(listaDeSegmentos, i);
+		int pos=buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
+		log_info(loggerMemoria, "Segmento: base: %d, limite: %d, pos en lista: %d", segmento->base, segmento->limite, pos);
 	}
 }
 
@@ -177,6 +190,7 @@ void deleteSegment(uint32_t id, uint32_t pid){
 
 
 void compactar(){
+	loggearListaDeSegmentos("antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//dejo vacia la lista de segmentos
 	int tamanioLista=list_size(listaAux);
@@ -191,13 +205,13 @@ void compactar(){
 	}
 	actualizarUltimoSegmentoLibre();
 	free(listaAux);
-
+	loggerListaDeSegmentos("despues de compactar");
 	//Actualizo las tablas de segmento, ponele
 	int tamListaTablas = list_size(listaDeTablas);
 	int j=0;
 	while(j<=tamListaTablas){
 		t_list* tablaDeSegmentos = list_get(listaDeTablas, j);
-		if(list_is_empty(tablaDeSegmentos)){
+		if(!list_is_empty(tablaDeSegmentos)){
 			actualizarTablaDeSegmentos(tablaDeSegmentos);
 		}
 		j++;
