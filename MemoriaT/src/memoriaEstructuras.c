@@ -135,7 +135,7 @@ void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
 
 void logearListaDeSegmentos(char* mensaje){
 	int tamLista = list_size(listaDeSegmentos);
-	log_info(loggerMemoria, "Lista de segmentos %c: ", mensaje);
+	log_info(loggerMemoria, "Lista de segmentos %s: ", mensaje);
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
 		int pos=buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
@@ -190,7 +190,7 @@ void deleteSegment(uint32_t id, uint32_t pid){
 
 
 void compactar(){
-	loggearListaDeSegmentos("antes de compactar");
+	logearListaDeSegmentos("antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//dejo vacia la lista de segmentos
 	int tamanioLista=list_size(listaAux);
@@ -201,11 +201,11 @@ void compactar(){
 		t_segmento* segAnterior = list_get(listaAux, i-1);
 		segmento->base = segAnterior->limite +1;
 		segmento->limite = segmento->base + segmento->tamanio;
-		list_add(listaDeSegmentos, i);
+		list_add(listaDeSegmentos, segmento);
 	}
 	actualizarUltimoSegmentoLibre();
 	free(listaAux);
-	loggerListaDeSegmentos("despues de compactar");
+	logearListaDeSegmentos("despues de compactar");
 	//Actualizo las tablas de segmento, ponele
 	int tamListaTablas = list_size(listaDeTablas);
 	int j=0;
