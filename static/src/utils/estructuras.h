@@ -34,7 +34,8 @@ typedef enum
 	F_WRITE,
 	F_TRUNCATE,
 	WAIT,
-	SIGNAL
+	SIGNAL,
+	COMPACTAR
 }op_code;
 
 typedef struct{

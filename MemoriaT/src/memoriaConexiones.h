@@ -11,6 +11,7 @@
 #include <utils/sockets.h>
 #include <pthread.h>
 #include "memoriaConfig.h"
+#include "algoritmosDeAsignacion.h"
 
 void atenderModulos(int socket_servidor);
 void atenderPeticionesCpu(int socket);

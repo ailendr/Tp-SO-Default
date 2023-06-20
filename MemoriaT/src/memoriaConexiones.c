@@ -8,11 +8,40 @@
 #include "memoriaConexiones.h"
 
 void atenderPeticionesCpu(int socket){
+	/*uint32_t protocolo;
+	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
+
+	switch(protocolo){
+	case(MOV_IN):
+
+		break;
+
+	case(MOV_OUT):
+
+		break;
+
+	default:
+		break;*/
 
 }
 
 void atenderPeticionesFs(int socket){
+	/*
+	uint32_t protocolo;
+	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
 
+	switch(protocolo){
+	case(F_READ):
+
+		break;
+
+	case (F_WRITE):
+
+		break;
+
+	default:
+		break;
+	}*/
 }
 
 void atenderPeticionesKernel(int socket){
@@ -37,28 +66,37 @@ void atenderPeticionesKernel(int socket){
 	 	 t_segmento* nuevoSegmento;
 	 	 nuevoSegmento->pid = pid;
 	 	 nuevoSegmento->id = id;
-	 	 createSegment(nuevoSegmento);
-
+	 	 uint32_t mensaje = createSegment(nuevoSegmento);
+	 	 send(socket, &mensaje, sizeof(uint32_t),0);
 			break;
+
 		case DELETE_SEGMENT:
 			//recibimos el id del segmento a eliminar
 			 deleteSegment(id);
+			 //hago un send de la tabla actualizada
 			break;
+
 		case HANDSHAKE_PedirMemoria:
 			t_segmento* tablaDeSegmentos;
 			tablaDeSegmentos = crearTablasDeSegmentos(pid);
 			//y hacer el send. Habria que serializar la tabla.
+			break;
+
+		case COMPACTAR:
+			compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada
+			//hago send de todas las tablas actualizadas.
+			break;
 	}	case EXIT:
 			liberarTablaDeSegmentos(pid);
+			break;
+		default:
+			break;
 	}
 
 	*/
 
 
 }
-
-
-
 
 
 void atenderModulos(int socket_servidor){

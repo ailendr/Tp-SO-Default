@@ -8,7 +8,7 @@
 #include "algoritmosDeAsignacion.h"
 
 
-void createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
+uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 	if(memoriaDisponible()>=tamanio){
 		algAsignacion algoritmo= asignarAlgoritmo();
 		t_segmento* segLibre;
@@ -28,17 +28,25 @@ void createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 		if(segLibre!=NULL){
 			nuevoSegmento->base=segLibre->base;
 			nuevoSegmento->limite =nuevoSegmento->base + nuevoSegmento->tamanio;
+			nuevoSegmento->estaEnMemoria=1;
 			segLibre->base=nuevoSegmento->limite+1;
 			segLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
 			segLibre->limite = segLibre->base + segLibre->tamanio;
-			//No se si hay que respetar el orden de como estaban, asi que asi muevo de a un lugar la pos de los segmentos desde huecolibre
+			//muevo de a un lugar la pos de los segmentos desde seglibre
 			actualizarListaDeSegmentos(nuevoSegmento, segLibre);
-			actualizarUltimoSegmentoLibre();
+			list_add_in_index(listaDeTablas, nuevoSegmento->PID , nuevoSegmento);
+
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);
+
+			return nuevoSegmento->base;
 		}
 		else {
-			//hacer send de que hay que compactar
+			return COMPACTAR;
 		}
+
+	}
+	else{
+		return HANDSHAKE_OutOfMemory;
 
 	}
 }

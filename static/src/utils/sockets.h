@@ -41,7 +41,8 @@ typedef enum {
     HANDSHAKE_Kernel,
 	HANDSHAKE_Fs,
 	HANDSHAKE_PedirMemoria,
-    HANDSHAKE_Ok
+    HANDSHAKE_Ok,
+	HANDSHAKE_OutOfMemory
 } t_handshake;
 
 int iniciarServidor(char*  ip, char* puerto);

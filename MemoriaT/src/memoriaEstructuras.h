@@ -16,7 +16,6 @@
 
 
 extern t_list* listaDeSegmentos;
-//extern t_list* listaHuecosLibres;
 extern void* memoriaContigua;
 extern t_segmento* segmentoCero;
 extern t_list * listaDeTablas;
@@ -34,6 +33,7 @@ bool huecoLibre(t_segmento* segmento);
 void actualizarUltimoSegmentoLibre();
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista);
 void deleteSegment(uint32_t id, uint32_t pid);
+void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos);
 void compactar();
 
 

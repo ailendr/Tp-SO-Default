@@ -10,17 +10,14 @@ void* memoriaContigua; //GLOBAL
 t_segmento* segmentoCero;
 t_list * listaDeTablas;
 t_list* listaDeSegmentos;
-//t_list* listaHuecosLibres;
 
-/*Esto pense tenerlo como el hueco mas grande que va quedando cuando se va llenando la memoria para ver cuando empezar a aplicar
-los algoritmos de asignacion*/
+/*Es para tener un hueco libre al principio cuando no hay segmentos y para cuando se compacte y queda contiguo el espacio libre*/
 t_segmento* segmentoLibre;
 
 
 void crearListas(){
 	listaDeTablas = list_create();
 	listaDeSegmentos = list_create();
-//	listaHuecosLibres = list_create();
 
 }
 
@@ -44,8 +41,6 @@ void crearSegmentoCero(){
 	segmentoCero->estaEnMemoria=1;
 	list_add(listaDeSegmentos, segmentoCero);
 	actualizarUltimoSegmentoLibre();
-	list_add(listaDeSegmentos, segmentoLibre);
-
 
 }
 
@@ -112,6 +107,10 @@ bool huecoLibre(t_segmento* segmento){
 	return segmento->estaEnMemoria ==0;
 }
 
+bool segmentoOcupado(t_segmento* segmento){
+	return segmento->estaEnMemoria ==1;
+}
+
 
 void actualizarUltimoSegmentoLibre(){
 	int ultimaPos=list_size(listaDeSegmentos);
@@ -120,7 +119,7 @@ void actualizarUltimoSegmentoLibre(){
 	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);
 	segmentoLibre->limite=tam_memoria();
 	segmentoLibre->estaEnMemoria=0;
-	//list_add_in_index(listaDeSegmentos, ultimaPos+1,segmentoLibre);
+	list_add_in_index(listaDeSegmentos, ultimaPos+1,segmentoLibre);
 }
 
 ////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
@@ -136,11 +135,45 @@ void deleteSegment(uint32_t id, uint32_t pid){
 	//Actualizo en la lista de segmentos que ya no esta en memoria
 	list_replace(listaDeSegmentos, pos, segmentoAEliminar);
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
-	//Esto es por si usamos la lista de huecos libres
-	//list_add(listaHuecosLibres, segmento);
+	//Falta la parte de unir con segmentos aledaños si estan libres
+
+}
+
+void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
+	int tam=list_size(tablaDeSegmentos);
+	for (int i=0; i<tam; i++){
+		t_segmento* segmento = list_get(tablaDeSegmentos, i);
+		int posListaSeg = buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
+		t_segmento* segActualizado = list_get(listaDeSegmentos, posListaSeg);
+		list_replace(tablaDeSegmentos, i, segActualizado);
+	}
 }
 
 void compactar(){
+	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
+	list_clean(listaDeSegmentos);//dejo vacia la lista de segmentos
+	int tamanioLista=list_size(listaAux);
 
+	//voy actualizando los segmentos y los vuelvo a cargar en la lista de segmentos
+	for(int i=1; i<=tamanioLista; i++){//Lo inicio en 1 porque segmentoCero siempre tiene los mismos valores
+		t_segmento* segmento = list_get(listaAux, i);
+		t_segmento* segAnterior = list_get(listaAux, i-1);
+		segmento->base = segAnterior->limite +1;
+		segmento->limite = segmento->base + segmento->tamanio;
+		list_add(listaDeSegmentos, i);
+	}
+	actualizarUltimoSegmentoLibre();
+	free(listaAux);
+
+	//Actualizo las tablas de segmento, ponele
+	int tamListaTablas = list_size(listaDeTablas);
+	int j=0;
+	while(j<=tamListaTablas){
+		t_list* tablaDeSegmentos = list_get(listaDeTablas, j);
+		if(list_is_empty(tablaDeSegmentos)){
+			actualizarTablaDeSegmentos(tablaDeSegmentos);
+		}
+		j++;
+	}
 }
 
