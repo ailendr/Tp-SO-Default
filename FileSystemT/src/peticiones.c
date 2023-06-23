@@ -70,6 +70,7 @@ void ejecutarPeticiones(){
 	t_list* aEjecutar;
 	t_instruccion* instruccion;
 	op_code nombre;
+	char nombreArchivo;
 
 	t_paquete* paqueteI;
 
@@ -83,6 +84,7 @@ void ejecutarPeticiones(){
 		instruccion = list_get(aEjecutar, 0);
 
 		nombre = instruccion->nombre;
+		nombreArchivo = instruccion -> param1;
 
 		if (nombre == EXIT){
 			log_info(loggerFS, "Finalice todas las peticiones pendientes. Finalizamos modulo");
@@ -97,10 +99,10 @@ void ejecutarPeticiones(){
 				//escribirArchivo();
 				break;
 			case F_OPEN:
-				if (1 /*si el archivo existe*/){
-					//abrirArchivo(archivo);
+				if (abrirArchivo(nombreArchivo)){ /*si el archivo existe*/ //no se como hacer la exixtencia ya que la hace dentro de AbrirArchivo
+					//abrirArchivo(nombreArchivo);
 				}else{
-					//crearArchivo(archivo);
+					crearArchivo(nombreArchivo);
 				}
 				break;
 			case F_TRUNCATE:
