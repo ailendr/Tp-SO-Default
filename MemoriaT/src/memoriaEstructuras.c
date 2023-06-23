@@ -58,10 +58,10 @@ int memoriaOcupada(t_list* lista){
 }
 
 int memoriaDisponible(){
-	t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)huecoLibre);
-	int tamanioHuecosLibres = memoriaOcupada(listaHuecosLibres);
+	t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)segmentoOcupado);
+	int tamanioHuecosOcupados = memoriaOcupada(listaHuecosLibres);
 	int tamMemoria = tam_memoria();
-	int memoriaDis = tamMemoria - memoriaOcupada(listaDeSegmentos) + tamanioHuecosLibres;
+	int memoriaDis = tamMemoria - tamanioHuecosOcupados;
 	return memoriaDis;
 }
 
@@ -96,6 +96,7 @@ void actualizarUltimoSegmentoLibre(){
 	list_add_in_index(listaDeSegmentos, ultimaPos+1,segmentoLibre);
 }
 
+//Mueve en una pos toda la lista de segmentos
 void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento){
 	t_list* listaAux = list_create();
 	int tamLista = list_size(listaDeSegmentos);
@@ -105,6 +106,7 @@ void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento)
 	list_add_all(listaDeSegmentos, listaAux);
 	free(listaAux);
 }
+
 
 void unirHuecosAledanios(t_segmento* segmento){
 	int pos = buscarPosSegmento(segmento->ID,segmento->PID, listaDeSegmentos);
@@ -151,7 +153,7 @@ t_list* crearTablaDeSegmentos(uint32_t pid){
 	t_list* tablaDeSegmentos = list_create();
 	segmentoCero->PID=pid;
 	list_add(tablaDeSegmentos, segmentoCero);
-	list_add_in_index(tablaDeSegmentos,pid, tablaDeSegmentos);
+	list_add_in_index(listaDeTablas,pid, tablaDeSegmentos);
 	log_info(loggerMemoria, "Creacion de proceso: %d", pid);
 	return tablaDeSegmentos;
 }
@@ -169,8 +171,8 @@ void liberarTablaDeSegmentos(uint32_t pid){
 		list_replace(listaDeSegmentos, pos, segmento);
 
 	}
+	list_clean(listaDeTablas, pid);
 	list_remove(listaDeTablas, pid);
-	free(tablaALiberar);
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 
