@@ -75,7 +75,7 @@ algAsignacion asignarAlgoritmo(){
 t_segmento* FirstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista){
 	int i =0;
 	t_segmento* huecoLibre=NULL;
-	while(i <= tamanioLista && tamSegmento>=huecoLibre->tamanio){
+	while(i <= tamanioLista && tamSegmento>huecoLibre->tamanio){
 		huecoLibre = list_get(listaHuecosLibres, i);
 		i++;
 	}

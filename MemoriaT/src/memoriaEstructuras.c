@@ -139,7 +139,8 @@ void logearListaDeSegmentos(char* mensaje){
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
 		int pos=buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
-		log_info(loggerMemoria, "Segmento: base: %d, limite: %d, pos en lista: %d", segmento->base, segmento->limite, pos);
+		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio);
+		log_info(loggerMemoria, "Pos en la lista: %d", pos);
 	}
 }
 
@@ -190,6 +191,7 @@ void deleteSegment(uint32_t id, uint32_t pid){
 
 
 void compactar(){
+	log_info("Solicitud de Compactación");
 	logearListaDeSegmentos("antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//dejo vacia la lista de segmentos
