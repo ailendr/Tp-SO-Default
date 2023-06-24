@@ -183,6 +183,18 @@ void instruccionAEjecutar() {
 				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)tiempoDeIO);
 				pthread_detach(hiloDeBloqueo);
 				break;
+			case MOV_IN:
+				log_info(loggerKernel, "Intruccion MOV_IN Fallida");
+				t_instruccion* instruccionMI = obtenerInstruccion(socketCPU,2);
+				free(instruccionMI);
+				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+				break;
+			case MOV_OUT:
+				log_info(loggerKernel, "Intruccion MOV_OUT Fallida");
+				t_instruccion* instruccionMO = obtenerInstruccion(socketCPU,2);
+				free(instruccionMO);
+				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+				break;
 			case CREATE_SEGMENT:
 				log_info(loggerKernel, "Intruccion Create Segment");
 				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
@@ -205,8 +217,18 @@ void instruccionAEjecutar() {
 			case F_SEEK:
 				break;
 			case F_READ:
+				log_info(loggerKernel, "Intruccion F READ");
+				t_instruccion* instruccionFR = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccionFR->param2);
+                //Serializa la instruccion ,la manda a FS y bloquea al proceso //
+                implementacionF(instruccionFR);
 				break;
 			case F_WRITE:
+				log_info(loggerKernel, "Intruccion F WRITE");
+				t_instruccion* instruccionFW = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccionFW->param2);
+                implementacionF(instruccionFW);
+
 				break;
 			case F_TRUNCATE:
 				break;
@@ -408,6 +430,23 @@ void bloquearHilo(int* tiempo){
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
 	sem_post(&planiCortoPlazo);
+}
+//Validacion para F Read y FWrite//
+void validarRyW(char* direccion){
+	int direc = atoi(direccion);
+	if(direc == -1){
+		finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+	}
+}
+//Funcion General para la mayoria de isntrucciones q empiezan con F//
+void implementacionF(t_instruccion* instruccion){
+	t_paquete* paqueteF = serializarInstruccion(instruccion);
+	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion");
+	ultimoEjecutado->estadoPcb= BLOCK;
+	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", ultimoEjecutado->contexto->pid, instruccion->param1);
+	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+	tiempoEnCPU(ultimoEjecutado);
+	free(instruccion);
 }
 
 //Logueo de las instrucciones para verificar que esta todo ok//

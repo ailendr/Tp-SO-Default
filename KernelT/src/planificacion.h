@@ -37,6 +37,7 @@ void cortoPlazo();
 //Nuevos//
 void ordenarReady();
 void enviarContextoACpu();
+
 void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void instruccionAEjecutar();
@@ -55,6 +56,8 @@ void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
 void bloquearHilo(int* tiempo);
+void validarRyW(char* direccion);
+void implementacionF(t_instruccion* instruccion);
 
 void loggearListaDeIntrucciones(t_list* instrucciones);
 
