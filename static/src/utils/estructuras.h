@@ -73,7 +73,6 @@ typedef enum{
 	} estadoPcb;
 
 typedef struct{
-	uint32_t PID;
 	int socketConsola;
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;

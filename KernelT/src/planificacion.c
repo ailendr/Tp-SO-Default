@@ -79,7 +79,7 @@ void largoPlazo() {
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
-		send(socketMemoria, &(proceso->PID),sizeof(uint32_t),0);
+		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
 
 		//asignarMemoria(proceso, tabla); //PCB creado
 		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d, proceso->contexto->pid);
@@ -185,11 +185,13 @@ void instruccionAEjecutar() {
 				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
 				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
-				int* tiempoDeIO = malloc(sizeof(int));
-				*tiempoDeIO = atoi(tiempo);//en microsegundos
 				free(instruccionIO);//Hay q liberar puntero
+				t_parametroIO* parametro = malloc(sizeof(t_parametroIO)) ;
+				parametro->tiempoDeBloqueo = atoi(tiempo);
+				parametro->procesoABloquear = ultimoEjecutado;
+
 				pthread_t hiloDeBloqueo; //crear hilo
-				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)tiempoDeIO);
+				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)parametro);
 				pthread_detach(hiloDeBloqueo);
 				break;
 			case MOV_IN:
@@ -423,12 +425,9 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 		}
 
 ////---Funcion de IO---/// Tengo que hacer lo que temia pasar como parametro un struct con tiempo y ultimo ejecutado
-void bloquearHilo(int* tiempo){
-	int tiempoDeBloqueo = *tiempo;
-	pthread_mutex_lock(&mutexUltimoEjecutado);
-	t_pcb* procesoBloqueado = ultimoEjecutado;
-	pthread_mutex_unlock(&mutexUltimoEjecutado);
-
+void bloquearHilo(t_parametroIO* parametro){
+    t_pcb* procesoBloqueado = parametro->procesoABloquear;
+    int tiempoDeBloqueo = parametro->tiempoDeBloqueo;
 	tiempoEnCPU(procesoBloqueado);
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
@@ -436,6 +435,7 @@ void bloquearHilo(int* tiempo){
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
+	free(parametro);
 	sem_post(&planiCortoPlazo);
 }
 //Validacion para F Read y FWrite//
