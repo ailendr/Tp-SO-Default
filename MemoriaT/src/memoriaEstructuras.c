@@ -162,17 +162,19 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	int tamTabla = list_size(tablaALiberar);
 	//Marco como libres a los segmentos del proceso
 	for(int i=0;i<tamTabla;i++){
-		t_segmento* segmento= list_get(tablaALiberar, i);
+		t_segmento* segmentoEnTabla= list_get(tablaALiberar, i);
 		//deleteSegment(segmento->ID, pid); No se si esta bien usar esta funcion
 		//Dejo esta otra opcion
-		int pos = buscarPosSegmento(segmento->ID, pid, listaDeSegmentos);
-		segmento->estaEnMemoria=0;
-		list_replace(listaDeSegmentos, pos, segmento); //Duda: Retorna el anterior que estaba en ese indice
+		int pos = buscarPosSegmento(segmentoEnTabla->ID, pid, listaDeSegmentos);
+		t_segmento* segmentoEnLista= list_get(listaDeSegmentos, pos);
+        segmentoEnLista->estaEnMemoria=0;
+		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
 
 	}
-	list_clean(listaDeTablas);//Habria que usar list_clean_and_destroy_elements pero mañana me fijo bien
-	//list_clean_and_destroy_elements(listaDeTablas, element_destroyer)
-	list_remove(listaDeTablas, pid);
+	list_clean(listaDeTablas);// Rlimina los segmentos de la tabla
+	//Habria que usar list_clean_and_destroy_elements pero mañana me fijo bien
+	//list_clean_and_destroy_elements(listaDeTablas, element_destroyer) ->HAY QUE MANDARLE UNA FUNCION QUE INDIQUE COMO SE LIBERA ESA ESTRUCTURA
+	list_remove(listaDeTablas, pid);// Elimina la tabla
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 
@@ -182,7 +184,7 @@ void deleteSegment(uint32_t id, uint32_t pid){ //no me cabe pasarle el pid porq 
 	//Actualizo la tabla de segmentos del proceso
 	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
 	int posEnTabla = buscarPosSegmento(id, pid, tablaDeSegmentosAActualizar);
-	list_remove(tablaDeSegmentosAActualizar,posEnTabla);
+	list_remove(tablaDeSegmentosAActualizar,posEnTabla);//lo elimino de la tabla de segmentos
 	segmentoAEliminar->estaEnMemoria=0;
 	//Actualizo en la lista de segmentos que ya no esta en memoria
 	list_replace(listaDeSegmentos, pos, segmentoAEliminar);

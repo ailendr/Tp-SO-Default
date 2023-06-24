@@ -100,6 +100,7 @@ void ordenarReady(){
 }
 
 void enviarContextoACpu(){
+	if(!list_is_empty(colaReady)){
 		t_pcb* procesoAEjec=extraerDeReady();
 		log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
@@ -109,7 +110,11 @@ void enviarContextoACpu(){
 		if(strcmp(Algoritmo(), "HRRN")==0){
 		clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
 		}
+		pthread_mutex_lock(&mutexUltimoEjecutado);
 		ultimoEjecutado = procesoAEjec;
+		pthread_mutex_unlock(&mutexUltimoEjecutado);
+	}
+	else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
 }
 
 void cortoPlazo() {
@@ -132,7 +137,10 @@ void instruccionAEjecutar() {
 		log_info(loggerKernel, "Se recibio el buffer del Contexto");
 		contextoActualizado = deserializarContexto(buffer, tamanio);
 		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);
+		pthread_mutex_lock(&mutexUltimoEjecutado);
 		ultimoEjecutado->contexto = contextoActualizado;
+		pthread_mutex_unlock(&mutexUltimoEjecutado);
+
 		free(buffer);
 //Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
@@ -142,6 +150,7 @@ void instruccionAEjecutar() {
 				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
 				free(instruccionExit);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
+				sem_post(&planiCortoPlazo);
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
@@ -368,7 +377,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
 	//sem_post(&cpuLibre);
-	sem_post(&planiCortoPlazo);
+	//sem_post(&planiCortoPlazo);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
@@ -405,6 +414,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
+				sem_post(&planiCortoPlazo);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
 				procesoAEjecutar(contextoActualizado);//Sigue en cpu
 				break;
@@ -412,10 +422,13 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 			}
 		}
 
-////---Funcion de IO---///
+////---Funcion de IO---/// Tengo que hacer lo que temia pasar como parametro un struct con tiempo y ultimo ejecutado
 void bloquearHilo(int* tiempo){
 	int tiempoDeBloqueo = *tiempo;
+	pthread_mutex_lock(&mutexUltimoEjecutado);
 	t_pcb* procesoBloqueado = ultimoEjecutado;
+	pthread_mutex_unlock(&mutexUltimoEjecutado);
+
 	tiempoEnCPU(procesoBloqueado);
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
