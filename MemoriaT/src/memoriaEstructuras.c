@@ -168,10 +168,11 @@ void liberarTablaDeSegmentos(uint32_t pid){
 		//Dejo esta otra opcion
 		int pos = buscarPosSegmento(segmento->ID, pid, listaDeSegmentos);
 		segmento->estaEnMemoria=0;
-		list_replace(listaDeSegmentos, pos, segmento);
+		list_replace(listaDeSegmentos, pos, segmento); //Duda: Retorna el anterior que estaba en ese indice
 
 	}
-	list_clean(listaDeTablas, pid);
+	list_clean(listaDeTablas);//Habria que usar list_clean_and_destroy_elements pero mañana me fijo bien
+	//list_clean_and_destroy_elements(listaDeTablas, element_destroyer)
 	list_remove(listaDeTablas, pid);
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
@@ -181,7 +182,8 @@ void deleteSegment(uint32_t id, uint32_t pid){
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
 	//Actualizo la tabla de segmentos del proceso
 	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
-	list_remove_element(tablaDeSegmentosAActualizar, segmentoAEliminar);
+	int posEnTabla = buscarPosSegmento(id, pid, tablaDeSegmentosAActualizar);
+	list_remove(tablaDeSegmentosAActualizar,posEnTabla);
 	segmentoAEliminar->estaEnMemoria=0;
 	//Actualizo en la lista de segmentos que ya no esta en memoria
 	list_replace(listaDeSegmentos, pos, segmentoAEliminar);
@@ -193,7 +195,7 @@ void deleteSegment(uint32_t id, uint32_t pid){
 
 
 void compactar(){
-	log_info("Solicitud de Compactación");
+	log_info(loggerMemoria,"Solicitud de Compactación");
 	logearListaDeSegmentos("antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//dejo vacia la lista de segmentos
