@@ -251,4 +251,38 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam){
 	return instruccion;
 }
 
+t_instruccion* obtenerInstruccion(int socket, int cantParam){
+	int tamanio = 0;
+	void *buffer = recibir_buffer(&tamanio, socket);
+	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer, cantParam);
+	return instruccionNueva;
+}
+
+////Serializacion de la tabla de segmentos: no voy a enviar un paquete porque el codigo de operacion no lo voy a usar/////
+//FALTAAAA DEJO LO GENERICO TENGO QUE ABSTRAER PARA SERIALIZAR CADA SEGMENTO
+t_buffer* serializarTablaDeSegmentos(t_list* tabla){
+	int tamanio = list_size(tabla);
+		t_buffer* buffer = malloc(sizeof(t_buffer));
+		buffer->size = sizeof(uint32_t)*6; //reservamos para el segmento
+		buffer->stream = NULL;
+		for(int i=0; i<tamanio; i++){
+			t_segmento* segmento = list_get(tabla,i);
+			int offset = 0;
+			buffer->stream = realloc(buffer->stream, buffer->size );
+			memcpy(buffer->stream, &(segmento->PID), sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(buffer->stream, &(segmento->ID), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+			memcpy(buffer->stream, &(segmento->base), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+			memcpy(buffer->stream, &(segmento->tamanio), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+			memcpy(buffer->stream, &(segmento->limite), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+			memcpy(buffer->stream, &(segmento->estaEnMemoria), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+			buffer->size+=offset;
+		}
+			return buffer;
+}
 

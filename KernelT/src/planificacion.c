@@ -308,12 +308,6 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 }
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
-t_instruccion* obtenerInstruccion(int socket, int cantParam){
-	int tamanio = 0;
-	void *buffer = recibir_buffer(&tamanio, socketCPU);
-	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer, cantParam);
-	return instruccionNueva;
-}
 
 t_list* obtenerInstrucciones(int socket_cliente) {
 	int codigoOp = recibir_operacion(socket_cliente);

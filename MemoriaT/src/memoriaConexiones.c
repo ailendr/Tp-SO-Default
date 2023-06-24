@@ -49,10 +49,12 @@ void atenderPeticionesKernel(int socket){
 	int pidDeProceso = 0;
 	recv(socket, &pidDeProceso, sizeof(uint32_t), MSG_WAITALL);
 	t_list* tablaDeSegmentos = crearTablaDeSegmentos(pidDeProceso);
+	t_buffer* bufferDeTabla = serializarTablaDeSegmentos(tablaDeSegmentos);
+	enviarBuffer(bufferDeTabla, socket);
 	//y hacer el send. Habria que serializar la tabla.
 
 	//Segunda Peticion : Son Instrucciones que llegan en paquete entonces tienen cod_op y buffer
-/*int codInstruccion = recibir_operacion(socket);
+     int codInstruccion = recibir_operacion(socket);
 	 switch(codInstruccion){
 		case CREATE_SEGMENT:
 		t_instruccion* instruccionCS = obtenerInstruccion(socket,2);
@@ -64,7 +66,7 @@ void atenderPeticionesKernel(int socket){
 	 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 	 	 send(socket, &mensaje, sizeof(uint32_t),0);
 			break;
-
+/*
 		case DELETE_SEGMENT:
 			//recibimos el id del segmento a eliminar
 			 deleteSegment(id);
@@ -78,11 +80,11 @@ void atenderPeticionesKernel(int socket){
 	}	case EXIT:
 			liberarTablaDeSegmentos(pid);
 			break;
-
+*/
 		default:
 			break;
 	}
-*/
+
 
 
 

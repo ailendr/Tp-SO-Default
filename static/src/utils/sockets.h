@@ -60,6 +60,7 @@ void recibirHandshake(int socket_cliente,t_handshake handshake,t_log* logger);
 void enviar_mensaje(char* mensaje, int socket_cliente);
 int enviarProtocolo(int conexion,t_handshake handshake,t_log* logger);
 void* serializar_paquete(t_paquete* paquete, int bytes);
+void enviarBuffer(t_buffer* buffer, int socket);
 
 void crear_buffer(t_paquete* paquete);
 t_paquete* crear_paquete(void);

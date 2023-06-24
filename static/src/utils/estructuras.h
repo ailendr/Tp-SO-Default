@@ -99,7 +99,7 @@ typedef struct{
 	uint32_t base;
 	uint32_t tamanio;
 	uint32_t limite;
-	int estaEnMemoria;
+	uint32_t estaEnMemoria;
 }t_segmento;
 
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

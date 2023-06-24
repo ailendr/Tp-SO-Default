@@ -9,6 +9,7 @@
 #define SRC_MEMORIACONEXIONES_H_
 
 #include <utils/sockets.h>
+#include <utils/serializacion.h>
 #include <pthread.h>
 #include "memoriaConfig.h"
 #include "algoritmosDeAsignacion.h"
