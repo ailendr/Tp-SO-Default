@@ -8,7 +8,7 @@ sem_t cpuLibre;
 pthread_mutex_t mutexReady;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexPID;
-
+pthread_mutex_t mutexUltimoEjecutado;
 
 
 void inicializarSemaforos(){
@@ -19,6 +19,7 @@ void inicializarSemaforos(){
 	pthread_mutex_init(&mutexReady, NULL);
 	pthread_mutex_init(&mutexNew, NULL);
 	pthread_mutex_init(&mutexPID, NULL);
+	pthread_mutex_init(&mutexUltimoEjecutado,NULL);
 
 }
 

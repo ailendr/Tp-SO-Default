@@ -34,7 +34,8 @@ typedef enum
 	F_WRITE,
 	F_TRUNCATE,
 	WAIT,
-	SIGNAL
+	SIGNAL,
+	COMPACTAR
 }op_code;
 
 typedef struct{
@@ -72,7 +73,6 @@ typedef enum{
 	} estadoPcb;
 
 typedef struct{
-	uint32_t PID;
 	int socketConsola;
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;
@@ -90,12 +90,15 @@ typedef struct{
 
 
 
-/*
-Lo dejo así ya queda a futuro, pero por ahora que quede comentado
+
+
 typedef struct{
+	uint32_t PID;
 	uint32_t ID;
-	uint32_t tamSegmento;
-	char* dirBase;
-}segmento;
- * */
+	uint32_t base;
+	uint32_t tamanio;
+	uint32_t limite;
+	uint32_t estaEnMemoria;
+}t_segmento;
+
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

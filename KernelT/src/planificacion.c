@@ -78,7 +78,9 @@ void largoPlazo() {
 		sem_wait(&multiprogramacion);
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
-		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //El handshake seria el pedido de memoria
+		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
+		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
+
 		//asignarMemoria(proceso, tabla); //PCB creado
 		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d, proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
@@ -98,6 +100,7 @@ void ordenarReady(){
 }
 
 void enviarContextoACpu(){
+	if(!list_is_empty(colaReady)){
 		t_pcb* procesoAEjec=extraerDeReady();
 		log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
@@ -107,7 +110,11 @@ void enviarContextoACpu(){
 		if(strcmp(Algoritmo(), "HRRN")==0){
 		clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
 		}
+		pthread_mutex_lock(&mutexUltimoEjecutado);
 		ultimoEjecutado = procesoAEjec;
+		pthread_mutex_unlock(&mutexUltimoEjecutado);
+	}
+	else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
 }
 
 void cortoPlazo() {
@@ -130,7 +137,10 @@ void instruccionAEjecutar() {
 		log_info(loggerKernel, "Se recibio el buffer del Contexto");
 		contextoActualizado = deserializarContexto(buffer, tamanio);
 		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);
+		pthread_mutex_lock(&mutexUltimoEjecutado);
 		ultimoEjecutado->contexto = contextoActualizado;
+		pthread_mutex_unlock(&mutexUltimoEjecutado);
+
 		free(buffer);
 //Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
@@ -140,6 +150,7 @@ void instruccionAEjecutar() {
 				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
 				free(instruccionExit);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
+				sem_post(&planiCortoPlazo);
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
@@ -173,16 +184,41 @@ void instruccionAEjecutar() {
 				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
 				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
-				int* tiempoDeIO = malloc(sizeof(int));
-				*tiempoDeIO = atoi(tiempo);//en microsegundos
 				free(instruccionIO);//Hay q liberar puntero
+				t_parametroIO* parametro = malloc(sizeof(t_parametroIO)) ;
+				parametro->tiempoDeBloqueo = atoi(tiempo);
+				parametro->procesoABloquear = ultimoEjecutado;
+
 				pthread_t hiloDeBloqueo; //crear hilo
-				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)tiempoDeIO);
+				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)parametro);
 				pthread_detach(hiloDeBloqueo);
 				break;
+			case MOV_IN:
+				log_info(loggerKernel, "Intruccion MOV_IN Fallida");
+				t_instruccion* instruccionMI = obtenerInstruccion(socketCPU,2);
+				free(instruccionMI);
+				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+				break;
+			case MOV_OUT:
+				log_info(loggerKernel, "Intruccion MOV_OUT Fallida");
+				t_instruccion* instruccionMO = obtenerInstruccion(socketCPU,2);
+				free(instruccionMO);
+				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+				break;
 			case CREATE_SEGMENT:
+				log_info(loggerKernel, "Intruccion Create Segment");
+				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
+						//TODO
+				free(instruccionCS);//Hay q liberar puntero
+
+
 				break;
 			case DELETE_SEGMENT:
+				log_info(loggerKernel, "Intruccion Delete Segmente");
+				t_instruccion* instruccionDS = obtenerInstruccion(socketCPU,1);
+					//TODO
+				free(instruccionDS);//Hay q liberar puntero
+
 				break;
 			case F_OPEN:
 				break;
@@ -191,8 +227,18 @@ void instruccionAEjecutar() {
 			case F_SEEK:
 				break;
 			case F_READ:
+				log_info(loggerKernel, "Intruccion F READ");
+				t_instruccion* instruccionFR = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccionFR->param2);
+                //Serializa la instruccion ,la manda a FS y bloquea al proceso //
+                implementacionF(instruccionFR);
 				break;
 			case F_WRITE:
+				log_info(loggerKernel, "Intruccion F WRITE");
+				t_instruccion* instruccionFW = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccionFW->param2);
+                implementacionF(instruccionFW);
+
 				break;
 			case F_TRUNCATE:
 				break;
@@ -272,12 +318,6 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 }
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
-t_instruccion* obtenerInstruccion(int socket, int cantParam){
-	int tamanio = 0;
-	void *buffer = recibir_buffer(&tamanio, socketCPU);
-	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer, cantParam);
-	return instruccionNueva;
-}
 
 t_list* obtenerInstrucciones(int socket_cliente) {
 	int codigoOp = recibir_operacion(socket_cliente);
@@ -338,7 +378,7 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
 	//sem_post(&cpuLibre);
-	sem_post(&planiCortoPlazo);
+	//sem_post(&planiCortoPlazo);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
@@ -375,6 +415,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
+				sem_post(&planiCortoPlazo);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
 				procesoAEjecutar(contextoActualizado);//Sigue en cpu
 				break;
@@ -382,10 +423,10 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 			}
 		}
 
-////---Funcion de IO---///
-void bloquearHilo(int* tiempo){
-	int tiempoDeBloqueo = *tiempo;
-	t_pcb* procesoBloqueado = ultimoEjecutado;
+////---Funcion de IO---/// Tengo que hacer lo que temia pasar como parametro un struct con tiempo y ultimo ejecutado
+void bloquearHilo(t_parametroIO* parametro){
+    t_pcb* procesoBloqueado = parametro->procesoABloquear;
+    int tiempoDeBloqueo = parametro->tiempoDeBloqueo;
 	tiempoEnCPU(procesoBloqueado);
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
@@ -393,7 +434,25 @@ void bloquearHilo(int* tiempo){
 	usleep(tiempoDeBloqueo);
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
+	free(parametro);
 	sem_post(&planiCortoPlazo);
+}
+//Validacion para F Read y FWrite//
+void validarRyW(char* direccion){
+	int direc = atoi(direccion);
+	if(direc == -1){
+		finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+	}
+}
+//Funcion General para la mayoria de isntrucciones q empiezan con F//
+void implementacionF(t_instruccion* instruccion){
+	t_paquete* paqueteF = serializarInstruccion(instruccion);
+	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion");
+	ultimoEjecutado->estadoPcb= BLOCK;
+	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", ultimoEjecutado->contexto->pid, instruccion->param1);
+	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+	tiempoEnCPU(ultimoEjecutado);
+	free(instruccion);
 }
 
 //Logueo de las instrucciones para verificar que esta todo ok//
