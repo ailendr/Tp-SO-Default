@@ -45,28 +45,23 @@ void atenderPeticionesFs(int socket){
 }
 
 void atenderPeticionesKernel(int socket){
-	//recibirHandshake(socket, HANDSHAKE_PedirMemoria);
-	uint32_t protocolo;
-	uint32_t resultado_ok = HANDSHAKE_Ok;
-	uint32_t resultado_error = - 1;
+	//Primer Peticion : crear Tabla para un Proceso//
+	int pidDeProceso = 0;
+	recv(socket, &pidDeProceso, sizeof(uint32_t), MSG_WAITALL);
+	t_list* tablaDeSegmentos = crearTablaDeSegmentos(pidDeProceso);
+	//y hacer el send. Habria que serializar la tabla.
 
-	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
-	if(protocolo == HANDSHAKE_PedirMemoria){
-		   send(socket, &resultado_ok, sizeof(uint32_t), 0);
-		   log_info(loggerMemoria, "Se ha iniciado estructura en memoria para un Proceso");
-	}
-	else{
-		   send(socket, &resultado_error, sizeof(uint32_t), 0);
-		}/*
-	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
-	//Falta agregar lo de como recibimos las cosas y las mandamos
-	switch(protocolo){
+	//Segunda Peticion : Son Instrucciones que llegan en paquete entonces tienen cod_op y buffer
+/*int codInstruccion = recibir_operacion(socket);
+	 switch(codInstruccion){
 		case CREATE_SEGMENT:
-	//Le actualizo aca el pid y el id al nuevo segmento
-	 	 t_segmento* nuevoSegmento;
-	 	 nuevoSegmento->pid = pid;
-	 	 nuevoSegmento->id = id;
-	 	 uint32_t mensaje = createSegment(nuevoSegmento);
+		t_instruccion* instruccionCS = obtenerInstruccion(socket,2);
+		int idSegmento = atoi(instruccionCS->param1);
+		int tamanioSegmento = atoi(instruccionCS->param2);
+	 	t_segmento* nuevoSegmento = malloc(sizeof(t_segmento));
+	 	 nuevoSegmento->PID=instruccionCS->pid;
+	 	 nuevoSegmento->ID = idSegmento;
+	 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 	 	 send(socket, &mensaje, sizeof(uint32_t),0);
 			break;
 
@@ -76,12 +71,6 @@ void atenderPeticionesKernel(int socket){
 			 //hago un send de la tabla actualizada
 			break;
 
-		case HANDSHAKE_PedirMemoria:
-			t_segmento* tablaDeSegmentos;
-			tablaDeSegmentos = crearTablasDeSegmentos(pid);
-			//y hacer el send. Habria que serializar la tabla.
-			break;
-
 		case COMPACTAR:
 			compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada
 			//hago send de todas las tablas actualizadas.
@@ -89,11 +78,12 @@ void atenderPeticionesKernel(int socket){
 	}	case EXIT:
 			liberarTablaDeSegmentos(pid);
 			break;
+
 		default:
 			break;
 	}
+*/
 
-	*/
 
 
 }

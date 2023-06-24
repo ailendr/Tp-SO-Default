@@ -78,7 +78,9 @@ void largoPlazo() {
 		sem_wait(&multiprogramacion);
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
-		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //El handshake seria el pedido de memoria
+		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
+		send(socketMemoria, &(proceso->PID),sizeof(uint32_t),0);
+
 		//asignarMemoria(proceso, tabla); //PCB creado
 		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d, proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
@@ -182,8 +184,19 @@ void instruccionAEjecutar() {
 				pthread_detach(hiloDeBloqueo);
 				break;
 			case CREATE_SEGMENT:
+				log_info(loggerKernel, "Intruccion Create Segment");
+				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
+						//TODO
+				free(instruccionCS);//Hay q liberar puntero
+
+
 				break;
 			case DELETE_SEGMENT:
+				log_info(loggerKernel, "Intruccion Delete Segmente");
+				t_instruccion* instruccionDS = obtenerInstruccion(socketCPU,1);
+					//TODO
+				free(instruccionDS);//Hay q liberar puntero
+
 				break;
 			case F_OPEN:
 				break;

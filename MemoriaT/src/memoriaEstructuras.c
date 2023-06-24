@@ -151,7 +151,6 @@ void logearListaDeSegmentos(char* mensaje){
 t_list* crearTablaDeSegmentos(uint32_t pid){
 
 	t_list* tablaDeSegmentos = list_create();
-	segmentoCero->PID=pid;
 	list_add(tablaDeSegmentos, segmentoCero);
 	list_add_in_index(listaDeTablas,pid, tablaDeSegmentos);
 	log_info(loggerMemoria, "Creacion de proceso: %d", pid);
@@ -177,7 +176,7 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 
-void deleteSegment(uint32_t id, uint32_t pid){
+void deleteSegment(uint32_t id, uint32_t pid){ //no me cabe pasarle el pid porq el segmento ya lo tiene
 	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
 	//Actualizo la tabla de segmentos del proceso
