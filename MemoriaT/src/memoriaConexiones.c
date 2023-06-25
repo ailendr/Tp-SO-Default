@@ -43,49 +43,56 @@ void atenderPeticionesFs(int socket){
 		break;
 	}*/
 }
+void enviarTablaDeSegmentos(t_list* tablaDeSegmentos, int socket){
+	t_buffer* bufferDeTabla = serializarTablaDeSegmentos(tablaDeSegmentos);
+	enviarBuffer(bufferDeTabla, socket);
+	free(bufferDeTabla);
+}
 
 void atenderPeticionesKernel(int socket){
-	//Primer Peticion : crear Tabla para un Proceso//
+	while(1){
+	/*//Primer Peticion : crear Tabla para un Proceso//
 	int pidDeProceso = 0;
 	recv(socket, &pidDeProceso, sizeof(uint32_t), MSG_WAITALL);
 	t_list* tablaDeSegmentos = crearTablaDeSegmentos(pidDeProceso);
-	t_buffer* bufferDeTabla = serializarTablaDeSegmentos(tablaDeSegmentos);
-	enviarBuffer(bufferDeTabla, socket);
-	//y hacer el send. Habria que serializar la tabla.
+	enviarTablaDeSegmentos(tablaDeSegmentos);*/
 
 	//Segunda Peticion : Son Instrucciones que llegan en paquete entonces tienen cod_op y buffer
      int codInstruccion = recibir_operacion(socket);
 	 switch(codInstruccion){
 		case CREATE_SEGMENT:
 		t_instruccion* instruccionCS = obtenerInstruccion(socket,2);
-		int idSegmento = atoi(instruccionCS->param1);
+		int idSegmentoCS = atoi(instruccionCS->param1);
 		int tamanioSegmento = atoi(instruccionCS->param2);
 	 	t_segmento* nuevoSegmento = malloc(sizeof(t_segmento));
 	 	 nuevoSegmento->PID=instruccionCS->pid;
-	 	 nuevoSegmento->ID = idSegmento;
+	 	 nuevoSegmento->ID = idSegmentoCS;
 	 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 	 	 send(socket, &mensaje, sizeof(uint32_t),0);
 			break;
-/*
 		case DELETE_SEGMENT:
-			//recibimos el id del segmento a eliminar
-			 deleteSegment(id);
-			 //hago un send de la tabla actualizada
+			t_instruccion* instruccionDS = obtenerInstruccion(socket,1);
+			int idSegmentoDS = atoi(instruccionDS->param1);
+			t_list* tablaActualizada = deleteSegment(idSegmentoDS, instruccionDS->pid);
+		    enviarTablaDeSegmentos(tablaActualizada,socket);
 			break;
-
+/*
 		case COMPACTAR:
 			compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada
 			//hago send de todas las tablas actualizadas.
 			break;
-	}	case EXIT:
+		case EXIT:
 			liberarTablaDeSegmentos(pid);
 			break;
 */
-		default:
+		default://Si entra aca es porque recibio un pid para crear la tabla de segmentos->sino agregamos el handashake eso da igual pero somos la q controlamos q envia kernely se supone q no enviamos nada incorrecto
+
+			t_list* tablaDeSegmentos = crearTablaDeSegmentos(codInstruccion);
+			enviarTablaDeSegmentos(tablaDeSegmentos,socket);
+
 			break;
+	 	 }
 	}
-
-
 
 
 }

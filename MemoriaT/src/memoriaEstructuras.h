@@ -34,11 +34,12 @@ void actualizarUltimoSegmentoLibre();
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista);
 void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibre);
 void logearListaDeSegmentos(char* mensaje);
+void destruirSegmento(t_segmento*);
 
 //FUNCIONES DE MEMORIA
 t_list* crearTablaDeSegmentos(uint32_t pid);
 void liberarTablaDeSegmentos(uint32_t pid);
-void deleteSegment(uint32_t id, uint32_t pid);
+t_list* deleteSegment(uint32_t id, uint32_t pid); //Me sirve que retorne la tabla actualizada
 void unirHuecosAledanios(t_segmento* segmento);
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos);
 void compactar();

@@ -146,6 +146,16 @@ void logearListaDeSegmentos(char* mensaje){
 	}
 }
 
+void destruirSegmento(t_segmento* self){
+	self->PID = 0;
+	self->ID=0;
+	self->limite=0,
+	self->base=0;
+	self->tamanio=0;
+	self->estaEnMemoria= 0;
+	free(self);
+}
+
 ////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
 
 t_list* crearTablaDeSegmentos(uint32_t pid){
@@ -171,27 +181,27 @@ void liberarTablaDeSegmentos(uint32_t pid){
 		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
 
 	}
-	list_clean(listaDeTablas);// Rlimina los segmentos de la tabla
-	//Habria que usar list_clean_and_destroy_elements pero mañana me fijo bien
-	//list_clean_and_destroy_elements(listaDeTablas, element_destroyer) ->HAY QUE MANDARLE UNA FUNCION QUE INDIQUE COMO SE LIBERA ESA ESTRUCTURA
+	//list_clean(listaDeTablas);
+	list_clean_and_destroy_elements(listaDeTablas, (void*) destruirSegmento);
 	list_remove(listaDeTablas, pid);// Elimina la tabla
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 
-void deleteSegment(uint32_t id, uint32_t pid){ //no me cabe pasarle el pid porq el segmento ya lo tiene
+t_list* deleteSegment(uint32_t id, uint32_t pid){ //Me sirve que retorne la tabla actualizada
 	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
 	//Actualizo la tabla de segmentos del proceso
 	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
 	int posEnTabla = buscarPosSegmento(id, pid, tablaDeSegmentosAActualizar);
-	list_remove(tablaDeSegmentosAActualizar,posEnTabla);//lo elimino de la tabla de segmentos
+	//list_remove(tablaDeSegmentosAActualizar,posEnTabla);//lo elimino de la tabla de segmentos
+	//void(* funcionParaDestruir)(t_segmento*);
+	//funcionParaDestruir = &destruirSegmento;
+	list_remove_and_destroy_element(tablaDeSegmentosAActualizar,posEnTabla,(void*)destruirSegmento);
 	segmentoAEliminar->estaEnMemoria=0;
-	//Actualizo en la lista de segmentos que ya no esta en memoria
-	list_replace(listaDeSegmentos, pos, segmentoAEliminar);
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
 	//Falta la parte de unir con segmentos aledaños si estan libres
 	unirHuecosAledanios(segmentoAEliminar);
-
+    return tablaDeSegmentosAActualizar;
 }
 
 
@@ -224,4 +234,5 @@ void compactar(){
 		j++;
 	}
 }
+
 

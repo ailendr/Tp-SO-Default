@@ -190,7 +190,7 @@ int enviarProtocolo(int conexion,t_handshake handshake,t_log* logger){
 
 }
 //Para enviar solo el buffer de la tabla de segmentos: Cuando llegue del lado del cliente hacer un voi* buffer = recibirBuffer -> lo q me importa esta en el stream/
-void enviarBuffer(t_buffer* buffer, int socket){
+  void enviarBuffer(t_buffer* buffer, int socket){
 	send(socket, &(buffer->size),sizeof(int),0);
 	send(socket, buffer->stream, buffer->size,0);
 

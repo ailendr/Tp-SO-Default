@@ -20,8 +20,12 @@ t_paquete* serializarInstruccion(t_instruccion* instruccion);
 //t_paquete* serializacionParametros (t_paquete* pInstruc, int offset, t_instruccion* instruc, int param);
 t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam);
 t_instruccion* obtenerInstruccion(int socket, int cantParam);
-
+//Serializacion y deserializacion de tabla de segmento//
 t_buffer* serializarTablaDeSegmentos(t_list* tabla);
+void serializarSegmento(t_segmento* segmento, t_buffer* buffer);
+t_segmento* deserializarSegmento(void* buffer, int desplazamiento);
+t_list* deserializarTablaDeSegmentos(int socket);
+
 
 ///Hecho por naty///
 int cantidadDeParametros(op_code instruccion);

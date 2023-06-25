@@ -80,9 +80,9 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
 		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
-
-		//asignarMemoria(proceso, tabla); //PCB creado
-		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d, proceso->contexto->pid);
+        t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(socketMemoria);
+		asignarMemoria(proceso, tablaDeSegmentos); //PCB creado
+		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
 		logCambioDeEstado(proceso, "NEW", "READY");
 		sem_post(&planiCortoPlazo);
@@ -186,10 +186,10 @@ void instruccionAEjecutar() {
 				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
 				char* tiempo = instruccionIO->param1;
 				free(instruccionIO);//Hay q liberar puntero
+				log_info(loggerKernel, "PID: %d - Ejecuta IO: %d", ultimoEjecutado->contexto->pid, atoi(tiempo));
 				t_parametroIO* parametro = malloc(sizeof(t_parametroIO)) ;
 				parametro->tiempoDeBloqueo = atoi(tiempo);
 				parametro->procesoABloquear = ultimoEjecutado;
-
 				pthread_t hiloDeBloqueo; //crear hilo
 				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)parametro);
 				pthread_detach(hiloDeBloqueo);
@@ -209,7 +209,9 @@ void instruccionAEjecutar() {
 			case CREATE_SEGMENT:
 				log_info(loggerKernel, "Intruccion Create Segment");
 				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
-						//TODO
+				//Serializamos y enviamos a memoria//
+				t_paquete* paqueteCS = serializarInstruccion(instruccionCS);
+				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
 				free(instruccionCS);//Hay q liberar puntero
 
 
@@ -217,7 +219,8 @@ void instruccionAEjecutar() {
 			case DELETE_SEGMENT:
 				log_info(loggerKernel, "Intruccion Delete Segmente");
 				t_instruccion* instruccionDS = obtenerInstruccion(socketCPU,1);
-					//TODO
+				t_paquete* paqueteDS = serializarInstruccion(instruccionDS);
+				validarEnvioDePaquete(paqueteDS, socketMemoria, loggerKernel, configKernel, "Instruccion Delete Segment");
 				free(instruccionDS);//Hay q liberar puntero
 
 				break;
