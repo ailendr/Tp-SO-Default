@@ -30,6 +30,7 @@ int main(void) {
 
 	atenderModulos(servidorMemoria);
 
+	iniciarEstructuras();
 
 	log_info(loggerMemoria, "Finalizando Memoria...\n");
 

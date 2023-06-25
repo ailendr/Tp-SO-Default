@@ -19,6 +19,18 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar);
 t_paquete* serializarInstruccion(t_instruccion* instruccion);
 //t_paquete* serializacionParametros (t_paquete* pInstruc, int offset, t_instruccion* instruc, int param);
 t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam);
+t_instruccion* obtenerInstruccion(int socket, int cantParam);
+
+//Serializacion y deserializacion de tabla de segmento//
+void serializarSegmento(t_segmento* segmento, t_buffer* buffer);
+t_segmento* deserializarSegmento(void* buffer, int desplazamiento);
+void serializarTablaDeSegmentos(t_list* tabla, t_buffer* buffer);
+t_list* deserializarTablaDeSegmentos(void* buffer,int desplazamiento, int size);
+
+//Serializacion y deserializacion Lista de Tablas//
+t_buffer* serializarListaDeTablas(t_list* listaDeTablas);
+t_list* deserializarListaDeTablas(int socket);
+
 
 ///Hecho por naty///
 int cantidadDeParametros(op_code instruccion);

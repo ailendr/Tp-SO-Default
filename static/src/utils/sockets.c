@@ -138,6 +138,7 @@ int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger,char* no
 		return -1;
 	}else{
 		log_info(logger, "He podido enviar el Paquete de %s", nombrePaq );
+		eliminar_paquete(paquete);
 	}
 
 	return 0;
@@ -149,6 +150,7 @@ void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger
 		terminarModulo(socket_cliente, logger, config);
 		exit(1);
 	}
+
 }
 
 
@@ -187,7 +189,48 @@ int enviarProtocolo(int conexion,t_handshake handshake,t_log* logger){
 	return 0;
 
 }
+//Para enviar solo el buffer de la tabla de segmentos: Cuando llegue del lado del cliente hacer un voi* buffer = recibirBuffer -> lo q me importa esta en el stream/
+  int enviarBuffer(t_buffer* buffer, int socket, char* nombreBuffer, t_log* logger){
+	 /*Hacer 2 sends o todo lo otro ajajaja
+	  * int returnSize, returnStream;
+		if( (returnSize = send(socket, &(buffer->size),sizeof(int),0)) == -1){
+		log_info(logger, "Error al enviar el size del buffer");}
+		if((returnStream = send(socket, buffer->stream, buffer->size,0)) == -1){
+		log_info(logger, "Error al enviar el contenido de :%s", nombreBuffer);
+		free(buffer->stream);
+		free(buffer);
 
+		}*/
+
+		int bytes = buffer->size + sizeof(int);
+		void * magic = malloc(bytes);
+		int desplazamiento = 0;
+		memcpy(magic + desplazamiento, &(buffer->size), sizeof(int));
+		desplazamiento+= sizeof(int);
+		memcpy(magic + desplazamiento, buffer->stream, buffer->size);
+		desplazamiento+= buffer->size;
+		int returnSend = send(socket, magic, bytes, 0);
+		free(magic);
+		free(buffer->stream);
+		free(buffer);
+
+		if(returnSend == -1){
+			log_info(logger, "Error al enviar %s:", nombreBuffer);
+			return -1;
+		}else{
+			log_info(logger, "He podido enviar %s:", nombreBuffer);
+		}
+
+		return 0;
+}
+
+  void validarEnvioBuffer(t_buffer* buffer, int socket, char* nombreBuffer, t_log* logger, t_config* config){
+	  if(enviarBuffer(buffer, socket, nombreBuffer, logger) == -1){
+	  		log_info(logger, "Fallo la conexion. Terminando Modulo");
+	  		terminarModulo(socket, logger, config);
+	  		exit(1);
+	  	}
+  }
 
 ////------FUNCIONES DEL SERVIDOR-----////
 

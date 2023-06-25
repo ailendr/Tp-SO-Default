@@ -18,7 +18,9 @@ int tam_memoria(){
 int cantSegmentos(){
 	return config_get_int_value(configMemoria, "CANT_SEGMENTOS");
 }
-
+int tam_segmento_cero(){
+	return config_get_int_value(configMemoria, "TAM_SEGMENTO");
+}
 int retardoMemoria(){
 	return config_get_int_value(configMemoria, "RETARDO_MEMORIA");
 }
@@ -27,6 +29,6 @@ int retardoCompactacion(){
 	return config_get_int_value(configMemoria, "RETARDO_COMPACTACION");
 }
 
-char* algortimoAsignacion(){
+char* algoritmoAsignacion(){
 	return config_get_string_value(configMemoria, "ALGORITMO_ASIGNACION");
 }

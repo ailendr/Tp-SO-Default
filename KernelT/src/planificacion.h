@@ -18,6 +18,11 @@
 #include "recursos.h"
 #include <utils/serializacion.h>
 
+typedef struct{
+	int tiempoDeBloqueo;
+	t_pcb* procesoABloquear;
+
+} t_parametroIO;
 
 extern t_queue* colaNew;
 extern t_list* colaReady;
@@ -51,13 +56,16 @@ void tiempoEnCPU(t_pcb* proceso);
 void generarProceso(int* socket_cliente);
 void finalizarProceso(t_pcb* procesoAFinalizar, char* motivoDeFin);
 t_list*  obtenerInstrucciones(int socket_cliente);
-t_instruccion* obtenerInstruccion(int socket, int cantParam);
 void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
-void bloquearHilo(int* tiempo);
+void bloquearHilo(t_parametroIO* parametro);
 void validarRyW(char* direccion);
 void implementacionF(t_instruccion* instruccion);
+
+void validarCS(int socket);
+
+void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
 
 void loggearListaDeIntrucciones(t_list* instrucciones);
 

@@ -41,7 +41,8 @@ typedef enum {
     HANDSHAKE_Kernel,
 	HANDSHAKE_Fs,
 	HANDSHAKE_PedirMemoria,
-    HANDSHAKE_Ok
+    HANDSHAKE_Ok,
+	HANDSHAKE_OutOfMemory
 } t_handshake;
 
 int iniciarServidor(char*  ip, char* puerto);
@@ -59,6 +60,9 @@ void recibirHandshake(int socket_cliente,t_handshake handshake,t_log* logger);
 void enviar_mensaje(char* mensaje, int socket_cliente);
 int enviarProtocolo(int conexion,t_handshake handshake,t_log* logger);
 void* serializar_paquete(t_paquete* paquete, int bytes);
+void validarEnvioBuffer(t_buffer* buffer, int socket, char* nombreBuffer, t_log* logger, t_config* config);
+int enviarBuffer(t_buffer* buffer, int socket, char* nombreBuffer, t_log* logger);
+
 
 void crear_buffer(t_paquete* paquete);
 t_paquete* crear_paquete(void);
@@ -66,8 +70,6 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger, char* nombrePaq);
 void eliminar_paquete(t_paquete* paquete);
-
-
 void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger,t_config* config, char* nombrePaq);
 
 void liberar_conexion(int socket);

@@ -66,7 +66,7 @@ t_contextoEjec* deserializarContexto(void *buffer, int tamanio) {
 
 	contexto->instrucciones = deserializarInstrucciones(stream, desplazamiento,
 			tamanioBuffer);
-
+    free(buffer);
 	return contexto;
 }
 
@@ -248,7 +248,96 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam){
 	   	memcpy(instruccion->param3, stream+desplazamiento,tamParam);
 
    }
+    free(buffer);
 	return instruccion;
 }
+
+t_instruccion* obtenerInstruccion(int socket, int cantParam){
+	int tamanio = 0;
+	void *buffer = recibir_buffer(&tamanio, socket);
+	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer, cantParam);
+	return instruccionNueva;
+}
+
+////SERIALIZACION Y DESERIALIZACION DE TABLA DE SEGMENTOS  : no voy a enviar un paquete porque el codigo de operacion no lo voy a usar/////
+
+void serializarTablaDeSegmentos(t_list* tabla, t_buffer* buffer){
+	    int tamanio = list_size(tabla);
+		for(int i=0; i<tamanio; i++){ //Mando el segmento Cero como uno mas y que tenga el PID con basura o lo puedo hacer aparte para evitar mandar el (segmento->pid) a piacere
+			t_segmento* segmento = list_get(tabla,i);
+			serializarSegmento(segmento,buffer);
+		}
+}
+
+t_list* deserializarTablaDeSegmentos(void* buffer,int desplazamiento, int size){ //El que llame a deserializar debe recibir el buffer antes
+        t_list* tablaDeSegmentos = list_create();
+		while(desplazamiento<size){
+		t_segmento* segmento = deserializarSegmento(buffer,desplazamiento);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
+		list_add(tablaDeSegmentos,segmento);
+		}
+		return tablaDeSegmentos;
+}
+
+void serializarSegmento(t_segmento* segmento, t_buffer* buffer){
+		int offset = 0;
+		buffer->stream = realloc(buffer->stream, buffer->size + 6* sizeof(uint32_t) );
+		memcpy(buffer->stream + offset, &(segmento->PID), sizeof(uint32_t));
+		offset += sizeof(uint32_t);
+		memcpy(buffer->stream+ offset, &(segmento->ID), sizeof(uint32_t));
+		offset += sizeof(uint32_t);
+		memcpy(buffer->stream + offset, &(segmento->base), sizeof(uint32_t));
+		offset += sizeof(uint32_t);
+		memcpy(buffer->stream+ offset, &(segmento->tamanio), sizeof(uint32_t));
+		offset += sizeof(uint32_t);
+		memcpy(buffer->stream+ offset, &(segmento->limite), sizeof(uint32_t));
+		offset += sizeof(uint32_t);
+		memcpy(buffer->stream+ offset, &(segmento->estaEnMemoria), sizeof(uint32_t));
+		offset += sizeof(uint32_t);
+		buffer->size+=offset;
+}
+
+t_segmento* deserializarSegmento(void* buffer, int desplazamiento){
+		t_segmento* segmento = malloc(sizeof(t_segmento));
+		memcpy(&(segmento->PID), buffer+desplazamiento, sizeof(uint32_t));
+		desplazamiento += sizeof(uint32_t);
+		memcpy(&(segmento->ID), buffer+desplazamiento, sizeof(uint32_t));
+		desplazamiento += sizeof(uint32_t);
+		memcpy(&(segmento->base), buffer+desplazamiento, sizeof(uint32_t));
+		desplazamiento += sizeof(uint32_t);
+		memcpy(&(segmento->tamanio), buffer+desplazamiento, sizeof(uint32_t));
+		desplazamiento += sizeof(uint32_t);
+		memcpy(&(segmento->limite), buffer+desplazamiento, sizeof(uint32_t));
+		desplazamiento += sizeof(uint32_t);
+		memcpy(&(segmento->estaEnMemoria), buffer+desplazamiento, sizeof(uint32_t));
+		desplazamiento += sizeof(uint32_t);
+		return segmento;
+}
+
+/// SERIALIZACION Y DESERIALIZACION DE LISTA DE TABLAS///
+t_buffer* serializarListaDeTablas(t_list* listaDeTablas){
+	    int tamanio = list_size(listaDeTablas);
+		t_buffer* buffer = malloc(sizeof(t_buffer));
+		buffer->size = 0;
+		buffer->stream = NULL;
+		for(int i=0; i<tamanio; i++){
+			t_list* tablaDeSeg = list_get(listaDeTablas,i);
+	        serializarTablaDeSegmentos(tablaDeSeg, buffer);
+		}
+	return buffer;
+}
+
+t_list* deserializarListaDeTablas(int socket){
+		int size;
+		int desplazamiento = 0;
+		t_list* listaDeTablas = list_create();
+		void* bufferListaDeTablas= recibir_buffer(&size,socket);
+		while(desplazamiento<size){
+		t_list* tablaDeSeg = deserializarTablaDeSegmentos(bufferListaDeTablas,desplazamiento,size);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
+		list_add(listaDeTablas,tablaDeSeg);
+		}
+		free(bufferListaDeTablas);
+		return listaDeTablas;
+}
+
 
 
