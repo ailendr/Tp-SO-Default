@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include "memoriaConfig.h"
 #include "algoritmosDeAsignacion.h"
+#include "memoriaEstructuras.h"
 
 void atenderModulos(int socket_servidor);
 void atenderPeticionesCpu(int socket);

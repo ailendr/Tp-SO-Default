@@ -49,7 +49,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 	}
 	else{
-		return HANDSHAKE_OutOfMemory;
+		return ERROR;
 
 	}
 }

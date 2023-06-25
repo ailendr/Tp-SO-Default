@@ -131,7 +131,9 @@ void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
 		t_segmento* segmento = list_get(tablaDeSegmentos, i);
 		int posListaSeg = buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
 		t_segmento* segActualizado = list_get(listaDeSegmentos, posListaSeg);
-		list_replace(tablaDeSegmentos, i, segActualizado);
+		//list_replace(tablaDeSegmentos, i, segActualizado);//Aca entiendo que tenga sentido replace pero me iria por liberar el anterior y agregar uno nuevo en esa pos
+	    list_remove_and_destroy_element(tablaDeSegmentos, i,(void*)destruirSegmento);
+	    list_add_in_index(tablaDeSegmentos,i,segActualizado);
 	}
 }
 
@@ -149,7 +151,7 @@ void logearListaDeSegmentos(char* mensaje){
 void destruirSegmento(t_segmento* self){
 	self->PID = 0;
 	self->ID=0;
-	self->limite=0,
+	self->limite=0;
 	self->base=0;
 	self->tamanio=0;
 	self->estaEnMemoria= 0;
@@ -179,23 +181,18 @@ void liberarTablaDeSegmentos(uint32_t pid){
 		t_segmento* segmentoEnLista= list_get(listaDeSegmentos, pos);
         segmentoEnLista->estaEnMemoria=0;
 		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
-
 	}
-	//list_clean(listaDeTablas);
 	list_clean_and_destroy_elements(listaDeTablas, (void*) destruirSegmento);
 	list_remove(listaDeTablas, pid);// Elimina la tabla
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 
-t_list* deleteSegment(uint32_t id, uint32_t pid){ //Me sirve que retorne la tabla actualizada
+t_list* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tabla actualizada
 	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
 	//Actualizo la tabla de segmentos del proceso
 	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
 	int posEnTabla = buscarPosSegmento(id, pid, tablaDeSegmentosAActualizar);
-	//list_remove(tablaDeSegmentosAActualizar,posEnTabla);//lo elimino de la tabla de segmentos
-	//void(* funcionParaDestruir)(t_segmento*);
-	//funcionParaDestruir = &destruirSegmento;
 	list_remove_and_destroy_element(tablaDeSegmentosAActualizar,posEnTabla,(void*)destruirSegmento);
 	segmentoAEliminar->estaEnMemoria=0;
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
@@ -205,7 +202,7 @@ t_list* deleteSegment(uint32_t id, uint32_t pid){ //Me sirve que retorne la tabl
 }
 
 
-void compactar(){
+void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
 	logearListaDeSegmentos("antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados

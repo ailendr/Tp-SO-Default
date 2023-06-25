@@ -209,20 +209,29 @@ void instruccionAEjecutar() {
 			case CREATE_SEGMENT:
 				log_info(loggerKernel, "Intruccion Create Segment");
 				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
+				int idSegmentoCS = atoi(instruccionCS->param1);
+				int tamanioSegmento = atoi(instruccionCS->param2);
+				log_info(loggerKernel,"PID: %d - Crear Segmento - Id: %d - Tamaño: %d", contextoActualizado->pid,idSegmentoCS,tamanioSegmento);
 				//Serializamos y enviamos a memoria//
 				t_paquete* paqueteCS = serializarInstruccion(instruccionCS);
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
-				free(instruccionCS);//Hay q liberar puntero
-
+				free(instruccionCS);
+                //Funcion que valida si Memoria pudo crear un segmento//
+				validarCS(socketMemoria);
 
 				break;
 			case DELETE_SEGMENT:
 				log_info(loggerKernel, "Intruccion Delete Segmente");
 				t_instruccion* instruccionDS = obtenerInstruccion(socketCPU,1);
+				int idSegmentoDS = atoi(instruccionDS->param1);
+				log_info(loggerKernel, "PID: %d - Eliminar Segmento - Id Segmento: %d",contextoActualizado->pid,idSegmentoDS);
+				//Serializamos y enviamos a memoria//
 				t_paquete* paqueteDS = serializarInstruccion(instruccionDS);
 				validarEnvioDePaquete(paqueteDS, socketMemoria, loggerKernel, configKernel, "Instruccion Delete Segment");
-				free(instruccionDS);//Hay q liberar puntero
-
+				free(instruccionDS);
+				//Recibimos la tabla de segmentos actualizada//
+				t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(socketMemoria);
+				asignarMemoria(ultimoEjecutado, tablaDeSegmentos);
 				break;
 			case F_OPEN:
 				break;
@@ -467,4 +476,25 @@ void loggearListaDeIntrucciones(t_list* instrucciones){
 			 char* instruccion= list_get(instrucciones,i);
 			 log_info(loggerKernel, "%s", instruccion);
 		}
+}
+//Validacion para CreateSegment//
+void validarCS(int socketMemoria){
+	uint32_t mensaje = 0;
+	recv(socketMemoria, &mensaje, sizeof(uint32_t),0);
+	switch (mensaje) {
+		case COMPACTAR:
+			//Validariamos que no haya operaciones esntre Fs y Memoria
+			//solicitariamos a la memoria que compacte enviandole un send de OK
+			//recibir lista de tablas actualizada
+			//deserializar lista de tablas
+			//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
+			break;
+		case ERROR:
+			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
+			break;
+		default: //Aca es cuando recibimos la base que no le encuento un uso
+			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
+			break;
+	}
+
 }

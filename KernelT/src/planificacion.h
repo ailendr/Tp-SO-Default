@@ -63,6 +63,8 @@ void bloquearHilo(t_parametroIO* parametro);
 void validarRyW(char* direccion);
 void implementacionF(t_instruccion* instruccion);
 
+void validarCS(int socket);
+
 void loggearListaDeIntrucciones(t_list* instrucciones);
 
 
