@@ -80,8 +80,7 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
 		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
-        t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(socketMemoria);
-		asignarMemoria(proceso, tablaDeSegmentos); //PCB creado
+		recibirYAsignarTablaDeSegmentos(proceso);
 		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
 		logCambioDeEstado(proceso, "NEW", "READY");
@@ -230,8 +229,7 @@ void instruccionAEjecutar() {
 				validarEnvioDePaquete(paqueteDS, socketMemoria, loggerKernel, configKernel, "Instruccion Delete Segment");
 				free(instruccionDS);
 				//Recibimos la tabla de segmentos actualizada//
-				t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(socketMemoria);
-				asignarMemoria(ultimoEjecutado, tablaDeSegmentos);
+				recibirYAsignarTablaDeSegmentos(ultimoEjecutado);
 				break;
 			case F_OPEN:
 				break;
@@ -496,5 +494,17 @@ void validarCS(int socketMemoria){
 			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
 			break;
 	}
+}
+
+//Recibir Tabla de segmentos//
+void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
+	//----Todo lo que implica deserializar una tabla de segmentos----//
+	 int size;
+	 int desplazamiento = 0;
+	 void* bufferTabla = recibir_buffer(&size,socketMemoria);
+	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,desplazamiento,size);
+	free(bufferTabla);
+	//---------------//
+	asignarMemoria(proceso, tablaDeSegmentos);
 
 }

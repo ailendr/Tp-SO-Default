@@ -43,10 +43,19 @@ void atenderPeticionesFs(int socket){
 		break;
 	}*/
 }
+
+//Solo para que no sea mucho codigo dentro de los cases//
 void enviarTablaDeSegmentos(t_list* tablaDeSegmentos, int socket){
-	t_buffer* bufferDeTabla = serializarTablaDeSegmentos(tablaDeSegmentos);
-	enviarBuffer(bufferDeTabla, socket);
-	free(bufferDeTabla);
+	t_buffer* bufferDeTabla = malloc(sizeof(t_buffer));
+     bufferDeTabla->size = 0;
+	 bufferDeTabla->stream = NULL;
+	serializarTablaDeSegmentos(tablaDeSegmentos, bufferDeTabla);
+	validarEnvioBuffer(bufferDeTabla, socket, "Tabla de Segmentos", loggerMemoria, configMemoria);
+}
+
+void enviarListaDeTablas(t_list* listaDeTablas, int socket){
+	t_buffer* bufferListaDeTablas = serializarListaDeTablas(listaDeTablas);
+	validarEnvioBuffer(bufferListaDeTablas, socket, "Lista de Tablas", loggerMemoria, configMemoria);
 }
 
 void atenderPeticionesKernel(int socket){
@@ -76,15 +85,19 @@ void atenderPeticionesKernel(int socket){
 			t_list* tablaActualizada = deleteSegment(idSegmentoDS, instruccionDS->pid);
 		    enviarTablaDeSegmentos(tablaActualizada,socket);
 			break;
-/*
+
 		case COMPACTAR:
-			compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada
-			//hago send de todas las tablas actualizadas.
+			int habilitado ;
+			recv(socket, &habilitado,sizeof(int),MSG_WAITALL);
+			if(habilitado == 1){
+				compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
+				enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
+			}
 			break;
-		case EXIT:
+	/*	case EXIT:
 			liberarTablaDeSegmentos(pid);
-			break;
-*/
+			break;*/
+
 		default://Si entra aca es porque recibio un pid para crear la tabla de segmentos->sino agregamos el handashake eso da igual pero somos la q controlamos q envia kernely se supone q no enviamos nada incorrecto
 
 			t_list* tablaDeSegmentos = crearTablaDeSegmentos(codInstruccion);

@@ -65,6 +65,8 @@ void implementacionF(t_instruccion* instruccion);
 
 void validarCS(int socket);
 
+void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
+
 void loggearListaDeIntrucciones(t_list* instrucciones);
 
 
