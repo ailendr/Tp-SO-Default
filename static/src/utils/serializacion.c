@@ -66,7 +66,7 @@ t_contextoEjec* deserializarContexto(void *buffer, int tamanio) {
 
 	contexto->instrucciones = deserializarInstrucciones(stream, desplazamiento,
 			tamanioBuffer);
-
+    free(buffer);
 	return contexto;
 }
 
@@ -248,6 +248,7 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam){
 	   	memcpy(instruccion->param3, stream+desplazamiento,tamParam);
 
    }
+    free(buffer);
 	return instruccion;
 }
 

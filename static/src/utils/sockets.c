@@ -138,6 +138,7 @@ int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger,char* no
 		return -1;
 	}else{
 		log_info(logger, "He podido enviar el Paquete de %s", nombrePaq );
+		eliminar_paquete(paquete);
 	}
 
 	return 0;
@@ -149,6 +150,7 @@ void validarEnvioDePaquete(t_paquete* paquete, int socket_cliente, t_log* logger
 		terminarModulo(socket_cliente, logger, config);
 		exit(1);
 	}
+
 }
 
 
