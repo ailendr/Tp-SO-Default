@@ -182,8 +182,8 @@ void liberarTablaDeSegmentos(uint32_t pid){
         segmentoEnLista->estaEnMemoria=0;
 		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
 	}
-	list_clean_and_destroy_elements(listaDeTablas, (void*) destruirSegmento);
-	list_remove(listaDeTablas, pid);// Elimina la tabla
+	list_clean_and_destroy_elements(tablaALiberar, (void*) destruirSegmento); //Destruimos los segmentos de la Tabla de Segmentos
+	list_remove_and_destroy_element(listaDeTablas,pid, (void*)list_destroy);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 

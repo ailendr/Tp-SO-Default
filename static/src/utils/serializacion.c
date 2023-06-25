@@ -259,7 +259,7 @@ t_instruccion* obtenerInstruccion(int socket, int cantParam){
 	return instruccionNueva;
 }
 
-////Serializacion de la tabla de segmentos: no voy a enviar un paquete porque el codigo de operacion no lo voy a usar/////
+////SERIALIZACION Y DESERIALIZACION DE TABLA DE SEGMENTOS  : no voy a enviar un paquete porque el codigo de operacion no lo voy a usar/////
 
 void serializarSegmento(t_segmento* segmento, t_buffer* buffer){
 		int offset = 0;
@@ -300,7 +300,8 @@ t_list* deserializarTablaDeSegmentos(int socket){
         t_list* tablaDeSegmentos = list_create();
 		void* bufferTabla = recibir_buffer(&size,socket);
 		while(desplazamiento<size){
-		t_segmento* segmento = deserializarSegmento(bufferTabla,desplazamiento); //Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
+		t_segmento* segmento = deserializarSegmento(bufferTabla,desplazamiento);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
+		list_add(tablaDeSegmentos,segmento);
 		}
 		free(bufferTabla);
 		return tablaDeSegmentos;
