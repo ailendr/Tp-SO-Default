@@ -36,7 +36,8 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 	pthread_mutex_lock(&mutexReady);
 	list_add(colaReady, procesoListo);
 	procesoListo->estadoPcb = READY;
-	clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));//Por HRRN
+	if(strcmp("HRRN", Algoritmo())==0){
+		clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));}//Por HRRN
 	pthread_mutex_unlock(&mutexReady);
 	log_info(loggerKernel,
 			"Cola Ready con algoritmo %s .Ingresa el proceso con id %d:",
