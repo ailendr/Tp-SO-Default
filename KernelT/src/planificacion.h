@@ -56,7 +56,7 @@ void bloquearHilo(t_parametroIO* parametro);
 void validarRyW(char* direccion);
 void implementacionF(t_instruccion* instruccion);
 
-void validarCS(int socket);
+void validarCS(int socketMemoria, t_contextoEjec* contexto);
 
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
 

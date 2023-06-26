@@ -80,9 +80,9 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
-		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
-		recibirYAsignarTablaDeSegmentos(proceso);
-		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
+		//send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
+		//recibirYAsignarTablaDeSegmentos(proceso);
+		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
 		logCambioDeEstado(proceso, "NEW", "READY");
 		sem_post(&planiCortoPlazo);
@@ -101,6 +101,7 @@ void ordenarReady(){
 
 void enviarContextoACpu(){
 	if(!list_is_empty(colaReady)){
+		ordenarReady();
 		t_pcb* procesoAEjec=extraerDeReady();
 		log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
@@ -113,6 +114,8 @@ void enviarContextoACpu(){
 		pthread_mutex_lock(&mutexUltimoEjecutado);
 		ultimoEjecutado = procesoAEjec;
 		pthread_mutex_unlock(&mutexUltimoEjecutado);
+		instruccionAEjecutar();
+
 	}
 	else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
 }
@@ -122,9 +125,8 @@ void cortoPlazo() {
 
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
-		ordenarReady();
         enviarContextoACpu();
-		instruccionAEjecutar();
+		//instruccionAEjecutar();
 	}
 }
 
@@ -150,7 +152,7 @@ void instruccionAEjecutar() {
 				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
 				free(instruccionExit);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
-				sem_post(&planiCortoPlazo);
+				//sem_post(&planiCortoPlazo);
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
@@ -170,7 +172,7 @@ void instruccionAEjecutar() {
 				char* recursoAConsumir = instruccionWait->param1;
 				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
 				free(instruccionWait);
-				sem_post(&planiCortoPlazo);
+				//sem_post(&planiCortoPlazo);
 				break;
 			case SIGNAL:
 				log_info(loggerKernel, "Intruccion SIGNAL");
@@ -199,14 +201,17 @@ void instruccionAEjecutar() {
 				t_instruccion* instruccionMI = obtenerInstruccion(socketCPU,2);
 				free(instruccionMI);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+				//sem_post(&planiCortoPlazo);
+
 				break;
 			case MOV_OUT:
 				log_info(loggerKernel, "Intruccion MOV_OUT Fallida");
 				t_instruccion* instruccionMO = obtenerInstruccion(socketCPU,2);
 				free(instruccionMO);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
+				//sem_post(&planiCortoPlazo);
 				break;
-			case CREATE_SEGMENT:
+			case CREATE_SEGMENT://El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Create Segment");
 				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
 				int idSegmentoCS = atoi(instruccionCS->param1);
@@ -217,10 +222,10 @@ void instruccionAEjecutar() {
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
 				free(instruccionCS);
                 //Funcion que valida si Memoria pudo crear un segmento//
-				validarCS(socketMemoria);
+				validarCS(socketMemoria, contextoActualizado);
 
 				break;
-			case DELETE_SEGMENT:
+			case DELETE_SEGMENT: //El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Delete Segmente");
 				t_instruccion* instruccionDS = obtenerInstruccion(socketCPU,1);
 				int idSegmentoDS = atoi(instruccionDS->param1);
@@ -231,6 +236,9 @@ void instruccionAEjecutar() {
 				free(instruccionDS);
 				//Recibimos la tabla de segmentos actualizada//
 				recibirYAsignarTablaDeSegmentos(ultimoEjecutado);
+				//El proceso sigue en ejecucion asi que lo volvemos a enviar a cpu
+				procesoAEjecutar(contextoActualizado);
+
 				break;
 			case F_OPEN:
 				break;
@@ -432,15 +440,16 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
-				sem_post(&planiCortoPlazo);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
+				sem_post(&planiCortoPlazo);
+
 				procesoAEjecutar(contextoActualizado);//Sigue en cpu
 				break;
 			 }
 			}
 		}
 
-////---Funcion de IO---/// Tengo que hacer lo que temia pasar como parametro un struct con tiempo y ultimo ejecutado
+////---Funcion de IO---///
 void bloquearHilo(t_parametroIO* parametro){
     t_pcb* procesoBloqueado = parametro->procesoABloquear;
     int tiempoDeBloqueo = parametro->tiempoDeBloqueo;
@@ -482,7 +491,7 @@ void loggearListaDeIntrucciones(t_list* instrucciones){
 		}
 }
 //Validacion para CreateSegment//
-void validarCS(int socketMemoria){
+void validarCS(int socketMemoria, t_contextoEjec* contexto){
 	uint32_t mensaje = 0;
 	recv(socketMemoria, &mensaje, sizeof(uint32_t),0);
 	switch (mensaje) {
@@ -492,12 +501,14 @@ void validarCS(int socketMemoria){
 			send(socketMemoria, &habilitado, sizeof(int),0);
 			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
+			procesoAEjecutar(contexto);
 			break;
 		case ERROR:
 			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
 			break;
 		default: //Aca es cuando recibimos la base que no le encuento un uso
 			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
+			procesoAEjecutar(contexto);
 			break;
 	}
 }
@@ -527,4 +538,10 @@ void actualizarTablaEnProcesos(t_list* listaDeTablas){
 	}
 }
 
+//Habilita corto plazo solo si hay procesos en Ready// DUDA: QUE HACEMOS CUANDO NO HAY NADIE EN LA COLA READY?
+/*void habilitarCortoPlazo(){
 
+	if(!list_is_empty(colaReady)){
+		sem_post(&planiCortoPlazo);
+	}
+}*/
