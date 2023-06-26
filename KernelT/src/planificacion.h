@@ -7,13 +7,9 @@
 
 #ifndef SRC_PLANIFICACION_H_
 #define SRC_PLANIFICACION_H_
-#include <commons/collections/queue.h>
 #include <time.h>
 
 #include "kernelGlobales.h"
-//#include "kernelConfig.h" //lo incluimos dentro de semaforos.h
-//#include "KernelConexiones.h"
-#include "pcb.h"
 #include "semaforos.h"
 #include "recursos.h"
 #include <utils/serializacion.h>
@@ -23,9 +19,6 @@ typedef struct{
 	t_pcb* procesoABloquear;
 
 } t_parametroIO;
-
-extern t_queue* colaNew;
-extern t_list* colaReady;
 
 
 void crearEstados();
@@ -66,6 +59,9 @@ void implementacionF(t_instruccion* instruccion);
 void validarCS(int socket);
 
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
+
+void actualizarTablaEnProcesos(t_list* listaDeTablas);
+void destruirProceso(t_pcb*);
 
 void loggearListaDeIntrucciones(t_list* instrucciones);
 

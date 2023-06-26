@@ -12,7 +12,6 @@
 #include <pthread.h>
 
 #include "kernelConfig.h"
-#include "kernelGlobales.h"
 #include "planificacion.h"
 
 
