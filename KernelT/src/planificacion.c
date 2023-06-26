@@ -16,6 +16,7 @@ uint32_t pid = 0;
 void crearEstados() {
 	colaNew = queue_create();
 	colaReady = list_create();
+	listaDeProcesos = list_create();
 }
 
 void eliminarEstados() {
@@ -111,9 +112,9 @@ void enviarContextoACpu(){
 		if(strcmp(Algoritmo(), "HRRN")==0){
 		clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
 		}
-		pthread_mutex_lock(&mutexUltimoEjecutado);
+		//pthread_mutex_lock(&mutexUltimoEjecutado);
 		ultimoEjecutado = procesoAEjec;
-		pthread_mutex_unlock(&mutexUltimoEjecutado);
+		//pthread_mutex_unlock(&mutexUltimoEjecutado);
 		instruccionAEjecutar();
 
 	}
@@ -139,11 +140,7 @@ void instruccionAEjecutar() {
 		log_info(loggerKernel, "Se recibio el buffer del Contexto");
 		contextoActualizado = deserializarContexto(buffer, tamanio);
 		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);
-		pthread_mutex_lock(&mutexUltimoEjecutado);
 		ultimoEjecutado->contexto = contextoActualizado;
-		pthread_mutex_unlock(&mutexUltimoEjecutado);
-
-		free(buffer);
 //Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
 		switch(codigo){
@@ -396,14 +393,10 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",procesoAFinalizar->contexto->pid, motivoDeFin);
 	int terminar = -1;
 	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
-    list_remove_and_destroy_element(listaDeProcesos, procesoAFinalizar->contexto->pid,(void *)destruirProceso); //DUDA: no sé si cuando se destruye el proceso que se obtiene de la lista de procesos refleja eso en el proceso q se envia por param
-	//Si no se ve reflejado el cambio entonces dejamos estos free sino con la linea anterior ya estaria//
-    free(procesoAFinalizar->contexto->instrucciones);
-	free(procesoAFinalizar->contexto);
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
-	free(procesoAFinalizar);
-	sem_post(&multiprogramacion);
-	//sem_post(&planiCortoPlazo);
+    list_remove_and_destroy_element(listaDeProcesos, procesoAFinalizar->contexto->pid,(void *)destruirProceso); //DUDA: no sé si cuando se destruye el proceso que se obtiene de la lista de procesos refleja eso en el proceso q se envia por param
+	//DUDA RESPONDIDA AL DEBUGGEAR: si se ve reflejado en el proceso enviado por param :)
+    sem_post(&multiprogramacion);
 }
 
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
