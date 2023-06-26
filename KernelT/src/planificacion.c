@@ -9,6 +9,7 @@
 
 t_queue *colaNew;
 t_list *colaReady;
+t_list* listaDeProcesos;//procesos admitidos en el sistema
 t_pcb *ultimoEjecutado;
 uint32_t pid = 0;
 
@@ -74,10 +75,10 @@ void largoPlazo() {
 		log_info(loggerKernel, "Pase el semaforo de largo plazo");
 		t_pcb *proceso;
 		//Pasaje de New a Ready//
-
 		sem_wait(&multiprogramacion);
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
+        list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
 		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
 		recibirYAsignarTablaDeSegmentos(proceso);
@@ -376,19 +377,24 @@ void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
 	procesoNuevo->tablaSegmentos = tablaDeSegmento;
 
 }
+void destruirProceso(t_pcb* self){
+	free(self->contexto->instrucciones);
+	free(self->contexto);
+	free(self);
+
+}
 
 void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
-
-	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",
-			procesoAFinalizar->contexto->pid, motivoDeFin);
+	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",procesoAFinalizar->contexto->pid, motivoDeFin);
 	int terminar = -1;
 	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
-	free(procesoAFinalizar->contexto->instrucciones);
+    list_remove_and_destroy_element(listaDeProcesos, procesoAFinalizar->contexto->pid,(void *)destruirProceso); //DUDA: no sé si cuando se destruye el proceso que se obtiene de la lista de procesos refleja eso en el proceso q se envia por param
+	//Si no se ve reflejado el cambio entonces dejamos estos free sino con la linea anterior ya estaria//
+    free(procesoAFinalizar->contexto->instrucciones);
 	free(procesoAFinalizar->contexto);
 	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
 	free(procesoAFinalizar);
 	sem_post(&multiprogramacion);
-	//sem_post(&cpuLibre);
 	//sem_post(&planiCortoPlazo);
 }
 
@@ -481,11 +487,11 @@ void validarCS(int socketMemoria){
 	recv(socketMemoria, &mensaje, sizeof(uint32_t),0);
 	switch (mensaje) {
 		case COMPACTAR:
-			//Validariamos que no haya operaciones esntre Fs y Memoria
-			//solicitariamos a la memoria que compacte enviandole un send de OK
-			//recibir lista de tablas actualizada
-			//deserializar lista de tablas
-			//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
+			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
+			int habilitado = 1;//solicitariamos a la memoria que compacte enviandole un send de OK
+			send(socketMemoria, &habilitado, sizeof(int),0);
+			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
+			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
 			break;
 		case ERROR:
 			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
@@ -508,3 +514,17 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	asignarMemoria(proceso, tablaDeSegmentos);
 
 }
+
+//Actualizar la tabla de segmentos de todos los procesos//
+void actualizarTablaEnProcesos(t_list* listaDeTablas){
+	int tamanio = list_size(listaDeProcesos);
+	for(int i=0; i<tamanio; i++){
+		t_pcb* proceso =list_get(listaDeProcesos,i);
+		if(proceso!= NULL){ //Me imagino que cuando vamos eliminando procesos como que queda esa posicion vacia por eso esta validacion pero no sé
+		  t_list* tablaDeSegmentos = list_get(listaDeTablas,i);
+		  proceso->tablaSegmentos = tablaDeSegmentos;
+		}
+	}
+}
+
+
