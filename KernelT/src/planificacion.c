@@ -82,9 +82,9 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
 		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
-		//send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
-		//recibirYAsignarTablaDeSegmentos(proceso);
-		//log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
+		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
+		recibirYAsignarTablaDeSegmentos(proceso);
+		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
 		logCambioDeEstado(proceso, "NEW", "READY");
 		sem_post(&planiCortoPlazo);
@@ -516,6 +516,8 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,desplazamiento,size);
 	free(bufferTabla);
 	//---------------//
+	t_segmento* segmentoCero = list_get(tablaDeSegmentos,0);
+	log_info(loggerKernel, "La tabla tiene un primer segmento de id: %d",segmentoCero->ID );
 	asignarMemoria(proceso, tablaDeSegmentos);
 
 }

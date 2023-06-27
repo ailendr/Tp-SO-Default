@@ -58,8 +58,11 @@ void enviarListaDeTablas(t_list* listaDeTablas, int socket){
 	validarEnvioBuffer(bufferListaDeTablas, socket, "Lista de Tablas", loggerMemoria, configMemoria);
 }
 
-void atenderPeticionesKernel(int socket){
-	while(1){
+void atenderPeticionesKernel(int* socketKernel){
+	int socket = *socketKernel;
+	//while(1){
+
+	log_info(loggerMemoria, "Esperando Peticiones de Kernel");
 	/*//Primer Peticion : crear Tabla para un Proceso//
 	int pidDeProceso = 0;
 	recv(socket, &pidDeProceso, sizeof(uint32_t), MSG_WAITALL);
@@ -108,14 +111,14 @@ void atenderPeticionesKernel(int socket){
 	}
 
 
-}
+//}
 
 
 void atenderModulos(int socket_servidor){
 	//NOTA: Podemos esperar el cliente y hacer el handshake tambien dentro de la func del hilo o antes
 	///---CLIENTE CPU---///
 	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
-	int socketCpu = esperar_cliente(socket_servidor, loggerMemoria);
+/*	int socketCpu = esperar_cliente(socket_servidor, loggerMemoria);
 	if(verificarSocket(socketCpu, loggerMemoria, configMemoria) == 1) {
 
 				   close(socket_servidor);
@@ -143,19 +146,20 @@ void atenderModulos(int socket_servidor){
 	pthread_t servidorDeFs;
 	pthread_create(&servidorDeFs, NULL, (void*)atenderPeticionesFs, (void*)&socketFs);
 	pthread_detach(servidorDeFs);
-
+*/
 
 	///---CLIENTE KERNEL ---///
-	int socketKernel = esperar_cliente(socket_servidor, loggerMemoria);
-	if(verificarSocket(socketKernel, loggerMemoria, configMemoria) == 1) {
+	int* socketKernel = malloc(sizeof(int));
+	*socketKernel = esperar_cliente(socket_servidor, loggerMemoria);
+	if(verificarSocket(*socketKernel, loggerMemoria, configMemoria) == 1) {
 
 				   close(socket_servidor);
 				   exit(1);
 			   }
-	recibirHandshake(socketKernel, HANDSHAKE_Kernel, loggerMemoria);
+	recibirHandshake(*socketKernel, HANDSHAKE_Kernel, loggerMemoria);
 
 	pthread_t servidorDeKernel;
-	pthread_create(&servidorDeKernel, NULL, (void*)atenderPeticionesKernel, (void*)&socketKernel);
+	pthread_create(&servidorDeKernel, NULL, (void*)atenderPeticionesKernel, (void*)socketKernel);
 	pthread_detach(servidorDeKernel);
 
 }
