@@ -34,7 +34,6 @@ void largoPlazo();
 void cortoPlazo();
 //Nuevos//
 void ordenarReady();
-void enviarContextoACpu();
 
 void algoritmoFIFO();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);

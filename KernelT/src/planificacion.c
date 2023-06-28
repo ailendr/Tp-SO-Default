@@ -101,34 +101,30 @@ void ordenarReady(){
 		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
 }
 
-void enviarContextoACpu(){
-	if(!list_is_empty(colaReady)){
-		ordenarReady();
-		t_pcb* procesoAEjec=extraerDeReady();
-		log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
-		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
-		procesoAEjecutar(contextoAEjec);
-		procesoAEjec->estadoPcb = EXEC;
-		logCambioDeEstado(procesoAEjec, "READY", "EXEC");
-		if(strcmp(Algoritmo(), "HRRN")==0){
-		clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
-		}
-		//pthread_mutex_lock(&mutexUltimoEjecutado);
-		ultimoEjecutado = procesoAEjec;
-		//pthread_mutex_unlock(&mutexUltimoEjecutado);
-		instruccionAEjecutar();
-
-	}
-	else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
-}
 
 void cortoPlazo() {
 	while (1) {
-
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
-        enviarContextoACpu();
-		//instruccionAEjecutar();
+		if(!list_is_empty(colaReady)){
+				ordenarReady();
+				t_pcb* procesoAEjec=extraerDeReady();
+				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
+				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
+				procesoAEjecutar(contextoAEjec);
+				procesoAEjec->estadoPcb = EXEC;
+				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
+				if(strcmp(Algoritmo(), "HRRN")==0){
+				clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
+				}
+				//pthread_mutex_lock(&mutexUltimoEjecutado);
+				ultimoEjecutado = procesoAEjec;
+				//pthread_mutex_unlock(&mutexUltimoEjecutado);
+				instruccionAEjecutar();
+
+			}
+			else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
+
 	}
 }
 
@@ -510,10 +506,10 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto){
 //Recibir Tabla de segmentos//
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	//----Todo lo que implica deserializar una tabla de segmentos----//
-	 int size;
+	 int size = 0;
 	 int desplazamiento = 0;
 	 void* bufferTabla = recibir_buffer(&size,socketMemoria);
-	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,desplazamiento,size);
+	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
 	free(bufferTabla);
 	//---------------//
 	t_segmento* segmentoCero = list_get(tablaDeSegmentos,0);

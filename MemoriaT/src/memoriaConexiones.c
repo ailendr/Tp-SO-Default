@@ -58,9 +58,17 @@ void enviarListaDeTablas(t_list* listaDeTablas, int socket){
 	validarEnvioBuffer(bufferListaDeTablas, socket, "Lista de Tablas", loggerMemoria, configMemoria);
 }
 
-void atenderPeticionesKernel(int* socketKernel){
-	int socket = *socketKernel;
-	//while(1){
+void atenderPeticionesKernel(int socket_servidor){
+
+		int socket = esperar_cliente(socket_servidor, loggerMemoria);
+		if(verificarSocket(socket, loggerMemoria, configMemoria) == 1) {
+
+					   close(socket_servidor);
+					   exit(1);
+				   }
+		recibirHandshake(socket, HANDSHAKE_Kernel, loggerMemoria);
+
+
 
 	log_info(loggerMemoria, "Esperando Peticiones de Kernel");
 	//Primer Peticion : crear Tabla para un Proceso//
@@ -149,7 +157,7 @@ void atenderModulos(int socket_servidor){
 */
 
 	///---CLIENTE KERNEL ---///
-	int* socketKernel = malloc(sizeof(int));
+	/*int* socketKernel = malloc(sizeof(int));
 	*socketKernel = esperar_cliente(socket_servidor, loggerMemoria);
 	if(verificarSocket(*socketKernel, loggerMemoria, configMemoria) == 1) {
 
@@ -157,10 +165,11 @@ void atenderModulos(int socket_servidor){
 				   exit(1);
 			   }
 	recibirHandshake(*socketKernel, HANDSHAKE_Kernel, loggerMemoria);
-
+    int* socketServidor = &socket_servidor;
 	pthread_t servidorDeKernel;
-	pthread_create(&servidorDeKernel, NULL, (void*)atenderPeticionesKernel, (void*)socketKernel);
-	pthread_detach(servidorDeKernel);
+	pthread_create(&servidorDeKernel, NULL, (void*)atenderPeticionesKernel, (void*) socketServidor);
+	pthread_detach(servidorDeKernel);*/
+	atenderPeticionesKernel(socket_servidor);
 
 }
 
