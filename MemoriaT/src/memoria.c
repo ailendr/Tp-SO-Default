@@ -28,10 +28,9 @@ int main(void) {
 
 	log_info(loggerMemoria, "Esperando Clientes ... \n");
 
-	iniciarEstructuras();
 	atenderModulos(servidorMemoria);
 
-
+	iniciarEstructuras();
 
 	log_info(loggerMemoria, "Finalizando Memoria...\n");
 

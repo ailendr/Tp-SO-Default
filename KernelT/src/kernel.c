@@ -20,7 +20,7 @@ int main(){
 
 	int server_fd = 0;
 
-	configKernel = config_create("/home/utnso/tp-2023-1c-Default-2.0/Pruebas/ConfigsDePrueba/kernel_HRRN.config");
+	configKernel = config_create("/home/utnso/tp-2023-1c-Default-2.0/KernelT/kernel.config");
 
 	if(verificarConfig (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
