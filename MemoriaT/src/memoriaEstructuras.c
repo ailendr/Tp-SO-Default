@@ -17,15 +17,15 @@ t_segmento* segmentoLibre;
 ///////////////////////////// ESTRUCTURAS DE MEMORIA/////////////////////////////////////////////////////////
 
 void crearListas(){
-	listaDeTablas = list_create();
 	listaDeSegmentos = list_create();
-
+	listaDeTablas = list_create();
 }
 
 void iniciarEstructuras(){
 	crearEspacioMemoria();
-	crearSegmentoCero();
 	crearListas();
+	crearSegmentoCero();
+	actualizarUltimoSegmentoLibre();
 }
 
 void crearEspacioMemoria (){
@@ -41,7 +41,7 @@ void crearSegmentoCero(){
 	segmentoCero->tamanio=tam_segmento_cero();
 	segmentoCero->estaEnMemoria=1;
 	list_add(listaDeSegmentos, segmentoCero);
-	actualizarUltimoSegmentoLibre();
+	log_info(loggerMemoria, "Se crea segmento cero base: %d, limite: %d", segmentoCero->base, segmentoCero->limite);
 
 }
 
@@ -58,8 +58,8 @@ int memoriaOcupada(t_list* lista){
 }
 
 int memoriaDisponible(){
-	t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)segmentoOcupado);
-	int tamanioHuecosOcupados = memoriaOcupada(listaHuecosLibres);
+	t_list* listaHuecosOcupados = list_filter(listaDeSegmentos, (void*)segmentoOcupado);
+	int tamanioHuecosOcupados = memoriaOcupada(listaHuecosOcupados);
 	int tamMemoria = tam_memoria();
 	int memoriaDis = tamMemoria - tamanioHuecosOcupados;
 	return memoriaDis;
@@ -87,13 +87,19 @@ bool segmentoOcupado(t_segmento* segmento){
 
 
 void actualizarUltimoSegmentoLibre(){
-	int ultimaPos=list_size(listaDeSegmentos);
+	segmentoLibre = malloc(sizeof(t_segmento));
+	int ultimaPos=list_size(listaDeSegmentos)-1;
 	t_segmento* ultimoSegmento = list_get(listaDeSegmentos, ultimaPos);
+	log_info(loggerMemoria, "ultimo segmento limite: %d", ultimoSegmento->limite);
 	segmentoLibre->base = ultimoSegmento->limite+1;
-	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);
+	segmentoLibre->tamanio=memoriaDisponible() - memoriaOcupada(list_filter(listaDeSegmentos, (void*)huecoLibre));
 	segmentoLibre->limite=tam_memoria();
 	segmentoLibre->estaEnMemoria=0;
+	segmentoLibre->ID=-1;
+	segmentoLibre->PID=-1;
 	list_add_in_index(listaDeSegmentos, ultimaPos+1,segmentoLibre);
+	int pos = buscarPosSegmento(segmentoLibre->ID, segmentoLibre->PID, listaDeSegmentos);
+	log_info(loggerMemoria, "Segmento libre pos: %d, base: %d, tamaño: %d", pos, segmentoLibre->base, segmentoLibre->tamanio );
 }
 
 //Mueve en una pos toda la lista de segmentos
@@ -196,7 +202,7 @@ t_list* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tab
 	list_remove_and_destroy_element(tablaDeSegmentosAActualizar,posEnTabla,(void*)destruirSegmento);
 	segmentoAEliminar->estaEnMemoria=0;
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
-	//Falta la parte de unir con segmentos aledaños si estan libres
+	//Se fija si los huecos aledaños estan libres
 	unirHuecosAledanios(segmentoAEliminar);
     return tablaDeSegmentosAActualizar;
 }
