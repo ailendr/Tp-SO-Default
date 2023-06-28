@@ -63,8 +63,8 @@ void atenderPeticionesKernel(int* socketKernel){
 	//while(1){
 
 	log_info(loggerMemoria, "Esperando Peticiones de Kernel");
-	/*//Primer Peticion : crear Tabla para un Proceso//
-	int pidDeProceso = 0;
+	//Primer Peticion : crear Tabla para un Proceso//
+	/*int pidDeProceso = 0;
 	recv(socket, &pidDeProceso, sizeof(uint32_t), MSG_WAITALL);
 	t_list* tablaDeSegmentos = crearTablaDeSegmentos(pidDeProceso);
 	enviarTablaDeSegmentos(tablaDeSegmentos);*/
