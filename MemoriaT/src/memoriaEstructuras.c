@@ -23,9 +23,10 @@ void crearListas(){
 }
 
 void iniciarEstructuras(){
+	crearListas();
 	crearEspacioMemoria();
 	crearSegmentoCero();
-	crearListas();
+	actualizarUltimoSegmentoLibre();
 }
 
 void crearEspacioMemoria (){
@@ -41,7 +42,7 @@ void crearSegmentoCero(){
 	segmentoCero->tamanio=tam_segmento_cero();
 	segmentoCero->estaEnMemoria=1;
 	list_add(listaDeSegmentos, segmentoCero);
-	actualizarUltimoSegmentoLibre();
+	//actualizarUltimoSegmentoLibre();
 
 }
 
@@ -87,7 +88,8 @@ bool segmentoOcupado(t_segmento* segmento){
 
 
 void actualizarUltimoSegmentoLibre(){
-	int ultimaPos=list_size(listaDeSegmentos);
+	segmentoLibre = malloc(sizeof(t_segmento));
+	int ultimaPos=list_size(listaDeSegmentos)-1;
 	t_segmento* ultimoSegmento = list_get(listaDeSegmentos, ultimaPos);
 	segmentoLibre->base = ultimoSegmento->limite+1;
 	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);

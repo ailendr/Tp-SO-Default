@@ -28,10 +28,12 @@ int main(void) {
 
 	log_info(loggerMemoria, "Esperando Clientes ... \n");
 
-	atenderModulos(servidorMemoria);
-
 	iniciarEstructuras();
 
+
+	atenderModulos(servidorMemoria);
+
+/*
 	log_info(loggerMemoria, "Finalizando Memoria...\n");
 
 	//terminarModulo(cliente, loggerMemoria, configMemoria); No lo vamos a usar porq la funcion del hilo ya cierra las conexion del cliente ahi
@@ -40,6 +42,6 @@ int main(void) {
 	close (servidorMemoria);
 
 	printf ("Finalizo Memoria  correctamente\n ");
-
+*/
 	return EXIT_SUCCESS;
 }
