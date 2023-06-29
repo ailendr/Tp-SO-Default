@@ -81,8 +81,8 @@ void largoPlazo() {
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
-		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
-		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
+        log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
+        send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
 		recibirYAsignarTablaDeSegmentos(proceso);
 		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
@@ -487,7 +487,7 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto){
 	switch (mensaje) {
 		case COMPACTAR:
 			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
-			int habilitado = 1;//solicitariamos a la memoria que compacte enviandole un send de OK
+			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
 			send(socketMemoria, &habilitado, sizeof(int),0);
 			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
@@ -513,7 +513,7 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	free(bufferTabla);
 	//---------------//
 	t_segmento* segmentoCero = list_get(tablaDeSegmentos,0);
-	log_info(loggerKernel, "La tabla tiene un primer segmento de id: %d",segmentoCero->ID );
+	log_info(loggerKernel,"Tabla de Segmentos Recibida. La Tabla tiene un primer segmento de id: %d",segmentoCero->ID );
 	asignarMemoria(proceso, tablaDeSegmentos);
 
 }
