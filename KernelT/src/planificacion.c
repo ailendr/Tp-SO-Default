@@ -388,11 +388,17 @@ void destruirProceso(t_pcb* self){
 
 void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",procesoAFinalizar->contexto->pid, motivoDeFin);
+	//---Aviso a Consola que finalice---//
 	int terminar = -1;
-	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
-	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
-    list_remove_and_destroy_element(listaDeProcesos, procesoAFinalizar->contexto->pid,(void *)destruirProceso); //DUDA: no sé si cuando se destruye el proceso que se obtiene de la lista de procesos refleja eso en el proceso q se envia por param
-	//DUDA RESPONDIDA AL DEBUGGEAR: si se ve reflejado en el proceso enviado por param :)
+	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0);
+
+	//--Aviso a Memoria que libere la tabla de Segmentos--//
+	int liberarTabla = EXIT;
+	send(socketMemoria,&liberarTabla, sizeof(int),0);
+	send(socketMemoria,&(procesoAFinalizar->contexto->pid),sizeof(uint32_t),0);
+
+	//Elimina el proceso de la lista de Proceso globales y libera //
+    list_remove_and_destroy_element(listaDeProcesos, procesoAFinalizar->contexto->pid,(void *)destruirProceso);
     sem_post(&multiprogramacion);
 }
 

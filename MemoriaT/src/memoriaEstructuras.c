@@ -59,8 +59,8 @@ int memoriaOcupada(t_list* lista){
 }
 
 int memoriaDisponible(){
-	t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)segmentoOcupado);
-	int tamanioHuecosOcupados = memoriaOcupada(listaHuecosLibres);
+	t_list* listaHuecosOcupados = list_filter(listaDeSegmentos, (void*)segmentoOcupado);
+	int tamanioHuecosOcupados = memoriaOcupada(listaHuecosOcupados);
 	int tamMemoria = tam_memoria();
 	int memoriaDis = tamMemoria - tamanioHuecosOcupados;
 	return memoriaDis;
@@ -106,7 +106,10 @@ void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento)
 	list_add(listaAux, segmento);
 	list_add_all(listaAux,list_slice_and_remove(listaDeSegmentos, pos+1, tamLista));
 	list_add_all(listaDeSegmentos, listaAux);
-	free(listaAux);
+	list_destroy_and_destroy_elements(listaAux, (void*)destruirSegmento);
+
+
+
 }
 
 
@@ -206,7 +209,7 @@ t_list* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tab
 
 void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
-	logearListaDeSegmentos("antes de compactar");
+	logearListaDeSegmentos("Antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//dejo vacia la lista de segmentos
 	int tamanioLista=list_size(listaAux);

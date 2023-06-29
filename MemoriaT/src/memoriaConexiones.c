@@ -101,9 +101,11 @@ void atenderPeticionesKernel(int socket_servidor){
 				compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
 				enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
 			break;
-	/*	case EXIT:
-			liberarTablaDeSegmentos(pid);
-			break;*/
+		case EXIT:
+			uint32_t pidALiberar = 0;
+			recv(socket, &pidALiberar, sizeof(uint32_t), MSG_WAITALL);
+			liberarTablaDeSegmentos(pidALiberar);
+			break;
 
 		default://Si entra aca es porque recibio un pid para crear la tabla de segmentos->sino agregamos el handashake eso da igual pero somos la q controlamos q envia kernely se supone q no enviamos nada incorrecto
 
