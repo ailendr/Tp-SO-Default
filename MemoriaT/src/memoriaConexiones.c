@@ -78,6 +78,7 @@ void atenderPeticionesKernel(int socket_servidor){
 	enviarTablaDeSegmentos(tablaDeSegmentos);*/
 
 	//Segunda Peticion : Son Instrucciones que llegan en paquete entonces tienen cod_op y buffer
+	while(1){
      int codInstruccion = recibir_operacion(socket);
 	 switch(codInstruccion){
 		case CREATE_SEGMENT:
@@ -114,6 +115,7 @@ void atenderPeticionesKernel(int socket_servidor){
 
 			break;
 	 	 }
+		}
 	}
 
 

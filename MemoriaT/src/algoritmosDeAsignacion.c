@@ -29,11 +29,15 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			nuevoSegmento->base=segLibre->base;
 			nuevoSegmento->limite =nuevoSegmento->base + nuevoSegmento->tamanio;
 			nuevoSegmento->estaEnMemoria=1;
-			segLibre->base=nuevoSegmento->limite+1;
-			segLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
-			segLibre->limite = segLibre->base + segLibre->tamanio;
+			//void *list_replace(t_list*, int index, void* element);
+			int pos= buscarPosSegmento(segLibre->ID, segLibre->PID,listaDeSegmentos);
+			t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
+			segmentoLibre= list_replace(listaDeSegmentos, pos,nuevoSegmento);
+			segmentoLibre->base=nuevoSegmento->limite+1;
+			segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
+			segmentoLibre->limite = segLibre->base + segLibre->tamanio;
 			//muevo de a un lugar la pos de los segmentos desde seglibre
-			actualizarListaDeSegmentos(nuevoSegmento, segLibre); //Duda: si el segLibre es siguiente a nuevoSegmento.Dentro de esta funcion no tenia que ser list_add(lisAux, nuevoSegmento) en vez de segmento?
+			actualizarListaDeSegmentos(nuevoSegmento, segmentoLibre); //Duda: si el segLibre es siguiente a nuevoSegmento.Dentro de esta funcion no tenia que ser list_add(lisAux, nuevoSegmento) en vez de segmento?
 			//Actualizo tabla de segmentos
 			t_list* tablaDeSegmentos = list_get(listaDeTablas, nuevoSegmento->PID);
 			list_add(tablaDeSegmentos, nuevoSegmento);

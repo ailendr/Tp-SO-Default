@@ -33,7 +33,7 @@ int main(){
 
 	///Funcion para inicializar las conexiones con FS,CPU y MEMORIA//
 		//Por el momento deje las funciones enviarMensaje adentro pero no deberian//
-   iniciarConexionesDeKernel();
+    iniciarConexionesDeKernel();
 
 
     crearEstados();

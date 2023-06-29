@@ -91,6 +91,8 @@ void actualizarUltimoSegmentoLibre(){
 	segmentoLibre = malloc(sizeof(t_segmento));
 	int ultimaPos=list_size(listaDeSegmentos)-1;
 	t_segmento* ultimoSegmento = list_get(listaDeSegmentos, ultimaPos);
+	segmentoLibre->ID=-1;
+	segmentoLibre->PID=-1;
 	segmentoLibre->base = ultimoSegmento->limite+1;
 	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);
 	segmentoLibre->limite=tam_memoria();
