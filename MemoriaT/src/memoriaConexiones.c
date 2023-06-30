@@ -79,7 +79,8 @@ void atenderPeticionesKernel(int socket_servidor){
 
 	//Segunda Peticion : Son Instrucciones que llegan en paquete entonces tienen cod_op y buffer
 	while(1){
-     int codInstruccion = recibir_operacion(socket);
+     op_code codInstruccion = 0;
+     codInstruccion=recibir_operacion(socket);
 	 switch(codInstruccion){
 		case CREATE_SEGMENT:
 		t_instruccion* instruccionCS = obtenerInstruccion(socket,2);
@@ -108,11 +109,14 @@ void atenderPeticionesKernel(int socket_servidor){
 			liberarTablaDeSegmentos(pidALiberar);
 			break;
 
-		default://Si entra aca es porque recibio un pid para crear la tabla de segmentos->sino agregamos el handashake eso da igual pero somos la q controlamos q envia kernely se supone q no enviamos nada incorrecto
-
-			t_list* tablaDeSegmentos = crearTablaDeSegmentos(codInstruccion);
+		case CREAR_TABLA://Si entra aca es porque recibio un pid para crear la tabla de segmentos->sino agregamos el handashake eso da igual pero somos la q controlamos q envia kernely se supone q no enviamos nada incorrecto
+			uint32_t pidTablaACrear = 0;
+			recv(socket, &pidTablaACrear, sizeof(uint32_t), MSG_WAITALL);
+			t_list* tablaDeSegmentos = crearTablaDeSegmentos(pidTablaACrear);
 			enviarTablaDeSegmentos(tablaDeSegmentos,socket);
 
+			break;
+		default:
 			break;
 	 	 }
 		}

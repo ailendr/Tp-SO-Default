@@ -82,6 +82,8 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
         log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
+        op_code pedido = CREAR_TABLA;
+        send(socketMemoria, &pedido,sizeof(int),0);
         send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
 		recibirYAsignarTablaDeSegmentos(proceso);
 		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);

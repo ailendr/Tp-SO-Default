@@ -36,7 +36,8 @@ typedef enum
 	WAIT,
 	SIGNAL,
 	COMPACTAR,
-	ERROR
+	ERROR,
+	CREAR_TABLA
 }op_code;
 
 typedef struct{
