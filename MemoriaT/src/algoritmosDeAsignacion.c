@@ -44,7 +44,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);
 
-			return nuevoSegmento->base;
+			return OK;
 		}
 		else {
 			return COMPACTAR;
@@ -80,7 +80,7 @@ t_segmento* FirstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamani
 	t_segmento* huecoLibre = NULL;
 	//t_segmento* huecoLibre= list_get(listaHuecosLibres, i); //Nat: Corrijo esto porque si esta en null no hay tamanio para evaluar pero si hago esto deberia quedar lo de abajo
 
-	while(i <= tamanioLista && tamSegmento>huecoLibre->tamanio){
+	while(i <= tamanioLista && tamSegmento>huecoLibre->tamanio){ //Debuggueado: ROMPE PORQUE HUECO LIBRE ES NULL
 		huecoLibre = list_get(listaHuecosLibres, i);
 		i++;
 	//	Nat: esto es lo de abajo pero si lo ponemos asi no me convence el while porq si la lista tiene 5 posiciones e i = 6, no entra al while por F & V -> F. y te retorna el hueco de la pos 6 q no deberia pasar

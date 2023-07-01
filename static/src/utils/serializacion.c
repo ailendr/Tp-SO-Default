@@ -130,7 +130,7 @@ t_paquete* serializarInstruccion(t_instruccion* instruc){
 	t_paquete* pInstruc = malloc(sizeof(t_paquete));
 	pInstruc->codigo_operacion = instruc->nombre;
 	pInstruc->buffer = malloc(sizeof(t_buffer));
-	pInstruc->buffer->size = sizeof(uint32_t)+ sizeof(uint8_t);
+	pInstruc->buffer->size = sizeof(uint32_t)+ sizeof(op_code);
 	pInstruc->buffer->stream = malloc(pInstruc->buffer->size); //Agrego esto porq es necesario reservarle memoria al stream
 
 	int offset = 0;
@@ -138,8 +138,8 @@ t_paquete* serializarInstruccion(t_instruccion* instruc){
 	memcpy(pInstruc->buffer->stream +offset, &(instruc->pid), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(pInstruc->buffer->stream +offset, &(instruc->nombre), sizeof(uint8_t));
-	offset += sizeof(uint8_t);
+	memcpy(pInstruc->buffer->stream +offset, &(instruc->nombre), sizeof(op_code));
+	offset += sizeof(op_code);
 
 	agregarParametros(pInstruc, instruc, cantParametros);
 
@@ -150,7 +150,7 @@ t_paquete* serializarInstruccion(t_instruccion* instruc){
 
 int cantidadDeParametros(op_code instruccion){
 	int cantidad = 0;
-	if(instruccion == EXIT|| instruccion == YIELD) cantidad = 0;
+	if(instruccion == EXIT|| instruccion == YIELD || instruccion == CREAR_TABLA) cantidad = 0;
 	if(instruccion == IO || instruccion == WAIT || instruccion == SIGNAL || instruccion == DELETE_SEGMENT) cantidad = 1;
 	if(instruccion == SET || instruccion == MOV_IN || instruccion == MOV_OUT || instruccion == F_OPEN|| instruccion == F_CLOSE || instruccion == F_SEEK || instruccion == F_TRUNCATE|| instruccion == CREATE_SEGMENT) cantidad = 2;
 	if(instruccion== F_READ || instruccion == F_WRITE) cantidad =3;
@@ -208,8 +208,8 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam){
 	memcpy(&(instruccion->pid), stream+desplazamiento, sizeof(uint32_t));
 	desplazamiento+=sizeof(uint32_t);
 //agrego esto por haberle enviado el nombre al serializar//
-	memcpy(&(instruccion->nombre), stream+desplazamiento, sizeof(uint8_t));
-	desplazamiento+= sizeof(uint8_t);
+	memcpy(&(instruccion->nombre), stream+desplazamiento, sizeof(op_code));
+	desplazamiento+= sizeof(op_code);
 //---Hermosa repeticion de codigo pero toy cansada--//
 	if(cantParam == 1){
 	memcpy(&(tamParam), stream+desplazamiento,sizeof(int));

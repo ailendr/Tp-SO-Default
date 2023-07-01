@@ -37,6 +37,7 @@ typedef enum
 	SIGNAL,
 	COMPACTAR,
 	ERROR,
+	OK,
 	CREAR_TABLA
 }op_code;
 

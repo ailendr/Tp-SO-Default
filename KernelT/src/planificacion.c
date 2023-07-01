@@ -82,9 +82,11 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
         log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
-        op_code pedido = CREAR_TABLA;
-        send(socketMemoria, &pedido,sizeof(int),0);
-        send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
+        t_instruccion* instruc = malloc(sizeof(t_instruccion));
+        instruc->nombre = CREAR_TABLA;
+        instruc->pid = proceso->contexto->pid;
+        t_paquete* paqueteI = serializarInstruccion(instruc);
+        validarEnvioDePaquete(paqueteI, socketMemoria, loggerKernel, configKernel, "Crear Tabla de Segmentos");
 		recibirYAsignarTablaDeSegmentos(proceso);
 		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
@@ -210,6 +212,7 @@ void instruccionAEjecutar() {
 			case CREATE_SEGMENT://El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Create Segment");
 				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
+				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccionCS->nombre);
 				int idSegmentoCS = atoi(instruccionCS->param1);
 				int tamanioSegmento = atoi(instruccionCS->param2);
 				log_info(loggerKernel,"PID: %d - Crear Segmento - Id: %d - Tamaño: %d", contextoActualizado->pid,idSegmentoCS,tamanioSegmento);
@@ -217,7 +220,7 @@ void instruccionAEjecutar() {
 				t_paquete* paqueteCS = serializarInstruccion(instruccionCS);
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
 				free(instruccionCS);
-                //Funcion que valida si Memoria pudo crear un segmento//
+                //Funcion que recibe un sed y valida si Memoria pudo crear un segmento//
 				validarCS(socketMemoria, contextoActualizado);
 
 				break;
@@ -504,7 +507,7 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto){
 		case ERROR:
 			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
 			break;
-		default: //Aca es cuando recibimos la base que no le encuento un uso
+		case OK: //hasta que le encontremos un uso a la base
 			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
 			procesoAEjecutar(contexto);
 			break;
