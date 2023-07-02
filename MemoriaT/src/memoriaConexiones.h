@@ -16,8 +16,8 @@
 #include "memoriaEstructuras.h"
 
 void atenderModulos(int socket_servidor);
-void atenderPeticionesCpu(int socket);
-void atenderPeticionesFs(int socket);
+void atenderPeticionesCpu(int* socket);
+void atenderPeticionesFs(int* socket);
 void atenderPeticionesKernel(int* socketKernel);
 void enviarTablaDeSegmentos(t_list* tablaDeSegmentos, int socket);
 void enviarListaDeTablas(t_list* listaDeTablas, int socket);

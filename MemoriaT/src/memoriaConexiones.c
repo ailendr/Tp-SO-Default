@@ -7,7 +7,7 @@
 
 #include "memoriaConexiones.h"
 
-void atenderPeticionesCpu(int socket){
+void atenderPeticionesCpu(int* socket){
 	/*uint32_t protocolo;
 	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
 
@@ -25,7 +25,7 @@ void atenderPeticionesCpu(int socket){
 
 }
 
-void atenderPeticionesFs(int socket){
+void atenderPeticionesFs(int* socket){
 	/*
 	uint32_t protocolo;
 	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);

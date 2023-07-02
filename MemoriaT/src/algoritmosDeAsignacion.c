@@ -76,20 +76,31 @@ algAsignacion asignarAlgoritmo(){
 }
 
 t_segmento* FirstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista){
-	int i =0;
-	t_segmento* huecoLibre = NULL;
-	//t_segmento* huecoLibre= list_get(listaHuecosLibres, i); //Nat: Corrijo esto porque si esta en null no hay tamanio para evaluar pero si hago esto deberia quedar lo de abajo
-
-	while(i <= tamanioLista && tamSegmento>huecoLibre->tamanio){ //Debuggueado: ROMPE PORQUE HUECO LIBRE ES NULL
-		huecoLibre = list_get(listaHuecosLibres, i);
-		i++;
-	//	Nat: esto es lo de abajo pero si lo ponemos asi no me convence el while porq si la lista tiene 5 posiciones e i = 6, no entra al while por F & V -> F. y te retorna el hueco de la pos 6 q no deberia pasar
-		/*i++;
-		huecoLibre = list_get(listaHuecosLibres, i);*/
+	int posicionHuecoLibre = huecoLibreDisponible(tamSegmento,listaHuecosLibres, tamanioLista);
+	t_segmento* huecoLibre;
+	if(posicionHuecoLibre == -1){
+		huecoLibre = NULL;
 	}
-	return huecoLibre;
+	else{
+		huecoLibre = list_get(listaHuecosLibres, posicionHuecoLibre);
+	}
 
+	return huecoLibre;
 }
+
+
+
+int huecoLibreDisponible(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista){
+	int i =0;
+		while(i <= tamanioLista){
+			t_segmento* huecoLibre= list_get(listaHuecosLibres, i);
+			if(tamSegmento <= huecoLibre->tamanio){
+				return i;
+				}
+			i++;
+			}
+	     return -1;
+	}
 
 
 bool BestFit(t_segmento* segmento1, t_segmento* segmento2){
