@@ -39,7 +39,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			//muevo de a un lugar la pos de los segmentos desde seglibre
 			actualizarListaDeSegmentos(nuevoSegmento, segmentoLibre); //Duda: si el segLibre es siguiente a nuevoSegmento.Dentro de esta funcion no tenia que ser list_add(lisAux, nuevoSegmento) en vez de segmento?
 			//Actualizo tabla de segmentos
-			t_list* tablaDeSegmentos = list_get(listaDeTablas, nuevoSegmento->PID);
+			t_list* tablaDeSegmentos = list_get(listaDeTablas,(int) nuevoSegmento->PID); //ROMPE ACA
 			list_add(tablaDeSegmentos, nuevoSegmento);
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);

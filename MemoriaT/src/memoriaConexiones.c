@@ -113,7 +113,7 @@ void atenderPeticionesKernel(int* socketKernel){
 			int idSegmentoCS = atoi(instruccionCS->param1);
 			int tamanioSegmento = atoi(instruccionCS->param2);
 		 	t_segmento* nuevoSegmento = malloc(sizeof(t_segmento));
-		 	 nuevoSegmento->PID=instruccionCS->pid;
+		 	 nuevoSegmento->PID = instruccionCS->pid;
 		 	 nuevoSegmento->ID = idSegmentoCS;
 		 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 		 	 send(socket, &mensaje, sizeof(uint32_t),0);
