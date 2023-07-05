@@ -10,8 +10,6 @@
 
 #include <utils/sockets.h>
 #include <pthread.h>
-
-#include "kernelConfig.h"
 #include "planificacion.h"
 
 
