@@ -213,7 +213,8 @@ void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
 	logearListaDeSegmentos("Antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
-	list_clean(listaDeSegmentos);//dejo vacia la lista de segmentos
+	list_clean_and_destroy_elements(listaDeSegmentos,(void*) destruirSegmento);//Es mejor destruir los elementos tambien por si queda algo
+
 	int tamanioLista=list_size(listaAux);
 
 	//voy actualizando los segmentos y los vuelvo a cargar en la lista de segmentos
@@ -225,7 +226,7 @@ void compactar() {
 		list_add(listaDeSegmentos, segmento);
 	}
 	actualizarUltimoSegmentoLibre();
-	free(listaAux);
+	list_destroy_and_destroy_elements(listaAux,(void*)destruirSegmento);
 	logearListaDeSegmentos("despues de compactar");
 	//Actualizo las tablas de segmento, ponele
 	int tamListaTablas = list_size(listaDeTablas);
