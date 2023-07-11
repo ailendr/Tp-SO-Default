@@ -84,26 +84,26 @@ void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
 	validarEnvioDePaquete(paqueteDeContexto, socketCPU, loggerKernel, configKernel, "Contexto");
 }
 
-void destruirProceso(t_pcb* self){
-	free(self->contexto->instrucciones);
-	free(self->contexto);
-	free(self);
-
-}
 
 void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
+	mostrarListaDeProcesos(); //Solo para debugguear
 	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",procesoAFinalizar->contexto->pid, motivoDeFin);
 	//---Aviso a Consola que finalice---//
 	int terminar = -1;
 	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0);
 
 	//--Aviso a Memoria que libere la tabla de Segmentos--//
-	int liberarTabla = EXIT;
-	send(socketMemoria,&liberarTabla, sizeof(int),0);
-	send(socketMemoria,&(procesoAFinalizar->contexto->pid),sizeof(uint32_t),0);
+	t_instruccion* instruc = malloc(sizeof(t_instruccion));
+	instruc->nombre = EXIT;
+	instruc->pid = procesoAFinalizar->contexto->pid;
+	t_paquete* paqueteI = serializarInstruccion(instruc);
+    validarEnvioDePaquete(paqueteI, socketMemoria, loggerKernel, configKernel, "Eliminar Tabla De Segmentos");
+	free(instruc);
 
-	//Elimina el proceso de la lista de Proceso globales y libera //
-    list_remove_and_destroy_element(listaDeProcesos, procesoAFinalizar->contexto->pid,(void *)destruirProceso);
+	int pidAEliminar = procesoAFinalizar->contexto->pid;
+	int pos = posProcesoAEliminar(listaDeProcesos,pidAEliminar); //Esto lo hago porque list_remove_and.. remueve el elemento y corre la posicion para que no quede vacia, o sea , no queda una posicion sin nada adentro
+    list_remove_and_destroy_element(listaDeProcesos, pos,(void *)destruirProceso);
+	mostrarListaDeProcesos(); //solo para debugguear
     sem_post(&multiprogramacion);
 }
 
@@ -208,12 +208,11 @@ void actualizarTablaEnProcesos(t_list* listaDeTablas){
 	int tamanio = list_size(listaDeProcesos);
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso =list_get(listaDeProcesos,i);
-		if(proceso!= NULL){ //Me imagino que cuando vamos eliminando procesos como que queda esa posicion vacia por eso esta validacion pero no sé
-		  t_list* tablaDeSegmentos = list_get(listaDeTablas,i);
+		  t_list* tablaDeSegmentos = list_get(listaDeTablas,i);//Esto no se hace asi deberiamos buscar el pid de los procesos para que nos de ESA tabla
 		  proceso->tablaSegmentos = tablaDeSegmentos;
 		}
 	}
-}
+
 
 t_list* crearListaDeBloqueo(){
 	char** vectorDeRecursos = Recursos(); //la funcion devuelve una array de strings con un null al final
@@ -268,8 +267,29 @@ int recursoDisponible(char* nombre){
 	return -1;
 }
 
+//Logueo de procesos en sistema //
+//Logueo de Lista de Procesos
+void mostrarListaDeProcesos(){
+	int tamanio = list_size(listaDeProcesos);
+	for(int i=0; i<tamanio; i++){
+		t_pcb* proceso = list_get(listaDeProcesos,i);
+		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
+	}
+}
 
 
+int posProcesoAEliminar(t_list* listaDeProcesos, int pidAEliminar ){
+	int tamanio = list_size(listaDeProcesos);
+	int i = 0;
+	while(i<tamanio){
+			t_pcb* proceso = list_get(listaDeProcesos, i);
+			if(proceso->contexto->pid == pidAEliminar ){
+			 return i;
+			}
+			i++;
+		}
+		return -1;
 
+}
 
 

@@ -8,7 +8,6 @@
 #ifndef SRC_KERNEL_H_
 #define SRC_KERNEL_H_
 
-#include <utils/sockets.h>
 #include "kernelConexiones.h"
 
 

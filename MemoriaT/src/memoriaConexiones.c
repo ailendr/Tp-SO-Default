@@ -130,12 +130,12 @@ void atenderPeticionesKernel(int* socketKernel){
 					enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
 				break;
 			case EXIT:
-				uint32_t pidALiberar = 0;
-				recv(socket, &pidALiberar, sizeof(uint32_t), MSG_WAITALL);
-				liberarTablaDeSegmentos(pidALiberar);
+				t_instruccion* instrucEliminarTabla = obtenerInstruccion(socket,0);
+				liberarTablaDeSegmentos(instrucEliminarTabla->pid);
+				free(instrucEliminarTabla);
 				break;
 
-			case CREAR_TABLA://Si entra aca es porque recibio un pid para crear la tabla de segmentos->sino agregamos el handashake eso da igual pero somos la q controlamos q envia kernely se supone q no enviamos nada incorrecto
+			case CREAR_TABLA:
 				t_instruccion* pedidocCrearTabla = obtenerInstruccion(socket,0);
 				t_list* tablaDeSegmentos = crearTablaDeSegmentos(pedidocCrearTabla->pid);
 				enviarTablaDeSegmentos(tablaDeSegmentos,socket);

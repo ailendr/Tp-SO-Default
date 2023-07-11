@@ -7,11 +7,8 @@
 
 #ifndef SRC_RECURSOS_H_
 #define SRC_RECURSOS_H_
-#include <stdlib.h>
-#include <time.h>
 #include "kernelGlobales.h"
 #include "semaforos.h"
-#include <utils/serializacion.h>
 
 typedef struct{
 	int tiempoDeBloqueo;
@@ -34,7 +31,7 @@ void cortoPlazo();
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void tiempoEnCPU(t_pcb* proceso);
 void finalizarProceso(t_pcb* procesoAFinalizar, char* motivoDeFin);
-void destruirProceso(t_pcb*);
+
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
 void bloquearHilo(t_parametroIO* parametro);
@@ -47,6 +44,11 @@ t_list* crearListaDeBloqueo();
 t_list* crearListaDeInstancias();
 void crearEstructurasDeRecursos();
 int recursoDisponible(char* nombre);
+
+//Logueo de las instrucciones para verificar que esta todo ok//
+void mostrarListaDeProcesos();
+
+int posProcesoAEliminar(t_list* listaDeProcesos, int pid);
 
 
 #endif /* SRC_RECURSOS_H_ */

@@ -20,11 +20,13 @@ void largoPlazo() {
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
+        mostrarListaDeProcesos();
         log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
         t_instruccion* instruc = malloc(sizeof(t_instruccion));
         instruc->nombre = CREAR_TABLA;
         instruc->pid = proceso->contexto->pid;
         t_paquete* paqueteI = serializarInstruccion(instruc);
+        free(instruc);
         validarEnvioDePaquete(paqueteI, socketMemoria, loggerKernel, configKernel, "Crear Tabla de Segmentos");
 		recibirYAsignarTablaDeSegmentos(proceso);
 		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
@@ -304,7 +306,7 @@ void generarProceso(int *socket_cliente) {
 
 	//Cerrando recursos
 	//close(consolaNueva);//Ver si esta demas esto o nos romperia
-	//free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
+	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
 	sem_post(&planiLargoPlazo);
 	}
 }
@@ -313,9 +315,6 @@ void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
 	procesoNuevo->tablaSegmentos = tablaDeSegmento;
 
 }
-
-
-
 
 //Logueo de las instrucciones para verificar que esta todo ok//
 void loggearListaDeIntrucciones(t_list* instrucciones){
@@ -326,6 +325,8 @@ void loggearListaDeIntrucciones(t_list* instrucciones){
 			 log_info(loggerKernel, "%s", instruccion);
 		}
 }
+
+
 
 
 //Recibir Tabla de segmentos//

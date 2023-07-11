@@ -32,8 +32,11 @@ t_contextoEjec* deserializarContexto(void *buffer, int tamanio) {
 	int tamanioBuffer = tamanio;
 	int desplazamiento = 0;
 
+	memcpy(&(contexto->pid), stream + desplazamiento, sizeof(uint32_t));
+		desplazamiento += sizeof(uint32_t);
 	memcpy(&(contexto->PC), stream + desplazamiento, sizeof(uint32_t));
 	desplazamiento += sizeof(uint32_t);
+
 	memcpy(&(contexto->AX), stream + desplazamiento, 4);
 	desplazamiento += 4;
 	memcpy(&(contexto->BX), stream + desplazamiento, 4);
@@ -61,8 +64,6 @@ t_contextoEjec* deserializarContexto(void *buffer, int tamanio) {
 	memcpy(&(contexto->RDX), stream + desplazamiento, 16);
 	desplazamiento += 16;
 
-	memcpy(&(contexto->pid), stream + desplazamiento, sizeof(uint32_t));
-	desplazamiento += sizeof(uint32_t);
 
 	contexto->instrucciones = deserializarInstrucciones(stream, desplazamiento,
 			tamanioBuffer);
@@ -81,6 +82,8 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad 
 	paqueteContexto->buffer->stream = malloc(paqueteContexto->buffer->size);
 	int offset = 0;
 
+	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->pid), sizeof(uint32_t));
+	offset += sizeof(uint32_t);
 	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->PC), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
@@ -111,8 +114,7 @@ t_paquete* serializarContexto(t_contextoEjec *procesoAEjecutar) { //En realidad 
 	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->RDX), 16);
 	offset += 16;
 
-	memcpy(paqueteContexto->buffer->stream + offset, &(procesoAEjecutar->pid), sizeof(uint32_t));
-	offset += sizeof(uint32_t);
+
 
 	t_list *instrucciones = procesoAEjecutar->instrucciones;
 	int tamanioInstrucciones = list_size(instrucciones);
@@ -142,7 +144,6 @@ t_paquete* serializarInstruccion(t_instruccion* instruc){
 	offset += sizeof(op_code);
 
 	agregarParametros(pInstruc, instruc, cantParametros);
-
 	return pInstruc;
 
 }

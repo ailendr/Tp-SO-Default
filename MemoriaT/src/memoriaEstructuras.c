@@ -155,15 +155,6 @@ void logearListaDeSegmentos(char* mensaje){
 	}
 }
 
-void destruirSegmento(t_segmento* self){
-	self->PID = 0;
-	self->ID=0;
-	self->limite=0;
-	self->base=0;
-	self->tamanio=0;
-	self->estaEnMemoria= 0;
-	free(self);
-}
 
 ////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
 

@@ -8,8 +8,6 @@
 #ifndef SRC_ALGORITMOSDEASIGNACION_H_
 #define SRC_ALGORITMOSDEASIGNACION_H_
 
-#include <utils/sockets.h>
-#include <utils/estructuras.h>
 #include "memoriaEstructuras.h"
 
 
