@@ -9,7 +9,7 @@
 
 t_superbloque* superBloque;
 t_bitarray* bitMap;
-t_list peticiones;
+t_list* peticiones;
 
 static t_superbloque* crearSuperbloque(uint32_t block_size, uint32_t block_count){
 	t_superbloque* sb;
@@ -97,11 +97,6 @@ void iniciarArchivoDeBloques(char* pathArch){
 	//tamanioDelArchivo = superBloque->blockSize * superBloque->blockCount;
 	//t_bloque* arrayBloques[superBloque->blockCount];
 }
-
-
-
-
-
 
 void iniciarBitMap(){
 	size_t bytes=superBloque->blockCount/8;

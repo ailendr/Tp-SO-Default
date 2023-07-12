@@ -9,7 +9,7 @@
 
 
 uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
-	if(memoriaDisponible()>=tamanio){
+	if(memoriaDisponible()>=tamanio ){ //Iba a validar que no pase los 16 segmentos por cada proceso pero en el tp seccion KERNEL dice que no se pedira crear un id del seg superior al arch de config
 		algAsignacion algoritmo= asignarAlgoritmo();
 		t_segmento* segLibre;
 		t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)huecoLibre);
@@ -29,19 +29,27 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			nuevoSegmento->base=segLibre->base;
 			nuevoSegmento->limite =nuevoSegmento->base + nuevoSegmento->tamanio;
 			nuevoSegmento->estaEnMemoria=1;
-			segLibre->base=nuevoSegmento->limite+1;
-			segLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
-			segLibre->limite = segLibre->base + segLibre->tamanio;
-			//muevo de a un lugar la pos de los segmentos desde seglibre
-			actualizarListaDeSegmentos(nuevoSegmento, segLibre);
+			//void *list_replace(t_list*, int index, void* element);
+			int pos= buscarPosSegmento(segLibre->ID, segLibre->PID,listaDeSegmentos); //Almacena cualquier cosa el id y pid del seg libre, deberia ser -1 si consideramos q la primera vez : el primer hueco libre sale del ultimo hueco libre
+			//No me gusta nada como se busca el hueco libre en la lista seg porq 1) que valor le ponemos al id y pid cuando creemos ese seg libre? si le ponemos -1 luego en la lista de segmentos habra mas de uno que cumpla y 2) si no se le pone nada al id y pid se llena de basura y cambia de valor siempre entonces imposible encontrarlo en la lista d seg
 
+			t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
+			segmentoLibre= list_replace(listaDeSegmentos, pos,nuevoSegmento);
+			segmentoLibre->base=nuevoSegmento->limite+1;
+			segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
+			segmentoLibre->limite = segLibre->base + segLibre->tamanio;
+			segmentoLibre->ID=-1; //agrego esto pero NO
+			segmentoLibre->PID=-1;//idem
+			//muevo de a un lugar la pos de los segmentos desde seglibre
+			actualizarListaDeSegmentos(nuevoSegmento, segmentoLibre);
 			//Actualizo tabla de segmentos
-			t_list* tablaDeSegmentos = list_get(listaDeTablas, nuevoSegmento->PID);
+			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
+			t_list* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
 			list_add(tablaDeSegmentos, nuevoSegmento);
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);
 
-			return nuevoSegmento->base;
+			return OK;
 		}
 		else {
 			return COMPACTAR;
@@ -49,7 +57,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 	}
 	else{
-		return HANDSHAKE_OutOfMemory;
+		return ERROR;
 
 	}
 }
@@ -73,15 +81,31 @@ algAsignacion asignarAlgoritmo(){
 }
 
 t_segmento* FirstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista){
-	int i =0;
-	t_segmento* huecoLibre=NULL;
-	while(i <= tamanioLista && tamSegmento>huecoLibre->tamanio){
-		huecoLibre = list_get(listaHuecosLibres, i);
-		i++;
+	int posicionHuecoLibre = huecoLibreDisponible(tamSegmento,listaHuecosLibres, tamanioLista);
+	t_segmento* huecoLibre;
+	if(posicionHuecoLibre == -1){
+		huecoLibre = NULL;
 	}
-	return huecoLibre;
+	else{
+		huecoLibre = list_get(listaHuecosLibres, posicionHuecoLibre);
+	}
 
+	return huecoLibre;
 }
+
+
+
+int huecoLibreDisponible(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista){
+	int i =0;
+		while(i <= tamanioLista){
+			t_segmento* huecoLibre= list_get(listaHuecosLibres, i);
+			if(tamSegmento <= huecoLibre->tamanio){
+				return i;
+				}
+			i++;
+			}
+	     return -1;
+	}
 
 
 bool BestFit(t_segmento* segmento1, t_segmento* segmento2){

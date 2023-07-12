@@ -42,10 +42,10 @@ int main(/*int argc, char** argv*/) {
 
 	// INICIALIZAR ESTRUCTURAS ----------------------------------------------------------------------
 	iniciarEstructuras();
-
+	peticiones = list_create();
 
 	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
-
+	sem_init(&nuevoPedido,0, 0);
 
 	// INICIALIZAR HILO  ----------------------------------------------------------------------------
     pthread_t hiloEjecutor;
@@ -57,17 +57,15 @@ int main(/*int argc, char** argv*/) {
 	pthread_detach(hiloAtencion);
 	pthread_detach(hiloEjecutor);
 
-	// ATENDER PETICIONES ---------------------------------------------------------------------------
-		//A medida que vayamos terminando las peticiones hay que terminar el cliente por eso no terminamos el cliente abajo
-
-
 
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
 
-	//finalizar semaforos TODO
+	list_destroy(peticiones);
+	sem_destroy(&nuevoPedido);
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
+	close (cliente);
 
 	printf ("\n Finalizo File System correctamente\n ");
 

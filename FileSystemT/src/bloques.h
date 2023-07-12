@@ -8,9 +8,9 @@
 #ifndef SRC_BLOQUES_H_
 #define SRC_BLOQUES_H_
 
-#include "FSEstructuras.h"
+#include <stdint.h>
 
-extern pthread_mutex_t mutexBlocks;
+#include "FSEstructuras.h"
 
 void escribirBloque (void* contenido, uint32_t sizeContenido, uint32_t numeroBloque);
 void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t offset , uint32_t numeroBloque);

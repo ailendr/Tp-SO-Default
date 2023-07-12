@@ -7,11 +7,23 @@
 
 #ifndef SRC_UTILS_ESTRUCTURAS_H_
 #define SRC_UTILS_ESTRUCTURAS_H_
+
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include <stdint.h>
+#include <stddef.h>
+
+//Bibliotecas de sockets//
+#include <sys/socket.h>
+#include <signal.h>
+#include <netdb.h>
+
+#include <commons/log.h>
+#include <commons/config.h>
 #include <commons/collections/list.h>
 #include <time.h>
-#include <stddef.h>
 
 
 typedef enum
@@ -35,7 +47,10 @@ typedef enum
 	F_TRUNCATE,
 	WAIT,
 	SIGNAL,
-	COMPACTAR
+	COMPACTAR,
+	ERROR,
+	OK,
+	CREAR_TABLA
 }op_code;
 
 typedef struct{
@@ -101,4 +116,10 @@ typedef struct{
 	uint32_t estaEnMemoria;
 }t_segmento;
 
+void destruirSegmento(t_segmento*);
+void destruirProceso(t_pcb*);
+void destruirContexto(t_contextoEjec* self);
+void destruirInstruccion(char* self);
+int posTablaEnLista(t_list* lista, uint32_t pid);
+bool pidEnTabla(t_list* lista, uint32_t pid);
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

@@ -8,6 +8,7 @@
 #ifndef SRC_FSUTILS_H_
 #define SRC_FSUTILS_H_
 
+#include <stdlib.h>
 #include "FSConfig.h"
 
 extern int servidorFS;

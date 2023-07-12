@@ -9,10 +9,6 @@
 #define SRC_MEMORIAESTRUCTURAS_H_
 
 #include "memoriaConfig.h"
-#include <stdlib.h>
-#include <stdint.h>
-#include <commons/collections/list.h>
-#include <utils/estructuras.h>
 
 
 extern t_list* listaDeSegmentos;
@@ -38,7 +34,7 @@ void logearListaDeSegmentos(char* mensaje);
 //FUNCIONES DE MEMORIA
 t_list* crearTablaDeSegmentos(uint32_t pid);
 void liberarTablaDeSegmentos(uint32_t pid);
-void deleteSegment(uint32_t id, uint32_t pid);
+t_list* deleteSegment(uint32_t id, uint32_t pid); //Me sirve que retorne la tabla actualizada
 void unirHuecosAledanios(t_segmento* segmento);
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos);
 void compactar();

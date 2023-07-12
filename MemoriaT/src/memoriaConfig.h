@@ -8,8 +8,6 @@
 #ifndef SRC_MEMORIACONFIG_H_
 #define SRC_MEMORIACONFIG_H_
 
-#include <commons/log.h>
-#include <commons/config.h>
 #include <utils/modulo.h>
 
 extern t_log* loggerMemoria;

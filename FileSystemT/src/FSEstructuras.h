@@ -42,7 +42,8 @@ typedef struct{
 
 extern t_superbloque* superBloque;
 extern t_bitarray* bitMap;
-extern t_list peticiones;
+extern t_list* peticiones;
+
 
 
 void iniciarEstructuras();

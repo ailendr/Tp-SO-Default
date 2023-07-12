@@ -8,9 +8,8 @@
 #ifndef SRC_ALGORITMOSDEASIGNACION_H_
 #define SRC_ALGORITMOSDEASIGNACION_H_
 
-#include <utils/sockets.h>
-#include <utils/estructuras.h>
 #include "memoriaEstructuras.h"
+
 
 
 typedef enum{
@@ -21,6 +20,7 @@ typedef enum{
 
 
 t_segmento* FirstFit(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
+int huecoLibreDisponible(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista);
 bool BestFit(t_segmento* segmento1, t_segmento* segmento2);
 bool WorstFit(t_segmento* segmento1, t_segmento* segmento2);
 t_segmento* WorstYBest(uint32_t tamSegmento, t_list* listaHuecosLibres, int tamanioLista, bool(algoritmo)(t_segmento* seg1, t_segmento* seg2));
