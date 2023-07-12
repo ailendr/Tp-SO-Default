@@ -60,7 +60,6 @@ void cortoPlazo() {
 
 			}
 			else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
-
 	}
 }
 
@@ -92,7 +91,6 @@ void instruccionAEjecutar() {
 				agregarAEstadoReady(ultimoEjecutado);
 				//sem_post(&cpuLibre);
 				sem_post(&planiCortoPlazo);
-
 				break;
 
 			case WAIT:
@@ -239,6 +237,7 @@ void ordenarReady(){
 	else {
 		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
 }
+
 void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
     double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));

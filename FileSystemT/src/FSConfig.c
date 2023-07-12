@@ -19,7 +19,7 @@ char* puertoEscucha(){
 	return config_get_string_value(configFS, "PUERTO_ESCUCHA");
 }
 
-char* pathSuperbloque(){
+char* pathSuperBloque(){
 	return config_get_string_value(configFS, "PATH_SUPERBLOQUE");
 }
 
