@@ -45,6 +45,7 @@ extern t_bitarray* bitMap;
 extern t_list* peticiones;
 
 
+
 void iniciarEstructuras();
 void validarArchivo(char* pathArch, int estructura);
 void iniciarSuperBloque();

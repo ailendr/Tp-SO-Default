@@ -9,9 +9,11 @@
 
 t_list* listaFCB;
 
+
 void abrirArchivo(char* nombreArchivo){
     //verificar existencia de FCB
     //pedir fcb a memoria?
+
 	//t_list* list_filter(t_list*, bool(*condition)(void*));
 	//int i = 0;
 	listaFCB = list_create();
@@ -80,6 +82,7 @@ void leerArchivo(nombreArchivo, direccionFisica, puntero, tamanio){
 void truncarArchivo(char* archivo, uint32_t tamanio){
 	t_fcb* fcb = fcbArchivo(archivo);
 	truncate(archivo, tamanio); //o usar truncate
+
 	if(tamanio >  fcb -> tamanioArchivo){ //Ampliar el tamaño del archivo (se agregan '/0')
 
 		fcb -> tamanioArchivo = fcb -> tamanioArchivo + tamanio; //Al ampliar actualizar el tamaño del archivo en el FCB
@@ -89,6 +92,7 @@ void truncarArchivo(char* archivo, uint32_t tamanio){
 	    asignarBloques();
 	}
 	    }/*else{//Reducir el tamaño del archivo
+
 
 	        //asignar el nuevo tamaño del archivo en el FCB
 	        fcb -> tamanioArchivo = fcb -> tamanioArchivo - tamanio;
@@ -118,6 +122,7 @@ int cantidadBloques(uint32_t tamanio){
 	recorrer el archivo de bloques para seleccionar nuevos bloques verificar que los bloques esten libres con el bitmap
 	y luego haccer que nuevos punteros apunten a estos bloques
 */
+
 t_fcb* fcbArchivo (char* nombreArchivo){
 	//listaFCB = list_create();
 	t_fcb* fcb1; //  = listaFCB[i];
@@ -131,3 +136,4 @@ t_fcb* fcbArchivo (char* nombreArchivo){
 		//crearFCB();
 	}
 }
+

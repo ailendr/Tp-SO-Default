@@ -57,6 +57,7 @@ int main(/*int argc, char** argv*/) {
 	pthread_detach(hiloAtencion);
 	pthread_detach(hiloEjecutor);
 
+
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
 

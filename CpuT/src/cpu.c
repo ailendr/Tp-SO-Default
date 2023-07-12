@@ -74,8 +74,6 @@ int main(/*int argc, char** argv*/) {
 	free (paqueteI);
 	free (paqueteC);
 
-	//(free(buffer); ESTO NO VA. EL BUFFER SE LIBERA EN VALIDARENVIOPAQUETE
-
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);
     close(socketMemoria);
