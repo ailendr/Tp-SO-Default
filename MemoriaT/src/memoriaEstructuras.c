@@ -42,7 +42,6 @@ void crearSegmentoCero(){
 	segmentoCero->tamanio=tam_segmento_cero();
 	segmentoCero->estaEnMemoria=1;
 	list_add(listaDeSegmentos, segmentoCero);
-	//actualizarUltimoSegmentoLibre();
 
 }
 
@@ -93,7 +92,7 @@ void actualizarUltimoSegmentoLibre(){
 	t_segmento* ultimoSegmento = list_get(listaDeSegmentos, ultimaPos);
 	segmentoLibre->ID=-1;
 	segmentoLibre->PID=-1;
-	segmentoLibre->base = ultimoSegmento->limite+1;
+	segmentoLibre->base = ultimoSegmento->limite+1; //No sé si debe estar ese +1
 	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);
 	segmentoLibre->limite=tam_memoria();
 	segmentoLibre->estaEnMemoria=0;
@@ -138,9 +137,7 @@ void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
 		t_segmento* segmento = list_get(tablaDeSegmentos, i);
 		int posListaSeg = buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
 		t_segmento* segActualizado = list_get(listaDeSegmentos, posListaSeg);
-		//list_replace(tablaDeSegmentos, i, segActualizado);//Aca entiendo que tenga sentido replace pero me iria por liberar el anterior y agregar uno nuevo en esa pos
-	    list_remove_and_destroy_element(tablaDeSegmentos, i,(void*)destruirSegmento);
-	    list_add_in_index(tablaDeSegmentos,i,segActualizado);
+	    list_replace_and_destroy_element(tablaDeSegmentos, i,segActualizado,(void*)destruirSegmento);
 	}
 }
 
@@ -168,7 +165,8 @@ t_list* crearTablaDeSegmentos(uint32_t pid){
 }
 
 void liberarTablaDeSegmentos(uint32_t pid){
-	t_list* tablaALiberar= list_get(listaDeTablas, pid);
+	int posDeTabla = posTablaEnLista(listaDeTablas,pid);
+	t_list* tablaALiberar= list_get(listaDeTablas, posDeTabla);
 	int tamTabla = list_size(tablaALiberar);
 	//Marco como libres a los segmentos del proceso
 	for(int i=0;i<tamTabla;i++){
@@ -181,18 +179,22 @@ void liberarTablaDeSegmentos(uint32_t pid){
 		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
 	}
 	list_clean_and_destroy_elements(tablaALiberar, (void*) destruirSegmento); //Destruimos los segmentos de la Tabla de Segmentos
-	list_remove_and_destroy_element(listaDeTablas,pid, (void*)list_destroy);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
+	list_remove_and_destroy_element(listaDeTablas,posDeTabla, (void*)list_destroy);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 
 t_list* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tabla actualizada
+	//Se pone el segmento como libre en la Lista de Segmentos
 	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
-	//Actualizo la tabla de segmentos del proceso
-	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,pid);
-	int posEnTabla = buscarPosSegmento(id, pid, tablaDeSegmentosAActualizar);
-	list_remove_and_destroy_element(tablaDeSegmentosAActualizar,posEnTabla,(void*)destruirSegmento);
 	segmentoAEliminar->estaEnMemoria=0;
+
+	//Actualizo la tabla de segmentos del proceso: Eliminando ese segmento de la tabla
+	int posDeTabla = posTablaEnLista(listaDeTablas,pid);//Primero se busca la tabla en la lista global de tablas
+	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,posDeTabla);
+	//Se busca el segmento en la Tabla de segmentos
+	int posSegEnTabla = buscarPosSegmento(id, pid, tablaDeSegmentosAActualizar);
+	list_remove_and_destroy_element(tablaDeSegmentosAActualizar,posSegEnTabla,(void*)destruirSegmento);
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
 	//Falta la parte de unir con segmentos aledaños si estan libres
 	unirHuecosAledanios(segmentoAEliminar);
@@ -231,4 +233,28 @@ void compactar() {
 	}
 }
 
+//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
+int posTablaEnLista(t_list* listaDeTablas,uint32_t pid){
+	int tamanio = list_size(listaDeTablas);
+	for(int i=0; i< tamanio; i++){
+		t_list* tabla = list_get(listaDeTablas,i);
+        if(pidEnTabla(tabla,pid)){
+        	return i;
+        	}
+		}
+	return -1;
+}
 
+//Similar al Any Satisfy para ver si esta los segmentos con ese pid entonces la tabla corresponde a ese pid//
+bool pidEnTabla(t_list* tabla, uint32_t pid){
+	int tam = list_size(tabla);
+	int cant = 0;
+	for(int i=0; i< tam; i++ ){
+		t_segmento* segmento = list_get(tabla,i);
+		if(segmento->PID == pid){
+			cant += 1;
+		}
+	}
+
+	return cant>0;
+}

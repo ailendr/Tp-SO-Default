@@ -39,5 +39,7 @@ void unirHuecosAledanios(t_segmento* segmento);
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos);
 void compactar();
 
+int posTablaEnLista(t_list* lista, uint32_t pid);
+bool pidEnTabla(t_list* lista, uint32_t pid);
 
 #endif /* SRC_MEMORIAESTRUCTURAS_H_ */
