@@ -52,7 +52,7 @@ int main(/*int argc, char** argv*/) {
 
 			while (verificador == 0){
 				instr = fetch (contextoRecibido);
-				nuevaInstr = decode (instr);
+				nuevaInstr = decode (instr, contextoRecibido);
 				verificador = execute (nuevaInstr, contextoRecibido);
 			}
 

@@ -143,7 +143,7 @@ void instruccionAEjecutar() {
 				break;
 			case CREATE_SEGMENT://El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Create Segment");
-				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
+				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);// No se estaba recibiendo bien el pid porq en Cpu no se ponia el pid: ARREGLADO
 				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccionCS->nombre);
 				int idSegmentoCS = atoi(instruccionCS->param1);
 				int tamanioSegmento = atoi(instruccionCS->param2);

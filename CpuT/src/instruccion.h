@@ -11,7 +11,7 @@
 #include "./utilsCpu.h"
 
 char* fetch(t_contextoEjec* cont);
-t_instruccion* decode (char* instruccion);
+t_instruccion* decode (char* instruccion, t_contextoEjec* contexto);
 int execute (t_instruccion* instruccion, t_contextoEjec* contexto);
 
 op_code asignarNombre (char* nombre);

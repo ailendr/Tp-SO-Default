@@ -109,7 +109,7 @@ void atenderPeticionesKernel(int* socketKernel){
 	     codInstruccion = recibir_operacion(socket);
 		 switch(codInstruccion){
 			case CREATE_SEGMENT:
-			t_instruccion* instruccionCS = obtenerInstruccion(socket,2);
+			t_instruccion* instruccionCS = obtenerInstruccion(socket,2); //Ahora recibe bien el PID venia arrastrando error desde la creacion en cpu
 			int idSegmentoCS = atoi(instruccionCS->param1);
 			int tamanioSegmento = atoi(instruccionCS->param2);
 		 	t_segmento* nuevoSegmento = malloc(sizeof(t_segmento));

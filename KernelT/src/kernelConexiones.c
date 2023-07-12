@@ -51,7 +51,7 @@ void iniciarConexionesDeKernel(){
 			  log_info(loggerKernel, "Enviando mensaje");
 
 			  	if (enviarProtocolo(socketMemoria,HANDSHAKE_Kernel, loggerKernel) == -1) exit(1);
-			  log_info(loggerKernel, "Finalizando conexion con Memoria \n");
+			//  log_info(loggerKernel, "Finalizando conexion con Memoria \n");
 
 
 		}

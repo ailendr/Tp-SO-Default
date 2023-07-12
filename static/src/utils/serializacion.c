@@ -249,7 +249,7 @@ t_instruccion* deserializarInstruccionEstructura (void* buffer, int cantParam){
 	   	memcpy(instruccion->param3, stream+desplazamiento,tamParam);
 
    }
-    free(buffer);
+    //free(buffer);
 	return instruccion;
 }
 
@@ -257,6 +257,7 @@ t_instruccion* obtenerInstruccion(int socket, int cantParam){
 	int tamanio = 0;
 	void *buffer = recibir_buffer(&tamanio, socket);
 	t_instruccion* instruccionNueva = deserializarInstruccionEstructura(buffer, cantParam);
+	free(buffer);
 	return instruccionNueva;
 }
 

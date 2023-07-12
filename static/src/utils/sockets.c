@@ -215,10 +215,10 @@ int enviarProtocolo(int conexion,t_handshake handshake,t_log* logger){
 		free(buffer);
 
 		if(returnSend == -1){
-			log_info(logger, "Error al enviar %s:", nombreBuffer);
+			log_info(logger, "Error al enviar : %s", nombreBuffer);
 			return -1;
 		}else{
-			log_info(logger, "He podido enviar %s:", nombreBuffer);
+			log_info(logger, "He podido enviar : %s", nombreBuffer);
 		}
 
 		return 0;

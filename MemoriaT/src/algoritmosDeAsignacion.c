@@ -30,7 +30,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			nuevoSegmento->limite =nuevoSegmento->base + nuevoSegmento->tamanio;
 			nuevoSegmento->estaEnMemoria=1;
 			//void *list_replace(t_list*, int index, void* element);
-			int pos= buscarPosSegmento(segLibre->ID, segLibre->PID,listaDeSegmentos);
+			int pos= buscarPosSegmento(segLibre->ID, segLibre->PID,listaDeSegmentos); //Almacena cualquier cosa el id y pid del seg libre, deberia ser -1 si consideramos q la primera vez : el primer hueco libre sale del ultimo hueco libre
 			t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
 			segmentoLibre= list_replace(listaDeSegmentos, pos,nuevoSegmento);
 			segmentoLibre->base=nuevoSegmento->limite+1;
