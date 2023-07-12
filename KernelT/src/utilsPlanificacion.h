@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef SRC_RECURSOS_H_
-#define SRC_RECURSOS_H_
+#ifndef SRC_UTILSPLANIFICACION_H_
+#define SRC_UTILSPLANIFICACION_H_
 #include "kernelGlobales.h"
 #include "semaforos.h"
 
@@ -51,4 +51,4 @@ void mostrarListaDeProcesos();
 int posProcesoAEliminar(t_list* listaDeProcesos, int pid);
 
 
-#endif /* SRC_RECURSOS_H_ */
+#endif /* SRC_UTILSPLANIFICACION_H_ */

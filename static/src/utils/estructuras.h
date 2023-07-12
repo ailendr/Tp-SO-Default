@@ -120,4 +120,6 @@ void destruirSegmento(t_segmento*);
 void destruirProceso(t_pcb*);
 void destruirContexto(t_contextoEjec* self);
 void destruirInstruccion(char* self);
+int posTablaEnLista(t_list* lista, uint32_t pid);
+bool pidEnTabla(t_list* lista, uint32_t pid);
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

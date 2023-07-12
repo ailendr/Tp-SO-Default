@@ -53,3 +53,29 @@ void destruirContexto(t_contextoEjec* self){
 void destruirInstruccion(char* self){ //Hago esto porque al deserializar se pide memoria para cada una con malloc
 	free(self);
 }
+
+//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
+int posTablaEnLista(t_list* listaDeTablas,uint32_t pid){
+	int tamanio = list_size(listaDeTablas);
+	for(int i=0; i< tamanio; i++){
+		t_list* tabla = list_get(listaDeTablas,i);
+        if(pidEnTabla(tabla,pid)){
+        	return i;
+        	}
+		}
+	return -1;
+}
+
+//Similar al Any Satisfy para ver si esta los segmentos con ese pid entonces la tabla corresponde a ese pid//
+bool pidEnTabla(t_list* tabla, uint32_t pid){
+	int tam = list_size(tabla);
+	int cant = 0;
+	for(int i=0; i< tam; i++ ){
+		t_segmento* segmento = list_get(tabla,i);
+		if(segmento->PID == pid){
+			cant += 1;
+		}
+	}
+
+	return cant>0;
+}

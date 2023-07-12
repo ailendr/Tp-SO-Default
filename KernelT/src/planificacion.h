@@ -7,7 +7,7 @@
 
 #ifndef SRC_PLANIFICACION_H_
 #define SRC_PLANIFICACION_H_
-#include "recursos.h"
+#include "utilsPlanificacion.h"
 
 
 

@@ -6,7 +6,7 @@
  */
 
 
-#include "recursos.h"
+#include "utilsPlanificacion.h"
 
 t_list* listaDeBloqueo;
 t_list* listaDeInstancias;
@@ -208,7 +208,8 @@ void actualizarTablaEnProcesos(t_list* listaDeTablas){
 	int tamanio = list_size(listaDeProcesos);
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso =list_get(listaDeProcesos,i);
-		  t_list* tablaDeSegmentos = list_get(listaDeTablas,i);//Esto no se hace asi deberiamos buscar el pid de los procesos para que nos de ESA tabla
+		int posDeTabla = posTablaEnLista(listaDeTablas, proceso->contexto->pid);
+		  t_list* tablaDeSegmentos = list_get(listaDeTablas,posDeTabla);
 		  proceso->tablaSegmentos = tablaDeSegmentos;
 		}
 	}

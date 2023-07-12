@@ -9,7 +9,7 @@
 
 
 uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
-	if(memoriaDisponible()>=tamanio){
+	if(memoriaDisponible()>=tamanio ){ //Iba a validar que no pase los 16 segmentos por cada proceso pero en el tp seccion KERNEL dice que no se pedira crear un id del seg superior al arch de config
 		algAsignacion algoritmo= asignarAlgoritmo();
 		t_segmento* segLibre;
 		t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)huecoLibre);
