@@ -24,6 +24,7 @@ void atenderPeticiones(){
 			log_info(loggerFS, "Kernel se desconecto, no se atienden mas peticiones");
 			newInstr->nombre = EXIT;
 			newInstr->pid = -1;
+			list_clean(peticiones);
 			list_add(peticiones, newInstr);
 		    sem_post(&nuevoPedido);
 			break;
