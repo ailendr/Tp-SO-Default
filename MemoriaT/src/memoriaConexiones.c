@@ -122,7 +122,7 @@ void atenderPeticionesKernel(int* socketKernel){
 			case DELETE_SEGMENT:
 				t_instruccion* instruccionDS = obtenerInstruccion(socket,1);
 				int idSegmentoDS = atoi(instruccionDS->param1);
-				t_list* tablaActualizada = deleteSegment(idSegmentoDS, instruccionDS->pid);
+				t_tabla* tablaActualizada = deleteSegment(idSegmentoDS, instruccionDS->pid);
 			    enviarTablaDeSegmentos(tablaActualizada,socket);
 			    free(instruccionDS);
 				break;
@@ -139,7 +139,7 @@ void atenderPeticionesKernel(int* socketKernel){
 
 			case CREAR_TABLA:
 				t_instruccion* pedidocCrearTabla = obtenerInstruccion(socket,0);
-				t_list* tablaDeSegmentos = crearTablaDeSegmentos(pedidocCrearTabla->pid);
+				t_tabla* tablaDeSegmentos = crearTablaDeSegmentos(pedidocCrearTabla->pid);
 				enviarTablaDeSegmentos(tablaDeSegmentos,socket);
 				free(pedidocCrearTabla);
 
@@ -153,7 +153,7 @@ void atenderPeticionesKernel(int* socketKernel){
 
 
 //Solo para que no sea mucho codigo dentro de los cases//
-void enviarTablaDeSegmentos(t_list* tablaDeSegmentos, int socket){
+void enviarTablaDeSegmentos(t_tabla* tablaDeSegmentos, int socket){
 	t_buffer* bufferDeTabla = malloc(sizeof(t_buffer));
      bufferDeTabla->size = 0;
 	 bufferDeTabla->stream = NULL;

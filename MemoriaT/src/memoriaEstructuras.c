@@ -155,14 +155,13 @@ void logearListaDeSegmentos(char* mensaje){
 
 ////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
 
-t_list* crearTablaDeSegmentos(uint32_t pid){
+t_tabla* crearTablaDeSegmentos(uint32_t pid){
 
-	t_list* tablaDeSegmentos = list_create();
-	uint32_t* identificador = malloc(sizeof(uint32_t));
-	*identificador = pid;
+	t_tabla* tablaDeSegmentos = malloc(sizeof(t_tabla));
+	tablaDeSegmentos->segmentos = list_create();
+    tablaDeSegmentos->PID = pid;
 	//log_info(loggerMemoria,"el pid recuperado es : %d",*identificador);
-	list_add(tablaDeSegmentos, (void*) identificador);
-	list_add(tablaDeSegmentos, segmentoCero);
+	list_add(tablaDeSegmentos->segmentos, segmentoCero);
 	list_add_in_index(listaDeTablas,pid, tablaDeSegmentos);
 	log_info(loggerMemoria, "Creacion de proceso: %d", pid);
 	return tablaDeSegmentos;
@@ -170,11 +169,11 @@ t_list* crearTablaDeSegmentos(uint32_t pid){
 
 void liberarTablaDeSegmentos(uint32_t pid){
 	int posDeTabla = posTablaEnLista(listaDeTablas,pid);
-	t_list* tablaALiberar= list_get(listaDeTablas, posDeTabla);
-	int tamTabla = list_size(tablaALiberar);
+	t_tabla* tablaALiberar= list_get(listaDeTablas, posDeTabla);
+	int tamTabla = list_size(tablaALiberar->segmentos);
 	//Marco como libres a los segmentos del proceso
 	for(int i=0;i<tamTabla;i++){
-		t_segmento* segmentoEnTabla= list_get(tablaALiberar, i);
+		t_segmento* segmentoEnTabla= list_get(tablaALiberar->segmentos, i);
 		//deleteSegment(segmento->ID, pid); No se si esta bien usar esta funcion
 		//Dejo esta otra opcion
 		int pos = buscarPosSegmento(segmentoEnTabla->ID, pid, listaDeSegmentos);
@@ -182,12 +181,12 @@ void liberarTablaDeSegmentos(uint32_t pid){
         segmentoEnLista->estaEnMemoria=0;
 		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
 	}
-	list_clean_and_destroy_elements(tablaALiberar, (void*) destruirSegmento); //Destruimos los segmentos de la Tabla de Segmentos
-	list_remove_and_destroy_element(listaDeTablas,posDeTabla, (void*)list_destroy);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
+	//list_clean_and_destroy_elements(tablaALiberar->segmentos, (void*) destruirSegmento); //Destruimos los segmentos de la Tabla de Segmentos
+	list_remove_and_destroy_element(listaDeTablas,posDeTabla, (void*)destruirTabla);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
 
-t_list* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tabla actualizada
+t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tabla actualizada
 	//Se pone el segmento como libre en la Lista de Segmentos
 	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
@@ -195,16 +194,16 @@ t_list* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tab
 
 	//Actualizo la tabla de segmentos del proceso: Eliminando ese segmento de la tabla
 	int posDeTabla = posTablaEnLista(listaDeTablas,pid);//Primero se busca la tabla en la lista global de tablas
-	t_list* tablaDeSegmentosAActualizar = list_get(listaDeTablas,posDeTabla);
+	t_tabla* tablaDeSegmentosAActualizar = list_get(listaDeTablas,posDeTabla);
 	//Se busca el segmento en la Tabla de segmentos
-	int posSegEnTabla = buscarPosSegmento(id, pid, tablaDeSegmentosAActualizar);
-	list_remove_and_destroy_element(tablaDeSegmentosAActualizar,posSegEnTabla,(void*)destruirSegmento);
+	t_list* segmentos = tablaDeSegmentosAActualizar->segmentos;
+	int posSegEnTabla = buscarPosSegmento(id, pid, segmentos);
+	list_remove_and_destroy_element(segmentos,posSegEnTabla,(void*)destruirSegmento);
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
 	//Falta la parte de unir con segmentos aledaños si estan libres
 	unirHuecosAledanios(segmentoAEliminar);
     return tablaDeSegmentosAActualizar;
 }
-
 
 void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");

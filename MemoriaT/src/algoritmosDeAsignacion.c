@@ -44,8 +44,8 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			actualizarListaDeSegmentos(nuevoSegmento, segmentoLibre);
 			//Actualizo tabla de segmentos
 			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
-			t_list* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
-			list_add(tablaDeSegmentos, nuevoSegmento);
+			t_tabla* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
+			list_add(tablaDeSegmentos->segmentos, nuevoSegmento);
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);
 

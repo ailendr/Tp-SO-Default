@@ -32,9 +32,9 @@ void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibr
 void logearListaDeSegmentos(char* mensaje);
 
 //FUNCIONES DE MEMORIA
-t_list* crearTablaDeSegmentos(uint32_t pid);
+t_tabla* crearTablaDeSegmentos(uint32_t pid);
 void liberarTablaDeSegmentos(uint32_t pid);
-t_list* deleteSegment(uint32_t id, uint32_t pid); //Me sirve que retorne la tabla actualizada
+t_tabla* deleteSegment(uint32_t id, uint32_t pid); //Me sirve que retorne la tabla actualizada
 void unirHuecosAledanios(t_segmento* segmento);
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos);
 void compactar();

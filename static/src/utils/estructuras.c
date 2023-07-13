@@ -54,19 +54,28 @@ void destruirInstruccion(char* self){ //Hago esto porque al deserializar se pide
 	free(self);
 }
 
-//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
+void destruirTabla(t_tabla* self){
+	list_destroy_and_destroy_elements(self->segmentos, (void*) destruirSegmento); //Elimino la lista donde estan los segmentos
+	self->PID = 0;
+	free(self);
+
+}
+
+
+//LO PONGO ACA PORQ LO USARÁ KERNEL
+//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta
 int posTablaEnLista(t_list* listaDeTablas,uint32_t pid){
 	int tamanio = list_size(listaDeTablas);
 	for(int i=0; i< tamanio; i++){
-		t_list* tabla = list_get(listaDeTablas,i);
-        if(pidEnTabla(tabla,pid)){
+		t_tabla* tabla = list_get(listaDeTablas,i);
+        if(tabla->PID == pid){
         	return i;
         	}
 		}
 	return -1;
 }
 
-//Similar al Any Satisfy para ver si esta los segmentos con ese pid entonces la tabla corresponde a ese pid//
+/*//Similar al Any Satisfy para ver si esta los segmentos con ese pid entonces la tabla corresponde a ese pid//
 bool pidEnTabla(t_list* tabla, uint32_t pid){
 	int tam = list_size(tabla);
 	int cant = 0;
@@ -78,4 +87,4 @@ bool pidEnTabla(t_list* tabla, uint32_t pid){
 	}
 
 	return cant>0;
-}
+}*/

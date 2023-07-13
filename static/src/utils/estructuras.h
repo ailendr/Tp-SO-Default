@@ -103,10 +103,6 @@ typedef struct{
 }t_pcb;
 
 
-
-
-
-
 typedef struct{
 	uint32_t PID;
 	uint32_t ID;
@@ -116,10 +112,17 @@ typedef struct{
 	uint32_t estaEnMemoria;
 }t_segmento;
 
+typedef struct{
+	uint32_t PID;
+	t_list* segmentos;
+}t_tabla;
+
+
+void destruirTabla(t_tabla* self);
 void destruirSegmento(t_segmento*);
 void destruirProceso(t_pcb*);
 void destruirContexto(t_contextoEjec* self);
 void destruirInstruccion(char* self);
-int posTablaEnLista(t_list* lista, uint32_t pid);
+int posTablaEnLista(t_list* listaDetablas, uint32_t pid);
 bool pidEnTabla(t_list* lista, uint32_t pid);
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */
