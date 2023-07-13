@@ -114,7 +114,7 @@ int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t
 	t_segmento* segmento;
 	t_segmento* huecoFree;
 
-	int primerHuecoLibre = FirstFit(tamSegmento);//Busco el primer hueco libre en el que entre para comparar
+	int primerHuecoLibre = huecoLibreDisponible(tamSegmento, listaDeSegmentos);//Busco el primer hueco libre en el que entre para comparar
 	huecoFree=list_get(listaDeSegmentos, primerHuecoLibre);
 
 	int pos = primerHuecoLibre; //Lo hago por el caso cuando no tenemos segmentos o no borramos ninguno todavia y asigna segmentoLibre
