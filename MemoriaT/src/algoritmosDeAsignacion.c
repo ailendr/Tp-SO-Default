@@ -109,7 +109,31 @@ bool WorstFit(t_segmento* segmento1, t_segmento* segmento2){
 		return segmento1->tamanio >= segmento2->tamanio;
 }
 
+int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t_segmento* seg1, t_segmento* seg2)){
+	int tamanio =list_size(listaDeSegmentos);
+	t_segmento* segmento;
+	t_segmento* huecoFree;
 
+	int primerHuecoLibre = FirstFit(tamSegmento);//Busco el primer hueco libre en el que entre para comparar
+	huecoFree=list_get(listaDeSegmentos, primerHuecoLibre);
+
+	int pos = primerHuecoLibre; //Lo hago por el caso cuando no tenemos segmentos o no borramos ninguno todavia y asigna segmentoLibre
+	for (int i=primerHuecoLibre; i<tamanio; i++){
+		segmento=list_get(listaDeSegmentos, i);
+
+		if(huecoLibre(segmento) && segmento->tamanio<=tamSegmento){
+			if(algoritmo(segmento, huecoFree)){
+				huecoFree=segmento;
+				pos=i;
+			}
+
+		}
+	}
+
+	return pos;
+}
+
+/*
 int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t_segmento* seg1, t_segmento* seg2)){
 	int tamanio = list_size(listaDeSegmentos);
 	t_segmento* huecoFree1 = NULL;
@@ -125,7 +149,8 @@ int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t
 	}
 	return 0;
 }
-	/* TODO
+	/*
+	TODO
 	t_segmento* segmento1=list_get(listaHuecosLibres, i);
 	t_segmento* segmento2=list_get(listaHuecosLibres, j);
 	while(i<=tamanioLista && j< tamanioLista){
