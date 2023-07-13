@@ -17,7 +17,7 @@ char* IP_Memoria();
 char* IP_Escucha();
 char* puertoMemoria();
 char* puertoEscucha();
-char* pathSuperbloque();
+char* pathSuperBloque();
 char* pathBitmap();
 char* pathBloques();
 char* pathFCB();

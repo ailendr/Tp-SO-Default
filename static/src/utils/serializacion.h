@@ -8,7 +8,6 @@
 #ifndef SRC_UTILS_SERIALIZACION_H_
 #define SRC_UTILS_SERIALIZACION_H_
 
-#include <string.h>
 #include "sockets.h"
 
 t_list* deserializarInstrucciones(void *buffer, int desplazamiento, int tamanioBuffer);
@@ -23,9 +22,9 @@ t_instruccion* obtenerInstruccion(int socket, int cantParam);
 
 //Serializacion y deserializacion de tabla de segmento//
 void serializarSegmento(t_segmento* segmento, t_buffer* buffer);
-t_segmento* deserializarSegmento(void* buffer, int desplazamiento);
+t_segmento* deserializarSegmento(void* buffer, int* desplazamiento);
 void serializarTablaDeSegmentos(t_list* tabla, t_buffer* buffer);
-t_list* deserializarTablaDeSegmentos(void* buffer,int desplazamiento, int size);
+t_list* deserializarTablaDeSegmentos(void* buffer,int* desplazamiento, int size);
 
 //Serializacion y deserializacion Lista de Tablas//
 t_buffer* serializarListaDeTablas(t_list* listaDeTablas);

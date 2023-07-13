@@ -7,68 +7,7 @@
 
 #include "planificacion.h"
 
-t_queue *colaNew;
-t_list *colaReady;
-t_list* listaDeProcesos;//procesos admitidos en el sistema
-t_pcb *ultimoEjecutado;
-uint32_t pid = 0;
 
-void crearEstados() {
-	colaNew = queue_create();
-	colaReady = list_create();
-	listaDeProcesos = list_create();
-}
-
-void eliminarEstados() {
-	list_destroy(colaReady);
-	queue_clean(colaNew);
-	queue_destroy(colaNew);
-}
-
-void agregarAEstadoNew(t_pcb *procesoNuevo) {
-	pthread_mutex_lock(&mutexNew);
-	queue_push(colaNew, procesoNuevo);
-	procesoNuevo->estadoPcb = NEW;
-	pthread_mutex_unlock(&mutexNew);
-}
-
-void agregarAEstadoReady(t_pcb *procesoListo) {
-	pthread_mutex_lock(&mutexReady);
-	list_add(colaReady, procesoListo);
-	procesoListo->estadoPcb = READY;
-	if(strcmp("HRRN", Algoritmo())==0){
-		clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));}//Por HRRN
-	pthread_mutex_unlock(&mutexReady);
-	log_info(loggerKernel,
-			"Cola Ready con algoritmo %s .Ingresa el proceso con id %d:",
-			Algoritmo(), procesoListo->contexto->pid);
-}
-
-t_pcb* extraerDeNew() {
-	pthread_mutex_lock(&mutexNew);
-	t_pcb *proceso = queue_pop(colaNew);
-	pthread_mutex_unlock(&mutexNew);
-	return proceso;
-}
-
-t_pcb* extraerDeReady() {
-	pthread_mutex_lock(&mutexReady);
-	t_pcb *proceso = list_remove(colaReady, 0); //Obtiene el 1er elem de la lista y lo elimina de la lista
-	pthread_mutex_unlock(&mutexReady);
-	return proceso;
-}
-
-void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado){
-	log_info(loggerKernel, "PID:%d  - Estado Anterior: %s - Estado Actual: %s", proceso->contexto->pid, estadoAnterior, nuevoEstado);
-}
-
-
-void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
-
-	t_paquete *paqueteDeContexto = serializarContexto(procesoAEjecutar); // "Pone el contexto en un paquete"
-	log_info(loggerKernel, "Paquete de Contexto creado con exito");
-	validarEnvioDePaquete(paqueteDeContexto, socketCPU, loggerKernel, configKernel, "Contexto");
-}
 
 void largoPlazo() {
 	while (1) {
@@ -81,8 +20,14 @@ void largoPlazo() {
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
-		//enviarProtocolo(socketMemoria, HANDSHAKE_PedirMemoria,loggerKernel); //Podemos hacer un hadshake y mandarle despues el pedido de memoria
-		send(socketMemoria, &(proceso->contexto->pid),sizeof(uint32_t),0);
+        mostrarListaDeProcesos();
+        log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
+        t_instruccion* instruc = malloc(sizeof(t_instruccion));
+        instruc->nombre = CREAR_TABLA;
+        instruc->pid = proceso->contexto->pid;
+        t_paquete* paqueteI = serializarInstruccion(instruc);
+        free(instruc);
+        validarEnvioDePaquete(paqueteI, socketMemoria, loggerKernel, configKernel, "Crear Tabla de Segmentos");
 		recibirYAsignarTablaDeSegmentos(proceso);
 		log_info(loggerKernel, "Tabla de segmentos inicial ya asignada a proceso PID: %d", proceso->contexto->pid);
 		agregarAEstadoReady(proceso);
@@ -90,45 +35,31 @@ void largoPlazo() {
 		sem_post(&planiCortoPlazo);
 	}
 }
-void ordenarReady(){
-	if (strcmp(Algoritmo(), "HRRN")==0){
-		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
-		list_iterate(colaReady, (void*) calcularNuevaEstimacion);
-		list_iterate(colaReady, (void*) calcularRR);
-		list_sort(colaReady, (void*)comparadorRR);
-	}
-	else {
-		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
-}
 
-void enviarContextoACpu(){
-	if(!list_is_empty(colaReady)){
-		ordenarReady();
-		t_pcb* procesoAEjec=extraerDeReady();
-		log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
-		t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
-		procesoAEjecutar(contextoAEjec);
-		procesoAEjec->estadoPcb = EXEC;
-		logCambioDeEstado(procesoAEjec, "READY", "EXEC");
-		if(strcmp(Algoritmo(), "HRRN")==0){
-		clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
-		}
-		//pthread_mutex_lock(&mutexUltimoEjecutado);
-		ultimoEjecutado = procesoAEjec;
-		//pthread_mutex_unlock(&mutexUltimoEjecutado);
-		instruccionAEjecutar();
 
-	}
-	else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
-}
 
 void cortoPlazo() {
 	while (1) {
-
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
-        enviarContextoACpu();
-		//instruccionAEjecutar();
+		if(!list_is_empty(colaReady)){
+				ordenarReady();
+				t_pcb* procesoAEjec=extraerDeReady();
+				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
+				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
+				procesoAEjecutar(contextoAEjec);
+				procesoAEjec->estadoPcb = EXEC;
+				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
+				if(strcmp(Algoritmo(), "HRRN")==0){
+				clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
+				}
+				//pthread_mutex_lock(&mutexUltimoEjecutado);
+				ultimoEjecutado = procesoAEjec;
+				//pthread_mutex_unlock(&mutexUltimoEjecutado);
+				instruccionAEjecutar();
+
+			}
+			else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
 	}
 }
 
@@ -160,7 +91,6 @@ void instruccionAEjecutar() {
 				agregarAEstadoReady(ultimoEjecutado);
 				//sem_post(&cpuLibre);
 				sem_post(&planiCortoPlazo);
-
 				break;
 
 			case WAIT:
@@ -211,7 +141,8 @@ void instruccionAEjecutar() {
 				break;
 			case CREATE_SEGMENT://El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Create Segment");
-				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);
+				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);// No se estaba recibiendo bien el pid porq en Cpu no se ponia el pid: ARREGLADO
+				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccionCS->nombre);
 				int idSegmentoCS = atoi(instruccionCS->param1);
 				int tamanioSegmento = atoi(instruccionCS->param2);
 				log_info(loggerKernel,"PID: %d - Crear Segmento - Id: %d - Tamaño: %d", contextoActualizado->pid,idSegmentoCS,tamanioSegmento);
@@ -219,7 +150,7 @@ void instruccionAEjecutar() {
 				t_paquete* paqueteCS = serializarInstruccion(instruccionCS);
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
 				free(instruccionCS);
-                //Funcion que valida si Memoria pudo crear un segmento//
+                //Funcion que recibe un sed y valida si Memoria pudo crear un segmento//
 				validarCS(socketMemoria, contextoActualizado);
 
 				break;
@@ -266,7 +197,7 @@ void instruccionAEjecutar() {
 		}
 	}
 
-
+//---ALGORITMOS---///
 void algoritmoFIFO() {
 	log_info(loggerKernel, "Empieza algoritmo FIFO");
 	t_pcb *procesoAEjec = extraerDeReady();
@@ -296,24 +227,23 @@ void algoritmoHRRN(){
 	ultimoEjecutado = procesoAEjec;
 }
 
+void ordenarReady(){
+	if (strcmp(Algoritmo(), "HRRN")==0){
+		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
+		list_iterate(colaReady, (void*) calcularNuevaEstimacion);
+		list_iterate(colaReady, (void*) calcularRR);
+		list_sort(colaReady, (void*)comparadorRR);
+	}
+	else {
+		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
+}
+
 void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
     double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
     proceso->estimadoReady = nuevaEstimacion;
 }
 
-void tiempoEnCPU(t_pcb* proceso){
-	if(strcmp("HRRN", Algoritmo())==0){
-    struct timespec end;
-    clock_gettime(CLOCK_REALTIME, &end);
-
-    long seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
-    long nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
-    double elapsed = seconds + nanoseconds*1e-9;
-
-    proceso->ultimaRafagaEjecutada=elapsed;
-	}
-}
 
 void calcularRR(t_pcb* proceso) {
 
@@ -334,6 +264,7 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
     return proceso1->RR >= proceso2->RR;
 
 }
+
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
 
@@ -374,7 +305,7 @@ void generarProceso(int *socket_cliente) {
 
 	//Cerrando recursos
 	//close(consolaNueva);//Ver si esta demas esto o nos romperia
-	//free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
+	free(socket_cliente); //duda de si esta bien el free o puede romper en la conexion aunque no lo creemos
 	sem_post(&planiLargoPlazo);
 	}
 }
@@ -383,23 +314,36 @@ void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
 	procesoNuevo->tablaSegmentos = tablaDeSegmento;
 
 }
-void destruirProceso(t_pcb* self){
-	free(self->contexto->instrucciones);
-	free(self->contexto);
-	free(self);
+
+//Logueo de las instrucciones para verificar que esta todo ok//
+void loggearListaDeIntrucciones(t_list* instrucciones){
+	int tamanioListaInstrucciones = list_size(instrucciones);
+	log_info(loggerKernel, "La lista de instrucciones del proceso %d es:", pid);
+		for (int i = 0; i < tamanioListaInstrucciones; i++){
+			 char* instruccion= list_get(instrucciones,i);
+			 log_info(loggerKernel, "%s", instruccion);
+		}
+}
+
+
+
+
+//Recibir Tabla de segmentos//
+void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
+	//----Todo lo que implica deserializar una tabla de segmentos----//
+	 int size = 0;
+	 int desplazamiento = 0;
+	 void* bufferTabla = recibir_buffer(&size,socketMemoria);
+	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
+	free(bufferTabla);
+	//---------------//
+	t_segmento* segmentoCero = list_get(tablaDeSegmentos,0);
+	log_info(loggerKernel,"Tabla de Segmentos Recibida. La Tabla tiene un primer segmento de id: %d",segmentoCero->ID );
+	asignarMemoria(proceso, tablaDeSegmentos);
 
 }
 
-void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
-	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",procesoAFinalizar->contexto->pid, motivoDeFin);
-	int terminar = -1;
-	send(procesoAFinalizar->socketConsola, &terminar, sizeof(int), 0); //Avisa a consola que finalice
-	// send(socketMemoria,&motivo, sizeof(uint32_t)); //Solicita a memoria que elimine la tabla de segmentos
-    list_remove_and_destroy_element(listaDeProcesos, procesoAFinalizar->contexto->pid,(void *)destruirProceso); //DUDA: no sé si cuando se destruye el proceso que se obtiene de la lista de procesos refleja eso en el proceso q se envia por param
-	//DUDA RESPONDIDA AL DEBUGGEAR: si se ve reflejado en el proceso enviado por param :)
-    sem_post(&multiprogramacion);
-}
-
+///UTILS DE INSTRUCCIONES///
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado){
 	/*1ero buscar el recurso: si no está finaliza el proceso
@@ -426,6 +370,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				 }
 				 else{
 					 procesoAEjecutar(contextoActualizado); //Sigue en cpu
+					 instruccionAEjecutar();
 					 }
 				break;
 			case 2://2=SIGNAL
@@ -438,52 +383,12 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				sem_post(&planiCortoPlazo);
 
 				procesoAEjecutar(contextoActualizado);//Sigue en cpu
+				instruccionAEjecutar();
 				break;
 			 }
 			}
 		}
 
-////---Funcion de IO---///
-void bloquearHilo(t_parametroIO* parametro){
-    t_pcb* procesoBloqueado = parametro->procesoABloquear;
-    int tiempoDeBloqueo = parametro->tiempoDeBloqueo;
-	tiempoEnCPU(procesoBloqueado);
-	procesoBloqueado->estadoPcb= BLOCK;
-	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
-    logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
-	usleep(tiempoDeBloqueo);
-	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
-	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
-	free(parametro);
-	sem_post(&planiCortoPlazo);
-}
-//Validacion para F Read y FWrite//
-void validarRyW(char* direccion){
-	int direc = atoi(direccion);
-	if(direc == -1){
-		finalizarProceso(ultimoEjecutado, "SEG_FAULT");
-	}
-}
-//Funcion General para la mayoria de isntrucciones q empiezan con F//
-void implementacionF(t_instruccion* instruccion){
-	t_paquete* paqueteF = serializarInstruccion(instruccion);
-	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion");
-	ultimoEjecutado->estadoPcb= BLOCK;
-	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", ultimoEjecutado->contexto->pid, instruccion->param1);
-	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
-	tiempoEnCPU(ultimoEjecutado);
-	free(instruccion);
-}
-
-//Logueo de las instrucciones para verificar que esta todo ok//
-void loggearListaDeIntrucciones(t_list* instrucciones){
-	int tamanioListaInstrucciones = list_size(instrucciones);
-	log_info(loggerKernel, "La lista de instrucciones del proceso %d es:", pid);
-		for (int i = 0; i < tamanioListaInstrucciones; i++){
-			 char* instruccion= list_get(instrucciones,i);
-			 log_info(loggerKernel, "%s", instruccion);
-		}
-}
 //Validacion para CreateSegment//
 void validarCS(int socketMemoria, t_contextoEjec* contexto){
 	uint32_t mensaje = 0;
@@ -491,53 +396,20 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto){
 	switch (mensaje) {
 		case COMPACTAR:
 			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
-			int habilitado = 1;//solicitariamos a la memoria que compacte enviandole un send de OK
+			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
 			send(socketMemoria, &habilitado, sizeof(int),0);
 			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
 			procesoAEjecutar(contexto);
+			instruccionAEjecutar();
 			break;
 		case ERROR:
 			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
 			break;
-		default: //Aca es cuando recibimos la base que no le encuento un uso
+		case OK: //hasta que le encontremos un uso a la base
 			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
 			procesoAEjecutar(contexto);
+			instruccionAEjecutar();
 			break;
 	}
 }
-
-//Recibir Tabla de segmentos//
-void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
-	//----Todo lo que implica deserializar una tabla de segmentos----//
-	 int size;
-	 int desplazamiento = 0;
-	 void* bufferTabla = recibir_buffer(&size,socketMemoria);
-	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,desplazamiento,size);
-	free(bufferTabla);
-	//---------------//
-	t_segmento* segmentoCero = list_get(tablaDeSegmentos,0);
-	log_info(loggerKernel, "La tabla tiene un primer segmento de id: %d",segmentoCero->ID );
-	asignarMemoria(proceso, tablaDeSegmentos);
-
-}
-
-//Actualizar la tabla de segmentos de todos los procesos//
-void actualizarTablaEnProcesos(t_list* listaDeTablas){
-	int tamanio = list_size(listaDeProcesos);
-	for(int i=0; i<tamanio; i++){
-		t_pcb* proceso =list_get(listaDeProcesos,i);
-		if(proceso!= NULL){ //Me imagino que cuando vamos eliminando procesos como que queda esa posicion vacia por eso esta validacion pero no sé
-		  t_list* tablaDeSegmentos = list_get(listaDeTablas,i);
-		  proceso->tablaSegmentos = tablaDeSegmentos;
-		}
-	}
-}
-
-//Habilita corto plazo solo si hay procesos en Ready// DUDA: QUE HACEMOS CUANDO NO HAY NADIE EN LA COLA READY?
-/*void habilitarCortoPlazo(){
-
-	if(!list_is_empty(colaReady)){
-		sem_post(&planiCortoPlazo);
-	}
-}*/

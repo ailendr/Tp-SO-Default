@@ -21,13 +21,14 @@ char* fetch (t_contextoEjec* cont) {
     return proxInstr;
 }
 
-t_instruccion* decode (char* instruccion) {
+t_instruccion* decode (char* instruccion, t_contextoEjec* contextoRecibido) {
 
 	t_instruccion* nuevaInstruccion = malloc (sizeof(t_instruccion));
 
 	char** token = string_split(instruccion, " ");
 
 	nuevaInstruccion->nombre = asignarNombre(token[0]);
+    nuevaInstruccion->pid = contextoRecibido->pid; //Faltaba asignarle  el Pid: Lo hago aca porque me parece que es el lugar correcto
 
 	if (token[1] != NULL) {
 		nuevaInstruccion->param1 = token[1];

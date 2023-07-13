@@ -8,17 +8,6 @@
 #ifndef SRC_UTILS_SOCKETS_H_
 #define SRC_UTILS_SOCKETS_H_
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <signal.h>
-#include <netdb.h>
-#include <commons/collections/list.h>
-#include <commons/log.h>
-#include <commons/config.h>
 //#include "modulo.h"
 #include "estructuras.h"
 
@@ -42,7 +31,6 @@ typedef enum {
 	HANDSHAKE_Fs,
 	HANDSHAKE_PedirMemoria,
     HANDSHAKE_Ok,
-	HANDSHAKE_OutOfMemory
 } t_handshake;
 
 int iniciarServidor(char*  ip, char* puerto);

@@ -8,7 +8,6 @@
 #ifndef SRC_KERNELGLOBALES_H_
 #define SRC_KERNELGLOBALES_H_
 
-#include <stdint.h>//BORRAR SI NO SIRVE
 #include"pcb.h"
 #include <commons/collections/queue.h>
 

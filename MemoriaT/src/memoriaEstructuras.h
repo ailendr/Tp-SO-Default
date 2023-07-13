@@ -9,10 +9,6 @@
 #define SRC_MEMORIAESTRUCTURAS_H_
 
 #include "memoriaConfig.h"
-#include <stdlib.h>
-#include <stdint.h>
-#include <commons/collections/list.h>
-#include <utils/estructuras.h>
 
 
 extern t_list* listaDeSegmentos;
@@ -34,7 +30,6 @@ void actualizarUltimoSegmentoLibre();
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista);
 void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibre);
 void logearListaDeSegmentos(char* mensaje);
-void destruirSegmento(t_segmento*);
 
 //FUNCIONES DE MEMORIA
 t_list* crearTablaDeSegmentos(uint32_t pid);

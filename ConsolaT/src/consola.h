@@ -8,10 +8,8 @@
 #ifndef SRC_CONSOLA_H_
 #define SRC_CONSOLA_H_
 
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <commons/string.h>
-#include <utils/sockets.h>
 #include <utils/modulo.h>
 #include "ConsolaConfig.h"
 #include "parseoInstrucciones.h"
