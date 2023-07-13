@@ -117,12 +117,14 @@ void atenderPeticionesKernel(int* socketKernel){
 		 	 nuevoSegmento->ID = idSegmentoCS;
 		 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 		 	 send(socket, &mensaje, sizeof(uint32_t),0);
+		 	 free(instruccionCS);
 				break;
 			case DELETE_SEGMENT:
 				t_instruccion* instruccionDS = obtenerInstruccion(socket,1);
 				int idSegmentoDS = atoi(instruccionDS->param1);
 				t_list* tablaActualizada = deleteSegment(idSegmentoDS, instruccionDS->pid);
 			    enviarTablaDeSegmentos(tablaActualizada,socket);
+			    free(instruccionDS);
 				break;
 
 			case COMPACTAR:
@@ -139,6 +141,7 @@ void atenderPeticionesKernel(int* socketKernel){
 				t_instruccion* pedidocCrearTabla = obtenerInstruccion(socket,0);
 				t_list* tablaDeSegmentos = crearTablaDeSegmentos(pedidocCrearTabla->pid);
 				enviarTablaDeSegmentos(tablaDeSegmentos,socket);
+				free(pedidocCrearTabla);
 
 				break;
 			default:

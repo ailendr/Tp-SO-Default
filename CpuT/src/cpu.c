@@ -71,8 +71,8 @@ int main(/*int argc, char** argv*/) {
 		}
 		}
 	}
-	free (paqueteI);
-	free (paqueteC);
+	//free (paqueteI); esto no va porque enviarPaquete ya libera al paquete una vez enviado
+	//free (paqueteC);
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);

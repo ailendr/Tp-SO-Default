@@ -158,6 +158,10 @@ void logearListaDeSegmentos(char* mensaje){
 t_list* crearTablaDeSegmentos(uint32_t pid){
 
 	t_list* tablaDeSegmentos = list_create();
+	uint32_t* identificador = malloc(sizeof(uint32_t));
+	*identificador = pid;
+	//log_info(loggerMemoria,"el pid recuperado es : %d",*identificador);
+	list_add(tablaDeSegmentos, (void*) identificador);
 	list_add(tablaDeSegmentos, segmentoCero);
 	list_add_in_index(listaDeTablas,pid, tablaDeSegmentos);
 	log_info(loggerMemoria, "Creacion de proceso: %d", pid);

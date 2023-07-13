@@ -107,49 +107,6 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
     sem_post(&multiprogramacion);
 }
 
-///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado){
-	/*1ero buscar el recurso: si no está finaliza el proceso
-	 -----------                         si esta decrementa o incrementa la instancia*/
-	int posicionRecurso = recursoDisponible(nombreRecurso);
-		if(posicionRecurso ==-1){
-			finalizarProceso(ultimoEjecutado, "Recurso No Existente");
-		}
-		else{
-			int* pvalor = list_get(listaDeInstancias,posicionRecurso);
-			int valor = *pvalor;
-			//free(pvalor); Preguntar como liberar una lista de punteross
-			switch (nombreInstruccion){
-			case 1: //1=WAIT
-				valor --;
-				log_info(loggerKernel, "PID: %d - WAIT: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
-				 if(valor<0){
-				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
-				queue_push(colaDeBloqueo, ultimoEjecutado);
-				tiempoEnCPU(ultimoEjecutado);
-				ultimoEjecutado->estadoPcb = BLOCK;
-				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
-				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
-				 }
-				 else{
-					 procesoAEjecutar(contextoActualizado); //Sigue en cpu
-					 }
-				break;
-			case 2://2=SIGNAL
-				valor ++;
-				log_info(loggerKernel, "PID: %d - SIGNAL: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
-				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
-				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
-				agregarAEstadoReady(procesoDesbloqueado);
-				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
-				sem_post(&planiCortoPlazo);
-
-				procesoAEjecutar(contextoActualizado);//Sigue en cpu
-				break;
-			 }
-			}
-		}
-
 ////---Funcion de IO---///
 void bloquearHilo(t_parametroIO* parametro){
     t_pcb* procesoBloqueado = parametro->procesoABloquear;
@@ -181,28 +138,7 @@ void implementacionF(t_instruccion* instruccion){
 	tiempoEnCPU(ultimoEjecutado);
 	free(instruccion);
 }
-//Validacion para CreateSegment//
-void validarCS(int socketMemoria, t_contextoEjec* contexto){
-	uint32_t mensaje = 0;
-	recv(socketMemoria, &mensaje, sizeof(uint32_t),0);
-	switch (mensaje) {
-		case COMPACTAR:
-			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
-			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
-			send(socketMemoria, &habilitado, sizeof(int),0);
-			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
-			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
-			procesoAEjecutar(contexto);
-			break;
-		case ERROR:
-			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
-			break;
-		case OK: //hasta que le encontremos un uso a la base
-			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
-			procesoAEjecutar(contexto);
-			break;
-	}
-}
+
 //Actualizar la tabla de segmentos de todos los procesos//
 void actualizarTablaEnProcesos(t_list* listaDeTablas){
 	int tamanio = list_size(listaDeProcesos);
@@ -292,5 +228,6 @@ int posProcesoAEliminar(t_list* listaDeProcesos, int pidAEliminar ){
 		return -1;
 
 }
+
 
 

@@ -33,11 +33,9 @@ void tiempoEnCPU(t_pcb* proceso);
 void finalizarProceso(t_pcb* procesoAFinalizar, char* motivoDeFin);
 
 
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
 void bloquearHilo(t_parametroIO* parametro);
 void validarRyW(char* direccion);
 void implementacionF(t_instruccion* instruccion);
-void validarCS(int socketMemoria, t_contextoEjec* contexto);
 void actualizarTablaEnProcesos(t_list* listaDeTablas);
 
 t_list* crearListaDeBloqueo();
