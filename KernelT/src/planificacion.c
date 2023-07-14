@@ -167,6 +167,7 @@ void instruccionAEjecutar() {
 				recibirYAsignarTablaDeSegmentos(ultimoEjecutado);
 				//El proceso sigue en ejecucion asi que lo volvemos a enviar a cpu
 				procesoAEjecutar(contextoActualizado);
+				instruccionAEjecutar();
 
 				break;
 			case F_OPEN:

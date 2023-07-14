@@ -202,6 +202,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 	//Se busca el segmento en la Tabla de segmentos
 	t_list* segmentos = tablaDeSegmentosAActualizar->segmentos;
 	int posSegEnTabla = buscarPosSegmento(id, pid, segmentos);
+	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio  );
 	list_remove_and_destroy_element(segmentos,posSegEnTabla,(void*)destruirSegmento);
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio );
 	//Falta la parte de unir con segmentos aledaños si estan libres
