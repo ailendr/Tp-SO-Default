@@ -31,7 +31,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			nuevoSegmento->estaEnMemoria=1;
 			//void *list_replace(t_list*, int index, void* element);
 			//No me gusta nada como se busca el hueco libre en la lista seg porq 1) que valor le ponemos al id y pid cuando creemos ese seg libre? si le ponemos -1 luego en la lista de segmentos habra mas de uno que cumpla y 2) si no se le pone nada al id y pid se llena de basura y cambia de valor siempre entonces imposible encontrarlo en la lista d seg
-
+            if(nuevoSegmento->tamanio < segLibre->tamanio){
 			t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
 			segmentoLibre= list_replace(listaDeSegmentos, posSegLibre,nuevoSegmento);
 			segmentoLibre->base=nuevoSegmento->limite;
@@ -45,6 +45,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			//muevo de a un lugar la pos de los segmentos desde seglibre
 			//int pos = buscarPosSegmento(nuevoSegmento->ID,nuevoSegmento->PID, listaDeSegmentos);
 			actualizarListaDeSegmentos(posSegLibre, segmentoLibre);
+            }
 			//Actualizo tabla de segmentos
 			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
 			t_tabla* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
