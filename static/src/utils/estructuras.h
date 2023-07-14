@@ -88,10 +88,16 @@ typedef enum{
 	} estadoPcb;
 
 typedef struct{
+	uint32_t PID;
+	t_list* segmentos;
+}t_tabla;
+
+
+typedef struct{
 	int socketConsola;
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;
-	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
+	t_tabla* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
 	double estimadoReady;//estimadorafaga
 	t_list* archAbiertos;
 
@@ -112,10 +118,6 @@ typedef struct{
 	uint32_t estaEnMemoria;
 }t_segmento;
 
-typedef struct{
-	uint32_t PID;
-	t_list* segmentos;
-}t_tabla;
 
 
 void destruirTabla(t_tabla* self);

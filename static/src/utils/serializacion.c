@@ -276,6 +276,7 @@ void serializarTablaDeSegmentos(t_tabla* tabla, t_buffer* buffer){
 
 t_tabla* deserializarTablaDeSegmentos(void* buffer,int* desplazamiento, int size){ //El que llame a deserializar debe recibir el buffer antes
         t_tabla* tablaDeSegmentos = malloc(sizeof(t_tabla));
+        tablaDeSegmentos->segmentos = list_create();
 		memcpy(&(tablaDeSegmentos->PID), buffer + *desplazamiento, sizeof(uint32_t));
         *desplazamiento = sizeof(uint32_t);
 
@@ -287,21 +288,20 @@ t_tabla* deserializarTablaDeSegmentos(void* buffer,int* desplazamiento, int size
 }
 
 void serializarSegmento(t_segmento* segmento, t_buffer* buffer){
-		int offset = 0;
 		buffer->stream = realloc(buffer->stream, buffer->size + 6* sizeof(uint32_t) );
-		memcpy(buffer->stream + offset, &(segmento->PID), sizeof(uint32_t));
-		offset += sizeof(uint32_t);
-		memcpy(buffer->stream+ offset, &(segmento->ID), sizeof(uint32_t));
-		offset += sizeof(uint32_t);
-		memcpy(buffer->stream + offset, &(segmento->base), sizeof(uint32_t));
-		offset += sizeof(uint32_t);
-		memcpy(buffer->stream+ offset, &(segmento->tamanio), sizeof(uint32_t));
-		offset += sizeof(uint32_t);
-		memcpy(buffer->stream+ offset, &(segmento->limite), sizeof(uint32_t));
-		offset += sizeof(uint32_t);
-		memcpy(buffer->stream+ offset, &(segmento->estaEnMemoria), sizeof(uint32_t));
-		offset += sizeof(uint32_t);
-		buffer->size+=offset;
+		memcpy(buffer->stream + buffer->size, &(segmento->PID), sizeof(uint32_t));
+		buffer->size += sizeof(uint32_t);
+		memcpy(buffer->stream+ buffer->size, &(segmento->ID), sizeof(uint32_t));
+		buffer->size += sizeof(uint32_t);
+		memcpy(buffer->stream + buffer->size, &(segmento->base), sizeof(uint32_t));
+		buffer->size += sizeof(uint32_t);
+		memcpy(buffer->stream+ buffer->size, &(segmento->tamanio), sizeof(uint32_t));
+		buffer->size += sizeof(uint32_t);
+		memcpy(buffer->stream+ buffer->size, &(segmento->limite), sizeof(uint32_t));
+		buffer->size += sizeof(uint32_t);
+		memcpy(buffer->stream+ buffer->size, &(segmento->estaEnMemoria), sizeof(uint32_t));
+		buffer->size += sizeof(uint32_t);
+
 }
 
 t_segmento* deserializarSegmento(void* buffer, int* desplazamiento){

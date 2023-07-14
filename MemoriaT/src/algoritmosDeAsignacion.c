@@ -10,9 +10,8 @@
 
 uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 	if(memoriaDisponible()>=tamanio ){ //Iba a validar que no pase los 16 segmentos por cada proceso pero en el tp seccion KERNEL dice que no se pedira crear un id del seg superior al arch de config
+		nuevoSegmento->tamanio = tamanio;
 		algAsignacion algoritmo= asignarAlgoritmo();
-		t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)huecoLibre);
-		int tamanio=list_size(listaHuecosLibres);
 		int tamSegmento = nuevoSegmento->tamanio;
 		int posSegLibre;
 		switch(algoritmo){
@@ -20,10 +19,10 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			posSegLibre= FirstFit(tamSegmento);
 		break;
 		case bestFit:
-			posSegLibre= WorstYBest(tamSegmento, listaHuecosLibres, (void*)BestFit);
+			posSegLibre= WorstYBest(tamSegmento, listaDeSegmentos, (void*)BestFit);
 		break;
 		case worstFit:
-			posSegLibre = WorstYBest(tamSegmento, listaHuecosLibres, (void*)WorstFit);
+			posSegLibre = WorstYBest(tamSegmento, listaDeSegmentos, (void*)WorstFit);
 		}
 		if(posSegLibre!=-1){
 			t_segmento* segLibre = list_get(listaDeSegmentos, posSegLibre);
@@ -35,9 +34,9 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 			t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
 			segmentoLibre= list_replace(listaDeSegmentos, posSegLibre,nuevoSegmento);
-			segmentoLibre->base=nuevoSegmento->limite+1;
+			segmentoLibre->base=nuevoSegmento->limite;
 			segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
-			segmentoLibre->limite = segLibre->base + segLibre->tamanio;
+			segmentoLibre->limite = segLibre->base + segLibre->tamanio; //Podria ir en vez de segLibre->base : TAMMEMORIA pero si hay un hueco libre no funcaria
 			segmentoLibre->ID=-1; //agrego esto pero NO
 			segmentoLibre->PID=-1;//idem
 			//muevo de a un lugar la pos de los segmentos desde seglibre
@@ -48,7 +47,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			t_tabla* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
 			list_add(tablaDeSegmentos->segmentos, nuevoSegmento);
 
-			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);
+			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, nuevoSegmento->tamanio);
 
 			return OK;
 		}
@@ -58,6 +57,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 	}
 	else{
+		destruirSegmento(nuevoSegmento); //antes de tirar error liberamos la memoria q le reservamos
 		return ERROR;
 
 	}
@@ -91,8 +91,9 @@ int FirstFit(uint32_t tamSegmento){
 int huecoLibreDisponible(uint32_t tamSegmento, t_list* listaDeSegmentos){
 	int tamanioLista = list_size(listaDeSegmentos);
 	int i =0;
+	logearListaDeSegmentos("Antes de retornar un hueco libre");
 		while(i <= tamanioLista){
-			t_segmento* huecoFree= list_get(listaDeSegmentos, i);
+			t_segmento* huecoFree= list_get(listaDeSegmentos, i); //rompe acá con un segundo createSegment
 			if(tamSegmento <= huecoFree->tamanio && huecoLibre(huecoFree)){
 				return i;
 				}
@@ -120,7 +121,7 @@ int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t
 	huecoFree=list_get(listaDeSegmentos, primerHuecoLibre);
 
 	int pos = primerHuecoLibre; //Lo hago por el caso cuando no tenemos segmentos o no borramos ninguno todavia y asigna segmentoLibre
-	for (int i=primerHuecoLibre; i<tamanio; i++){
+	for (int i=primerHuecoLibre+1; i<tamanio; i++){
 		segmento=list_get(listaDeSegmentos, i);
 
 		if(huecoLibre(segmento) && segmento->tamanio<=tamSegmento){
@@ -151,7 +152,7 @@ int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t
 	}
 	return 0;
 }
-	/*
+
 	TODO
 	t_segmento* segmento1=list_get(listaHuecosLibres, i);
 	t_segmento* segmento2=list_get(listaHuecosLibres, j);

@@ -310,7 +310,7 @@ void generarProceso(int *socket_cliente) {
 	}
 }
 
-void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
+void asignarMemoria(t_pcb *procesoNuevo, t_tabla *tablaDeSegmento) {
 	procesoNuevo->tablaSegmentos = tablaDeSegmento;
 
 }
@@ -334,10 +334,10 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	 int size = 0;
 	 int desplazamiento = 0;
 	 void* bufferTabla = recibir_buffer(&size,socketMemoria);
-	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
+	t_tabla* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
 	free(bufferTabla);
 	//---------------//
-	t_segmento* segmentoCero = list_get(tablaDeSegmentos,0);
+	t_segmento* segmentoCero = list_get(tablaDeSegmentos->segmentos,0);
 	log_info(loggerKernel,"Tabla de Segmentos Recibida. La Tabla tiene un primer segmento de id: %d",segmentoCero->ID );
 	asignarMemoria(proceso, tablaDeSegmentos);
 
