@@ -145,7 +145,7 @@ void actualizarTablaEnProcesos(t_list* listaDeTablas){
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso =list_get(listaDeProcesos,i);
 		int posDeTabla = posTablaEnLista(listaDeTablas, proceso->contexto->pid);
-		  t_list* tablaDeSegmentos = list_get(listaDeTablas,posDeTabla);
+		  t_tabla* tablaDeSegmentos = list_get(listaDeTablas,posDeTabla);
 		  proceso->tablaSegmentos = tablaDeSegmentos;
 		}
 	}

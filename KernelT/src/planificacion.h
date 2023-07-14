@@ -27,7 +27,7 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);
 
 void generarProceso(int* socket_cliente);
 t_list*  obtenerInstrucciones(int socket_cliente);
-void asignarMemoria(t_pcb* procesoNuevo, t_list* tablaDeSegmento);
+void asignarMemoria(t_pcb* procesoNuevo, t_tabla* tablaDeSegmento);
 
 
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);

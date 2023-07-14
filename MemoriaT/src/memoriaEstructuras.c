@@ -92,7 +92,7 @@ void actualizarUltimoSegmentoLibre(){
 	t_segmento* ultimoSegmento = list_get(listaDeSegmentos, ultimaPos);
 	segmentoLibre->ID=-1;
 	segmentoLibre->PID=-1;
-	segmentoLibre->base = ultimoSegmento->limite+1; //No sé si debe estar ese +1
+	segmentoLibre->base = ultimoSegmento->limite; //No sé si debe estar ese +1 porque recordemos que la DL < Limite , ese ultimo byte es la base, o sea desde donde comienza, el prox segmento
 	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);
 	segmentoLibre->limite=tam_memoria();
 	segmentoLibre->estaEnMemoria=0;
