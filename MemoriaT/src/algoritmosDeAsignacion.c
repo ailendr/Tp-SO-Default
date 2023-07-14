@@ -39,16 +39,19 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			segmentoLibre->limite = segLibre->base + segLibre->tamanio; //Podria ir en vez de segLibre->base : TAMMEMORIA pero si hay un hueco libre no funcaria
 			segmentoLibre->ID=-1; //agrego esto pero NO
 			segmentoLibre->PID=-1;//idem
+
+			logearListaDeSegmentos("despues de asignar la pos del segLibe al segNuevo: "
+					"----------------------------------------------------");
 			//muevo de a un lugar la pos de los segmentos desde seglibre
-			int pos = buscarPosSegmento(nuevoSegmento,nuevoSegmento->PID, listaDeSegmentos);
-			actualizarListaDeSegmentos(pos, listaDeSegmentos);
+			//int pos = buscarPosSegmento(nuevoSegmento->ID,nuevoSegmento->PID, listaDeSegmentos);
+			actualizarListaDeSegmentos(posSegLibre, segmentoLibre);
 			//Actualizo tabla de segmentos
 			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
 			t_tabla* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
 			list_add(tablaDeSegmentos->segmentos, nuevoSegmento);
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, nuevoSegmento->tamanio);
-
+			logearListaDeSegmentos("despues de mover los segmentos");
 			return OK;
 		}
 		else {
@@ -64,16 +67,23 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 }
 
 
-
 void actualizarListaDeSegmentos(int pos, t_segmento* segmento){
 	int tamLista=list_size(listaDeSegmentos);
-	t_segmento* segmentoAux;
-	for(int i=pos;i<tamLista;i++){
+	t_segmento* segmentoAux;//=malloc(sizeof(t_segmento));
+	int i;
+	if(pos +1==tamLista){
+		list_add_in_index(listaDeSegmentos,pos+1,segmento);
+	}else{
+		for(i=pos + 1;i<=tamLista;i++){
 		segmentoAux=list_replace(listaDeSegmentos, i, segmento);
-		segmento = segmentoAux;
+		segmento=segmentoAux;
+			if(i==tamLista){
+				list_add_in_index(listaDeSegmentos, i+1, segmentoAux);
+			}
+		}
 	}
+	//free(segmentoAux);
 }
-
 algAsignacion asignarAlgoritmo(){
 	algAsignacion algoritmo;
 	if (strcmp(algoritmoAsignacion(), "FIRST") == 0) algoritmo = firstFit;

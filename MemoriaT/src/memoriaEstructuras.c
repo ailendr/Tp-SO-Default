@@ -100,6 +100,7 @@ void actualizarUltimoSegmentoLibre(){
 }
 
 //Mueve en una pos toda la lista de segmentos
+/*
 void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento){
 	t_list* listaAux = list_create();
 	int tamLista = list_size(listaDeSegmentos);
@@ -112,7 +113,7 @@ void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento)
 
 
 }
-
+*/
 
 void unirHuecosAledanios(t_segmento* segmento){
 	int pos = buscarPosSegmento(segmento->ID,segmento->PID, listaDeSegmentos);
