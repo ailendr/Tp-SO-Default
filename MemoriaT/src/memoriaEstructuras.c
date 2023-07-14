@@ -69,12 +69,15 @@ int memoriaDisponible(){
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista){
 	int tamLista = list_size(lista);
 	int i = 0;
-	t_segmento* segmento = list_get(lista, i);
-	while(i<=tamLista && segmento->ID!=idSegmento && segmento->PID!=pid){
-  		i++;
-  		segmento=list_get(lista, i);
+
+	while(i<tamLista){
+  		t_segmento* segmento=list_get(lista, i);
+		if(segmento->ID==idSegmento && segmento->PID==pid){
+			return i;
+		}
+		i++;
  	}
-	return i;
+	return -1;
 }
 
 bool huecoLibre(t_segmento* segmento){
