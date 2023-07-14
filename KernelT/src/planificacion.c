@@ -19,8 +19,10 @@ void largoPlazo() {
 		sem_wait(&multiprogramacion);
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
+		pthread_mutex_lock(&mutexListaDeProcesos);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
         mostrarListaDeProcesos();
+        pthread_mutex_unlock(&mutexListaDeProcesos);
         log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
         t_instruccion* instruc = malloc(sizeof(t_instruccion));
         instruc->nombre = CREAR_TABLA;
@@ -316,19 +318,6 @@ void asignarMemoria(t_pcb *procesoNuevo, t_tabla *tablaDeSegmento) {
 
 }
 
-//Logueo de las instrucciones para verificar que esta todo ok//
-void loggearListaDeIntrucciones(t_list* instrucciones){
-	int tamanioListaInstrucciones = list_size(instrucciones);
-	log_info(loggerKernel, "La lista de instrucciones del proceso %d es:", pid);
-		for (int i = 0; i < tamanioListaInstrucciones; i++){
-			 char* instruccion= list_get(instrucciones,i);
-			 log_info(loggerKernel, "%s", instruccion);
-		}
-}
-
-
-
-
 //Recibir Tabla de segmentos//
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	//----Todo lo que implica deserializar una tabla de segmentos----//
@@ -338,8 +327,7 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	t_tabla* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
 	free(bufferTabla);
 	//---------------//
-	t_segmento* segmentoCero = list_get(tablaDeSegmentos->segmentos,0);
-	log_info(loggerKernel,"Tabla de Segmentos Recibida. La Tabla tiene un primer segmento de id: %d",segmentoCero->ID );
+	loggearTablaDeSegmentos(tablaDeSegmentos);
 	asignarMemoria(proceso, tablaDeSegmentos);
 
 }

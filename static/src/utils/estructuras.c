@@ -20,7 +20,7 @@ void destruirSegmento(t_segmento* self){
 
 void destruirProceso(t_pcb* self){
 	close(self->socketConsola);
-	list_destroy_and_destroy_elements(self->tablaSegmentos, (void*) destruirSegmento);
+	//list_destroy_and_destroy_elements(self->tablaSegmentos, (void*) destruirTabla);
 	list_destroy(self->archAbiertos); //HAY QUE VER COMO FINALIZAMOS LOS ARCHIVOS ABIERTOS
 	destruirContexto(self->contexto);
 	free(self->contexto);

@@ -33,8 +33,6 @@ void asignarMemoria(t_pcb* procesoNuevo, t_tabla* tablaDeSegmento);
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
 
 
-void loggearListaDeIntrucciones(t_list* instrucciones);
-
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
 void validarCS(int socketMemoria, t_contextoEjec* contexto);
 

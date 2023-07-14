@@ -102,9 +102,20 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 
 	int pidAEliminar = procesoAFinalizar->contexto->pid;
 	int pos = posProcesoAEliminar(listaDeProcesos,pidAEliminar); //Esto lo hago porque list_remove_and.. remueve el elemento y corre la posicion para que no quede vacia, o sea , no queda una posicion sin nada adentro
-    list_remove_and_destroy_element(listaDeProcesos, pos,(void *)destruirProceso);
-	mostrarListaDeProcesos(); //solo para debugguear
+   if(pos != -1){
+       destruirTabla(procesoAFinalizar->tablaSegmentos);
+       pthread_mutex_lock(&mutexListaDeProcesos);
+      // t_pcb* proceso = list_get(listaDeProcesos, pos);
+       //destruirTabla(proceso->tablaSegmentos);
+       list_remove_and_destroy_element(listaDeProcesos, pos,(void *)destruirProceso);
+       mostrarListaDeProcesos(); //solo para debugguear
+       pthread_mutex_unlock(&mutexListaDeProcesos);
+
     sem_post(&multiprogramacion);
+   }
+   else {
+	   log_info(loggerKernel, "ERROR: No se encuentra el proceso a eliminar");
+   }
 }
 
 ////---Funcion de IO---///
@@ -204,15 +215,7 @@ int recursoDisponible(char* nombre){
 	return -1;
 }
 
-//Logueo de procesos en sistema //
-//Logueo de Lista de Procesos
-void mostrarListaDeProcesos(){
-	int tamanio = list_size(listaDeProcesos);
-	for(int i=0; i<tamanio; i++){
-		t_pcb* proceso = list_get(listaDeProcesos,i);
-		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
-	}
-}
+
 
 
 int posProcesoAEliminar(t_list* listaDeProcesos, int pidAEliminar ){
@@ -229,5 +232,31 @@ int posProcesoAEliminar(t_list* listaDeProcesos, int pidAEliminar ){
 
 }
 
+//Logueo de procesos en sistema //
+//Logueo de Lista de Procesos
+void mostrarListaDeProcesos(){
+	int tamanio = list_size(listaDeProcesos);
+	for(int i=0; i<tamanio; i++){
+		t_pcb* proceso = list_get(listaDeProcesos,i);
+		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
+	}
+}
+//Logueo de las instrucciones para verificar que esta todo ok//
+void loggearListaDeIntrucciones(t_list* instrucciones){
+	int tamanioListaInstrucciones = list_size(instrucciones);
+	log_info(loggerKernel, "La lista de instrucciones del proceso %d es:", pid);
+		for (int i = 0; i < tamanioListaInstrucciones; i++){
+			 char* instruccion= list_get(instrucciones,i);
+			 log_info(loggerKernel, "%s", instruccion);
+		}
+}
 
+void loggearTablaDeSegmentos(t_tabla* tabla){
+	int tamanio = list_size(tabla->segmentos);
+		log_info(loggerKernel, "La Tabla de Segmentos contiene :");
+			for (int i = 0; i < tamanio; i++){
+				 t_segmento* segmento= list_get(tabla->segmentos,i);
+				 log_info(loggerKernel, "Segmento ID : %d", segmento->ID);
+			}
+	}
 

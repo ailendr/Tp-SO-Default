@@ -176,7 +176,7 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	t_tabla* tablaALiberar= list_get(listaDeTablas, posDeTabla);
 	int tamTabla = list_size(tablaALiberar->segmentos);
 	//Marco como libres a los segmentos del proceso
-	for(int i=0;i<tamTabla;i++){
+	for(int i=1;i<tamTabla;i++){
 		t_segmento* segmentoEnTabla= list_get(tablaALiberar->segmentos, i);
 		//deleteSegment(segmento->ID, pid); No se si esta bien usar esta funcion
 		//Dejo esta otra opcion
