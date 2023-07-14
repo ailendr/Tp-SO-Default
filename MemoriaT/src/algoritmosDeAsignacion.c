@@ -29,23 +29,24 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			nuevoSegmento->base=segLibre->base;
 			nuevoSegmento->limite =nuevoSegmento->base + nuevoSegmento->tamanio;
 			nuevoSegmento->estaEnMemoria=1;
-			//void *list_replace(t_list*, int index, void* element);
-			//No me gusta nada como se busca el hueco libre en la lista seg porq 1) que valor le ponemos al id y pid cuando creemos ese seg libre? si le ponemos -1 luego en la lista de segmentos habra mas de uno que cumpla y 2) si no se le pone nada al id y pid se llena de basura y cambia de valor siempre entonces imposible encontrarlo en la lista d seg
-            if(nuevoSegmento->tamanio < segLibre->tamanio){
-			t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
-			segmentoLibre= list_replace(listaDeSegmentos, posSegLibre,nuevoSegmento);
-			segmentoLibre->base=nuevoSegmento->limite;
-			segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
-			segmentoLibre->limite = segLibre->base + segLibre->tamanio; //Podria ir en vez de segLibre->base : TAMMEMORIA pero si hay un hueco libre no funcaria
-			segmentoLibre->ID=-1; //agrego esto pero NO
-			segmentoLibre->PID=-1;//idem
 
-			logearListaDeSegmentos("despues de asignar la pos del segLibe al segNuevo: "
-					"----------------------------------------------------");
-			//muevo de a un lugar la pos de los segmentos desde seglibre
-			//int pos = buscarPosSegmento(nuevoSegmento->ID,nuevoSegmento->PID, listaDeSegmentos);
-			actualizarListaDeSegmentos(posSegLibre, segmentoLibre);
-            }
+            if(nuevoSegmento->tamanio < segLibre->tamanio){
+
+				t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
+				segmentoLibre= list_replace(listaDeSegmentos, posSegLibre,nuevoSegmento);
+				segmentoLibre->base=nuevoSegmento->limite;
+				segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
+				segmentoLibre->limite = segLibre->base + segLibre->tamanio; //Podria ir en vez de segLibre->base : TAMMEMORIA pero si hay un hueco libre no funcaria
+				segmentoLibre->ID=-1; //agrego esto pero NO
+				segmentoLibre->PID=-1;//idem
+
+				logearListaDeSegmentos("despues de asignar la pos del segLibre al segNuevo: "
+						"----------------------------------------------------");
+				//muevo de a un lugar la pos de los segmentos desde seglibre
+				//int pos = buscarPosSegmento(nuevoSegmento->ID,nuevoSegmento->PID, listaDeSegmentos);
+				list_add_in_index(listaDeSegmentos,posSegLibre+1,segmentoLibre);
+             }
+
 			//Actualizo tabla de segmentos
 			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
 			t_tabla* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
@@ -67,24 +68,6 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 	}
 }
 
-
-void actualizarListaDeSegmentos(int pos, t_segmento* segmento){
-	int tamLista=list_size(listaDeSegmentos);
-	t_segmento* segmentoAux;//=malloc(sizeof(t_segmento));
-	int i;
-	if(pos +1==tamLista){
-		list_add_in_index(listaDeSegmentos,pos+1,segmento);
-	}else{
-		for(i=pos + 1;i<=tamLista;i++){
-		segmentoAux=list_replace(listaDeSegmentos, i, segmento);
-		segmento=segmentoAux;
-			if(i==tamLista){
-				list_add_in_index(listaDeSegmentos, i+1, segmentoAux);
-			}
-		}
-	}
-	//free(segmentoAux);
-}
 algAsignacion asignarAlgoritmo(){
 	algAsignacion algoritmo;
 	if (strcmp(algoritmoAsignacion(), "FIRST") == 0) algoritmo = firstFit;
@@ -148,41 +131,9 @@ int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t
 }
 
 /*
-int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t_segmento* seg1, t_segmento* seg2)){
-	int tamanio = list_size(listaDeSegmentos);
-	t_segmento* huecoFree1 = NULL;
-	//int i =0;
-	//int j=1;
-	int iterador = 0;
-	while(iterador < tamanio ){
-		t_segmento* segmento=list_get(listaDeSegmentos, iterador);
-		if(huecoLibre(segmento)){
-        huecoFree1 = segmento;
-        return iterador;
-		}
-	}
-	return 0;
-}
 
-	TODO
-	t_segmento* segmento1=list_get(listaHuecosLibres, i);
-	t_segmento* segmento2=list_get(listaHuecosLibres, j);
-	while(i<=tamanioLista && j< tamanioLista){
-		if(segmento1->tamanio>=tamSegmento && algoritmo(segmento1, segmento2)){
-			huecoLibre = segmento1;
-			segmento2 = list_get(listaHuecosLibres, j++);
-		}else if(segmento2->tamanio >= tamSegmento){
-			huecoLibre = segmento2;
-			segmento1 = list_get(listaHuecosLibres, i++);
-		}
-		else {
-			i++; j++;
-		}
-	}
-	return huecoLibre;
-}*/
 
-/*/Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
+//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
 int posTablaEnList(t_list* listaDeTablas,uint32_t pid){
 	int tamanio = list_size(listaDeTablas);
 	for(int i=0; i< tamanio; i++){

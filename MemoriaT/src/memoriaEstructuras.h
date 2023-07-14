@@ -30,6 +30,7 @@ void actualizarUltimoSegmentoLibre();
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista);
 //void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibre);
 void logearListaDeSegmentos(char* mensaje);
+void actualizarListaDeSegmentos(int pos, t_segmento* segmento);
 
 //FUNCIONES DE MEMORIA
 t_tabla* crearTablaDeSegmentos(uint32_t pid);

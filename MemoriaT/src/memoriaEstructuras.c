@@ -95,11 +95,11 @@ void actualizarUltimoSegmentoLibre(){
 	t_segmento* ultimoSegmento = list_get(listaDeSegmentos, ultimaPos);
 	segmentoLibre->ID=-1;
 	segmentoLibre->PID=-1;
-	segmentoLibre->base = ultimoSegmento->limite; //No sé si debe estar ese +1 porque recordemos que la DL < Limite , ese ultimo byte es la base, o sea desde donde comienza, el prox segmento
+	segmentoLibre->base = ultimoSegmento->limite;
 	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);
 	segmentoLibre->limite=tam_memoria();
 	segmentoLibre->estaEnMemoria=0;
-	list_add_in_index(listaDeSegmentos, ultimaPos+1,segmentoLibre);
+	list_add(listaDeSegmentos,segmentoLibre);
 }
 
 //Mueve en una pos toda la lista de segmentos
@@ -150,12 +150,28 @@ void logearListaDeSegmentos(char* mensaje){
 	log_info(loggerMemoria, "Lista de segmentos %s: ", mensaje);
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
-		int pos=buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
 		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio);
-		log_info(loggerMemoria, "Pos en la lista: %d", pos);
+		log_info(loggerMemoria, "Pos en la lista: %d", i);
 	}
 }
 
+void actualizarListaDeSegmentos(int pos, t_segmento* segmento){
+	int tamLista=list_size(listaDeSegmentos);
+	t_segmento* segmentoAux;//=malloc(sizeof(t_segmento));
+	int i;
+	if(pos +1==tamLista){
+		list_add_in_index(listaDeSegmentos,pos+1,segmento);
+	}else{
+		for(i=pos + 1;i<=tamLista;i++){
+		segmentoAux=list_replace(listaDeSegmentos, i, segmento);
+		segmento=segmentoAux;
+			if(i==tamLista){
+				list_add_in_index(listaDeSegmentos, i+1, segmentoAux);
+			}
+		}
+	}
+	//free(segmentoAux);
+}
 
 ////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
 
@@ -178,14 +194,11 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	//Marco como libres a los segmentos del proceso
 	for(int i=1;i<tamTabla;i++){
 		t_segmento* segmentoEnTabla= list_get(tablaALiberar->segmentos, i);
-		//deleteSegment(segmento->ID, pid); No se si esta bien usar esta funcion
-		//Dejo esta otra opcion
 		int pos = buscarPosSegmento(segmentoEnTabla->ID, pid, listaDeSegmentos);
 		t_segmento* segmentoEnLista= list_get(listaDeSegmentos, pos);
         segmentoEnLista->estaEnMemoria=0;
 		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
 	}
-	//list_clean_and_destroy_elements(tablaALiberar->segmentos, (void*) destruirSegmento); //Destruimos los segmentos de la Tabla de Segmentos
 	list_remove_and_destroy_element(listaDeTablas,posDeTabla, (void*)destruirTabla);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
 }
@@ -194,20 +207,25 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 	//Se pone el segmento como libre en la Lista de Segmentos
 	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
+
 	t_segmento* segAux = malloc(sizeof(t_segmento));
-	segAux->ID = segmentoAEliminar->ID;
-	segAux->PID=segmentoAEliminar->PID;
+	segAux->ID = -1;
+	segAux->PID=-1;
 	segAux->base = segmentoAEliminar->base;
 	segAux->tamanio = segmentoAEliminar->tamanio;
 	segAux->limite=segmentoAEliminar->limite;
 	segAux->estaEnMemoria = 0;
 
-	logearListaDeSegmentos("la lista de seg cuando se elimina un segmento de la tabla");
-	list_replace_and_destroy_element(listaDeSegmentos,pos, segAux,(void*) destruirSegmento);
+	list_remove(listaDeSegmentos,pos);
+	logearListaDeSegmentos("la lista de seg cuando lo remuevo al segAEliminar");
+
+	list_add_in_index(listaDeSegmentos, pos, segAux);
+	logearListaDeSegmentos("la lista de seg cuando agrego segAux");
 
 	//Actualizo la tabla de segmentos del proceso: Eliminando ese segmento de la tabla
 	int posDeTabla = posTablaEnLista(listaDeTablas,pid);//Primero se busca la tabla en la lista global de tablas
 	t_tabla* tablaDeSegmentosAActualizar = list_get(listaDeTablas,posDeTabla);
+
 	//Se busca el segmento en la Tabla de segmentos
 	t_list* segmentos = tablaDeSegmentosAActualizar->segmentos;
 	int posSegEnTabla = buscarPosSegmento(id, pid, segmentos);
