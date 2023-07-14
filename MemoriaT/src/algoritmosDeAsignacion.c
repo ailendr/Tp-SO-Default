@@ -41,7 +41,8 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			segmentoLibre->ID=-1; //agrego esto pero NO
 			segmentoLibre->PID=-1;//idem
 			//muevo de a un lugar la pos de los segmentos desde seglibre
-			actualizarListaDeSegmentos(nuevoSegmento, segmentoLibre);
+			int pos = buscarPosSegmento(nuevoSegmento,nuevoSegmento->PID, listaDeSegmentos);
+			actualizarListaDeSegmentos(pos, listaDeSegmentos);
 			//Actualizo tabla de segmentos
 			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
 			t_tabla* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
@@ -62,16 +63,17 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 	}
 }
 
-/*
+
+
 void actualizarListaDeSegmentos(int pos, t_segmento* segmento){
 	int tamLista=list_size(listaDeSegmentos);
 	t_segmento* segmentoAux;
-	for(int i=pos;i<=tamLista;i++){
+	for(int i=pos;i<tamLista;i++){
 		segmentoAux=list_replace(listaDeSegmentos, i, segmento);
 		segmento = segmentoAux;
 	}
 }
-*/
+
 algAsignacion asignarAlgoritmo(){
 	algAsignacion algoritmo;
 	if (strcmp(algoritmoAsignacion(), "FIRST") == 0) algoritmo = firstFit;
