@@ -118,7 +118,7 @@ int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t
 	for (int i=primerHuecoLibre+1; i<tamanio; i++){
 		segmento=list_get(listaDeSegmentos, i);
 
-		if(huecoLibre(segmento) && segmento->tamanio<=tamSegmento){
+		if(huecoLibre(segmento) && segmento->tamanio >= tamSegmento){
 			if(algoritmo(segmento, huecoFree)){
 				huecoFree=segmento;
 				pos=i;
