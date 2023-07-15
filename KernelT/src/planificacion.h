@@ -34,7 +34,7 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
 
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
-void validarCS(int socketMemoria, t_contextoEjec* contexto);
+void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instruccion);
 
 
 

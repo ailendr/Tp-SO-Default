@@ -124,7 +124,7 @@ void unirHuecosAledanios(t_segmento* segmento, int pos){
 
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
 	int tam=list_size(tablaDeSegmentos);
-	for (int i=0; i<tam; i++){
+	for (int i=1; i<tam; i++){
 		t_segmento* segmento = list_get(tablaDeSegmentos, i);
 		int posListaSeg = buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
 		t_segmento* segActualizado = list_get(listaDeSegmentos, posListaSeg);
@@ -213,28 +213,28 @@ void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
 	logearListaDeSegmentos("Antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
-	list_clean_and_destroy_elements(listaDeSegmentos,(void*) destruirSegmento);//Es mejor destruir los elementos tambien por si queda algo
-
+	list_clean(listaDeSegmentos);//Es mejor destruir los elementos tambien por si queda algo
+	list_add(listaDeSegmentos, segmentoCero);
 	int tamanioLista=list_size(listaAux);
 
 	//voy actualizando los segmentos y los vuelvo a cargar en la lista de segmentos
-	for(int i=1; i<=tamanioLista; i++){//Lo inicio en 1 porque segmentoCero siempre tiene los mismos valores
+	for(int i=1; i<tamanioLista; i++){//Lo inicio en 1 porque segmentoCero siempre tiene los mismos valores
 		t_segmento* segmento = list_get(listaAux, i);
 		t_segmento* segAnterior = list_get(listaAux, i-1);
-		segmento->base = segAnterior->limite +1;
+		segmento->base = segAnterior->limite;
 		segmento->limite = segmento->base + segmento->tamanio;
 		list_add(listaDeSegmentos, segmento);
 	}
 	actualizarUltimoSegmentoLibre();
-	list_destroy_and_destroy_elements(listaAux,(void*)destruirSegmento);
+	list_destroy(listaAux);
 	logearListaDeSegmentos("despues de compactar");
 	//Actualizo las tablas de segmento, ponele
 	int tamListaTablas = list_size(listaDeTablas);
 	int j=0;
-	while(j<=tamListaTablas){
-		t_list* tablaDeSegmentos = list_get(listaDeTablas, j);
-		if(!list_is_empty(tablaDeSegmentos)){
-			actualizarTablaDeSegmentos(tablaDeSegmentos);
+	while(j<tamListaTablas){
+		t_tabla* tablaDeSegmentos = list_get(listaDeTablas, j);
+		if(!list_is_empty(tablaDeSegmentos->segmentos)){
+			actualizarTablaDeSegmentos(tablaDeSegmentos->segmentos);
 		}
 		j++;
 	}

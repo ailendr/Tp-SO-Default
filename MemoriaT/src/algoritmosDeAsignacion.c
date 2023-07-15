@@ -86,7 +86,7 @@ int huecoLibreDisponible(uint32_t tamSegmento, t_list* listaDeSegmentos){
 	int tamanioLista = list_size(listaDeSegmentos);
 	int i =0;
 	logearListaDeSegmentos("Antes de retornar un hueco libre");
-		while(i <= tamanioLista){
+		while(i < tamanioLista){
 			t_segmento* huecoFree= list_get(listaDeSegmentos, i); //rompe acá con un segundo createSegment
 			if(tamSegmento <= huecoFree->tamanio && huecoLibre(huecoFree)){
 				return i;

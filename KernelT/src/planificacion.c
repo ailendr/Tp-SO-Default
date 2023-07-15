@@ -151,9 +151,9 @@ void instruccionAEjecutar() {
 				//Serializamos y enviamos a memoria//
 				t_paquete* paqueteCS = serializarInstruccion(instruccionCS);
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
-				free(instruccionCS);
                 //Funcion que recibe un sed y valida si Memoria pudo crear un segmento//
-				validarCS(socketMemoria, contextoActualizado);
+				validarCS(socketMemoria, contextoActualizado, instruccionCS);
+				free(instruccionCS);
 
 				break;
 			case DELETE_SEGMENT: //El proceso sigue en cpu
@@ -379,7 +379,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 		}
 
 //Validacion para CreateSegment//
-void validarCS(int socketMemoria, t_contextoEjec* contexto){
+void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instruccion){
 	uint32_t mensaje = 0;
 	recv(socketMemoria, &mensaje, sizeof(uint32_t),0);
 	switch (mensaje) {
@@ -389,8 +389,10 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto){
 			send(socketMemoria, &habilitado, sizeof(int),0);
 			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
-			procesoAEjecutar(contexto);
-			instruccionAEjecutar();
+			t_paquete* paqueteCS = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
+			validarCS(socketMemoria, contexto,instruccion);
+
 			break;
 		case ERROR:
 			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
