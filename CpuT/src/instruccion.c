@@ -141,7 +141,6 @@ void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
 	//TODO VALIDACION
 
-	//TODO -> Hablar como me van a mandar la info
 	valorGuardar = recibir_mensaje(socketMemoria);
 	instruccion->param2 = valorGuardar;
 	set(instruccion, contexto);
