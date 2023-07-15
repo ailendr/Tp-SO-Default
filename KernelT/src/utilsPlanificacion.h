@@ -46,7 +46,6 @@ int recursoDisponible(char* nombre);
 //Logueo de las instrucciones para verificar que esta todo ok//
 void mostrarListaDeProcesos();
 void loggearListaDeIntrucciones(t_list* instrucciones);
-void loggearTablaDeSegmentos(t_tabla* tabla);
 int posProcesoAEliminar(t_list* listaDeProcesos, int pid);
 
 

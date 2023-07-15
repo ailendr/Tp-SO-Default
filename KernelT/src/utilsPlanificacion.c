@@ -158,8 +158,11 @@ void actualizarTablaEnProcesos(t_list* listaDeTablas){
 		int posDeTabla = posTablaEnLista(listaDeTablas, proceso->contexto->pid);
 		  t_tabla* tablaDeSegmentos = list_get(listaDeTablas,posDeTabla);
 		  proceso->tablaSegmentos = tablaDeSegmentos;
+          loggearTablaDeSegmentos(tablaDeSegmentos, loggerKernel);
+
 		}
 	}
+
 
 
 t_list* crearListaDeBloqueo(){
@@ -251,12 +254,4 @@ void loggearListaDeIntrucciones(t_list* instrucciones){
 		}
 }
 
-void loggearTablaDeSegmentos(t_tabla* tabla){
-	int tamanio = list_size(tabla->segmentos);
-		log_info(loggerKernel, "La Tabla de Segmentos contiene :");
-			for (int i = 0; i < tamanio; i++){
-				 t_segmento* segmento= list_get(tabla->segmentos,i);
-				 log_info(loggerKernel, "Segmento ID : %d", segmento->ID);
-			}
-	}
 

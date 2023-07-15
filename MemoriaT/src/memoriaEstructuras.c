@@ -137,7 +137,7 @@ void logearListaDeSegmentos(char* mensaje){
 	log_info(loggerMemoria, "Lista de segmentos %s: ", mensaje);
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
-		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio);
+		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria);
 		log_info(loggerMemoria, "Pos en la lista: %d", i);
 	}
 }
@@ -227,17 +227,19 @@ void compactar() {
 	}
 	actualizarUltimoSegmentoLibre();
 	list_destroy(listaAux);
-	logearListaDeSegmentos("despues de compactar");
-	//Actualizo las tablas de segmento, ponele
+	logearListaDeSegmentos("Despues de compactar");
+
+	//Solo loggeamos la tabla porque los segmentos ya estan actualizados desde la listaDeSegmentos: SACAR A FUTURO///
 	int tamListaTablas = list_size(listaDeTablas);
 	int j=0;
 	while(j<tamListaTablas){
 		t_tabla* tablaDeSegmentos = list_get(listaDeTablas, j);
 		if(!list_is_empty(tablaDeSegmentos->segmentos)){
-			actualizarTablaDeSegmentos(tablaDeSegmentos->segmentos);
+         loggearTablaDeSegmentos(tablaDeSegmentos, loggerMemoria);
 		}
 		j++;
 	}
+
 }
 
 

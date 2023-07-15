@@ -75,6 +75,16 @@ int posTablaEnLista(t_list* listaDeTablas,uint32_t pid){
 	return -1;
 }
 
+void loggearTablaDeSegmentos(t_tabla* tabla, t_log* logger){
+	int tamanio = list_size(tabla->segmentos);
+		log_info(logger, "La Tabla de Segmentos contiene :");
+			for (int i = 0; i < tamanio; i++){
+				 t_segmento* segmento= list_get(tabla->segmentos,i);
+				 log_info(logger, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria);
+			}
+	}
+
+
 /*//Similar al Any Satisfy para ver si esta los segmentos con ese pid entonces la tabla corresponde a ese pid//
 bool pidEnTabla(t_list* tabla, uint32_t pid){
 	int tam = list_size(tabla);

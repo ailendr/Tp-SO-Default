@@ -115,6 +115,7 @@ void atenderPeticionesKernel(int* socketKernel){
 		 	t_segmento* nuevoSegmento = malloc(sizeof(t_segmento));
 		 	 nuevoSegmento->PID = instruccionCS->pid;
 		 	 nuevoSegmento->ID = idSegmentoCS;
+		 	 logearListaDeSegmentos("Antes de Realizar Create Segment");
 		 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 		 	 send(socket, &mensaje, sizeof(uint32_t),0);
 		 	 free(instruccionCS);

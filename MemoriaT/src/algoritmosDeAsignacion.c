@@ -40,8 +40,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 				segmentoLibre->ID=-1; //agrego esto pero NO
 				segmentoLibre->PID=-1;//idem
 
-				logearListaDeSegmentos("despues de asignar la pos del segLibre al segNuevo: "
-						"----------------------------------------------------");
+				//logearListaDeSegmentos("despues de asignar la pos del segLibre al segNuevo: "
 				//muevo de a un lugar la pos de los segmentos desde seglibre
 				//int pos = buscarPosSegmento(nuevoSegmento->ID,nuevoSegmento->PID, listaDeSegmentos);
 				list_add_in_index(listaDeSegmentos,posSegLibre+1,segmentoLibre);
@@ -53,7 +52,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			list_add(tablaDeSegmentos->segmentos, nuevoSegmento);
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, nuevoSegmento->tamanio);
-			logearListaDeSegmentos("despues de mover los segmentos");
+			logearListaDeSegmentos("Despues de mover los segmentos");
 			return OK;
 		}
 		else {
@@ -85,7 +84,7 @@ int FirstFit(uint32_t tamSegmento){
 int huecoLibreDisponible(uint32_t tamSegmento, t_list* listaDeSegmentos){
 	int tamanioLista = list_size(listaDeSegmentos);
 	int i =0;
-	logearListaDeSegmentos("Antes de retornar un hueco libre");
+	//logearListaDeSegmentos("Antes de retornar un hueco libre");
 		while(i < tamanioLista){
 			t_segmento* huecoFree= list_get(listaDeSegmentos, i); //rompe acá con un segundo createSegment
 			if(tamSegmento <= huecoFree->tamanio && huecoLibre(huecoFree)){
