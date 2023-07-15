@@ -36,7 +36,7 @@ int main(/*int argc, char** argv*/) {
 		int codigo = recibir_operacion(cliente);
 
 		if(codigo == -1) {
-			log_info(loggerCPU, "se cayo kernel");
+			log_info(loggerCPU, "Se cayo kernel");
 			break;
 		}
     
@@ -63,8 +63,10 @@ int main(/*int argc, char** argv*/) {
 
 			paqueteC = serializarContexto(contextoRecibido);
 			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
+			//TODO VALIDACION
 			paqueteI = serializarInstruccion(nuevaInstr);
 			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			//TODO VALIDACION
 
 		} else {
 			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");

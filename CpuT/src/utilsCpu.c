@@ -88,11 +88,14 @@ int iniciarSocketsCpu(){
 }
 
 char* mmu (char* direccionLogica){
-	char* direccionFisica;
+	int dirFisica = 0;
+	int numSegmento = 0;
 
-
+	//Transformar de char a entero
+	numSegmento = floor(direccionLogica/tamSegmento());
+	//dirFisica = baseSegmento + desplazamiento_segmento;
 
 	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
-	return direccionFisica;
+	return (char*)direccionFisica; //TA MAL
 }
 
