@@ -102,36 +102,23 @@ void actualizarUltimoSegmentoLibre(){
 	list_add(listaDeSegmentos,segmentoLibre);
 }
 
-//Mueve en una pos toda la lista de segmentos
-/*
-void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* segmento){
-	t_list* listaAux = list_create();
-	int tamLista = list_size(listaDeSegmentos);
-	int pos= buscarPosSegmento(nuevoSegmento->ID, nuevoSegmento->PID,listaDeSegmentos);
-	list_add(listaAux, segmento);
-	list_add_all(listaAux,list_slice_and_remove(listaDeSegmentos, pos+1, tamLista));
-	list_add_all(listaDeSegmentos, listaAux);
-	list_destroy_and_destroy_elements(listaAux, (void*)destruirSegmento);
 
-
-
-}
-*/
-
-void unirHuecosAledanios(t_segmento* segmento){
-	int pos = buscarPosSegmento(segmento->ID,segmento->PID, listaDeSegmentos);
-	t_segmento* segmentoAnterior =list_get(listaDeSegmentos, pos-1);
-	t_segmento* segmentoSiguiente = list_get(listaDeSegmentos, pos+1);
+void unirHuecosAledanios(t_segmento* segmento, int pos){
+	int posAnterior = pos -1;
+	int posSiguiente = pos + 1;
+	t_segmento* segmentoAnterior =list_get(listaDeSegmentos, posAnterior);
+	t_segmento* segmentoSiguiente = list_get(listaDeSegmentos, posSiguiente);
 
 	 if(huecoLibre(segmentoAnterior)){
 		 segmento->base=segmentoAnterior->base;
 		 segmento->tamanio = segmento->tamanio + segmentoAnterior->tamanio;
-		 list_remove(listaDeSegmentos, pos-1);
-
-	 }else if(huecoLibre(segmentoSiguiente)){
+		 list_remove_and_destroy_element(listaDeSegmentos,pos-1,(void*)destruirSegmento);
+		 posSiguiente = pos;
+	 }
+	 if(huecoLibre(segmentoSiguiente)){
 		 segmento->tamanio += segmentoSiguiente->tamanio;
 		 segmento->limite=segmentoSiguiente->limite;
-		 list_remove(listaDeSegmentos, pos + 1);
+		 list_remove_and_destroy_element(listaDeSegmentos,posSiguiente,(void*)destruirSegmento);
 	 }
 }
 
@@ -155,23 +142,6 @@ void logearListaDeSegmentos(char* mensaje){
 	}
 }
 
-void actualizarListaDeSegmentos(int pos, t_segmento* segmento){
-	int tamLista=list_size(listaDeSegmentos);
-	t_segmento* segmentoAux;//=malloc(sizeof(t_segmento));
-	int i;
-	if(pos +1==tamLista){
-		list_add_in_index(listaDeSegmentos,pos+1,segmento);
-	}else{
-		for(i=pos + 1;i<=tamLista;i++){
-		segmentoAux=list_replace(listaDeSegmentos, i, segmento);
-		segmento=segmentoAux;
-			if(i==tamLista){
-				list_add_in_index(listaDeSegmentos, i+1, segmentoAux);
-			}
-		}
-	}
-	//free(segmentoAux);
-}
 
 ////////////////////////////////FUNCIONES DE MEMORIA///////////////////////////////
 
@@ -231,10 +201,9 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 	int posSegEnTabla = buscarPosSegmento(id, pid, segmentos);
 	log_info(loggerMemoria,"Eliminación de Segmento: “PID: %d - Eliminar Segmento: %d - Base: %d - TAMAÑO: %d",pid,id,segmentoAEliminar->base, segmentoAEliminar->tamanio  );
 	list_remove_and_destroy_element(segmentos,posSegEnTabla,(void*)destruirSegmento);
-	//Falta la parte de unir con segmentos aledaños si estan libres
 
-
-	unirHuecosAledanios(segmentoAEliminar);
+	//Busco si los huecos aledaños estan libres para consolidar
+	unirHuecosAledanios(segAux, pos);
 	logearListaDeSegmentos("La lista de seg cuando se elimina un segmento de la tabla");
 
     return tablaDeSegmentosAActualizar;
