@@ -51,6 +51,7 @@ typedef enum
 	ERROR,
 	OK,
 	CREAR_TABLA
+
 }op_code;
 
 typedef struct{
@@ -116,6 +117,8 @@ typedef struct{
 	uint32_t tamanio;
 	uint32_t limite;
 	uint32_t estaEnMemoria;
+	bool tieneInfo;
+	int tamanioInfo;
 }t_segmento;
 
 

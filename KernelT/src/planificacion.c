@@ -77,6 +77,7 @@ void instruccionAEjecutar() {
 		ultimoEjecutado->contexto = contextoActualizado;
 //Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
+		t_instruccion* intruccion ;
 		switch(codigo){
 			case EXIT:
 				log_info(loggerKernel, "Intruccion EXIT");

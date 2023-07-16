@@ -30,6 +30,11 @@ void actualizarUltimoSegmentoLibre();
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista);
 //void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibre);
 void logearListaDeSegmentos(char* mensaje);
+void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket, op_code operacion, int bytes);
+void escribirMemoria(t_segmento* segmento, int tamInfo);
+void validarNumSegmento(int numSeg, int socket);
+void escribir(t_segmento* segmento);
+
 
 
 //FUNCIONES DE MEMORIA

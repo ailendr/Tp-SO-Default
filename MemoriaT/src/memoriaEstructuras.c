@@ -41,6 +41,8 @@ void crearSegmentoCero(){
 	segmentoCero->limite = tam_segmento_cero();//Es lo mismo que hacer base + tamanio en este caso
 	segmentoCero->tamanio=tam_segmento_cero();
 	segmentoCero->estaEnMemoria=1;
+	segmentoCero->tieneInfo=0;
+	segmentoCero->tamanioInfo=0;
 	list_add(listaDeSegmentos, segmentoCero);
 
 }
@@ -99,6 +101,8 @@ void actualizarUltimoSegmentoLibre(){
 	segmentoLibre->tamanio=tam_memoria() - memoriaOcupada(listaDeSegmentos);
 	segmentoLibre->limite=tam_memoria();
 	segmentoLibre->estaEnMemoria=0;
+	segmentoLibre->tieneInfo = 0;
+	segmentoLibre->tamanioInfo=0;
 	list_add(listaDeSegmentos,segmentoLibre);
 }
 
@@ -185,6 +189,9 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 	segAux->tamanio = segmentoAEliminar->tamanio;
 	segAux->limite=segmentoAEliminar->limite;
 	segAux->estaEnMemoria = 0;
+	segAux->tieneInfo=0;
+	segAux->tamanioInfo=0;
+	//Ver si eliminamos la info en memoria Contigua correspondiente a ese Segmento//
 
 	list_remove(listaDeSegmentos,pos);
 	logearListaDeSegmentos("la lista de seg cuando lo remuevo al segAEliminar");
@@ -221,9 +228,17 @@ void compactar() {
 	for(int i=1; i<tamanioLista; i++){//Lo inicio en 1 porque segmentoCero siempre tiene los mismos valores
 		t_segmento* segmento = list_get(listaAux, i);
 		t_segmento* segAnterior = list_get(listaAux, i-1);
+		if(segmento->tieneInfo){
+			char* info = malloc(segmento->tamanioInfo);
+			memcpy(&info, memoriaContigua+segmento->base,segmento->tamanioInfo);
+			memcpy(memoriaContigua+segAnterior->limite, &info, segmento->tamanioInfo);
+			free(info);
+			}
+
 		segmento->base = segAnterior->limite;
 		segmento->limite = segmento->base + segmento->tamanio;
 		list_add(listaDeSegmentos, segmento);
+
 	}
 	actualizarUltimoSegmentoLibre();
 	list_destroy(listaAux);
@@ -242,4 +257,53 @@ void compactar() {
 
 }
 
+
+void validarNumSegmento(int numSeg, int socket){
+	if(numSeg >= cantSegmentos()){
+    op_code valorOp = ERROR;
+    send(socket, &valorOp, sizeof(op_code), 0);
+	}
+}
+
+void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket, op_code operacion, int bytes){
+	char** direccionFisica = string_split(direcF, " ");
+	char* numSeg = direccionFisica[1];
+	char* desplazamiento = direccionFisica[2];
+	int numSegmento= atoi(numSeg);
+	int offset = atoi(desplazamiento);
+	validarNumSegmento(numSegmento, socket);
+	int posDeTabla = posTablaEnLista(listaDeTablas, pid);
+	t_tabla* tabla = list_get(listaDeTablas, posDeTabla);
+	int posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
+	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
+    usleep(retardoMemoria());
+		if(operacion == MOV_IN){ //Consultar si la cantidad de lo que leo de meoria es el offset o se lee a partir del offset? si es asi entonces cuanto tamaño leo??????
+			memcpy(&registro, memoriaContigua + segmento->base, offset);
+			enviar_mensaje(registro, socket);
+		}
+	   if(operacion == F_WRITE){
+			memcpy(&registro, memoriaContigua + segmento->base+offset, bytes);
+            enviar_mensaje(registro, socket);
+	   }
+
+	 if(operacion == MOV_OUT ||operacion == F_READ){//similar a FRead
+			memcpy(memoriaContigua + segmento->base+ offset, &registro, strlen(registro));
+            escribirMemoria( segmento, strlen(registro));
+		}
+
+}
+
+
+void escribirMemoria(t_segmento* segmento, int tamInfo){
+	segmento->tieneInfo = 1;
+	segmento->tamanioInfo = tamInfo;
+}
+
+//// Func para probar compactacion//
+
+void escribir(t_segmento* segmento){
+	char* info = "Aprobamos SO";
+	memcpy(memoriaContigua+segmento->base, &info, strlen(info));
+
+}
 

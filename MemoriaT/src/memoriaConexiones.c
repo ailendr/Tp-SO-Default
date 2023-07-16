@@ -7,41 +7,62 @@
 
 #include "memoriaConexiones.h"
 
-void atenderPeticionesCpu(int* socket){
-	/*uint32_t protocolo;
-	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
+void atenderPeticionesCpu(int* socketCpu){
+	int socket = * socketCpu;
 
-	switch(protocolo){
+while(1){
+	int codInstruccion;
+    codInstruccion = recibir_operacion(socket);
+    t_instruccion* instruccion;
+	switch(codInstruccion){
 	case(MOV_IN):
+		instruccion = obtenerInstruccion(socket, 2);
+	implementarInstruccion(instruccion->param2,instruccion->pid, instruccion->param1,socket, MOV_IN,0);
+
+
 
 		break;
 
 	case(MOV_OUT):
+		instruccion = obtenerInstruccion(socket, 2);
+	implementarInstruccion(instruccion->param1, instruccion->pid, instruccion->param2,socket, MOV_OUT,0);
+
 
 		break;
 
 	default:
-		break;*/
-
+		break;
+		}
+	}
 }
 
-void atenderPeticionesFs(int* socket){
-	/*
-	uint32_t protocolo;
-	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
 
-	switch(protocolo){
+
+void atenderPeticionesFs(int* socketFs){
+   int socket = *socketFs;
+	while(1){
+		int codInstruccion;
+	    codInstruccion = recibir_operacion(socket);
+	    t_instruccion* instruccion;
+	switch(codInstruccion){
 	case(F_READ):
+			instruccion = obtenerInstruccion(socket, 3);
+		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_READ,0);
+
 
 		break;
 
 	case (F_WRITE):
+			instruccion = obtenerInstruccion(socket, 3);
+	        int bytes = atoi(instruccion->param3);
+		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_WRITE, bytes);
 
 		break;
 
 	default:
 		break;
-	}*/
+		}
+	}
 }
 
 
@@ -129,6 +150,7 @@ void atenderPeticionesKernel(int* socketKernel){
 				break;
 
 			case COMPACTAR:
+				    usleep(retardoCompactacion());
 					compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
 					enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
 				break;

@@ -29,6 +29,8 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			nuevoSegmento->base=segLibre->base;
 			nuevoSegmento->limite =nuevoSegmento->base + nuevoSegmento->tamanio;
 			nuevoSegmento->estaEnMemoria=1;
+			nuevoSegmento->tieneInfo=0;
+			nuevoSegmento->tamanioInfo=0;
 
             if(nuevoSegmento->tamanio < segLibre->tamanio){
 
@@ -53,6 +55,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, nuevoSegmento->tamanio);
 			logearListaDeSegmentos("Despues de mover los segmentos");
+
 			return OK;
 		}
 		else {
