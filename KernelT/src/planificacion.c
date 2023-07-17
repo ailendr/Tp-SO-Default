@@ -343,14 +343,14 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 			finalizarProceso(ultimoEjecutado, "Recurso No Existente");
 		}
 		else{
-			int* pvalor = list_get(listaDeInstancias,posicionRecurso);
-			int valor = *pvalor;
+			int* valor = list_get(listaDeInstancias,posicionRecurso);
+			//int valor = *pvalor;
 			//free(pvalor); Preguntar como liberar una lista de punteross
 			switch (nombreInstruccion){
 			case 1: //1=WAIT
-				valor --;
-				log_info(loggerKernel, "PID: %d - WAIT: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
-				 if(valor<0){
+				*valor -= 1;
+				log_info(loggerKernel, "PID: %d - WAIT: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, *valor);
+				 if(*valor<0){
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				queue_push(colaDeBloqueo, ultimoEjecutado);
 				tiempoEnCPU(ultimoEjecutado);
@@ -364,14 +364,15 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 					 }
 				break;
 			case 2://2=SIGNAL
-				valor ++;
-				log_info(loggerKernel, "PID: %d - SIGNAL: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
+				*valor += 1;
+				log_info(loggerKernel, "PID: %d - SIGNAL: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, *valor);
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
+				if(!queue_is_empty(colaDeBloqueo)){
 				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
 				agregarAEstadoReady(procesoDesbloqueado);
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
 				sem_post(&planiCortoPlazo);
-
+				}
 				procesoAEjecutar(contextoActualizado);//Sigue en cpu
 				instruccionAEjecutar();
 				break;

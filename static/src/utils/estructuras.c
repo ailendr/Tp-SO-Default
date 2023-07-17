@@ -15,6 +15,8 @@ void destruirSegmento(t_segmento* self){
 	self->base=0;
 	self->tamanio=0;
 	self->estaEnMemoria= 0;
+	self->tieneInfo = NULL;
+	self->tamanioInfo = 0;
 	free(self);
 }
 

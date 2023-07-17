@@ -163,23 +163,33 @@ t_tabla* crearTablaDeSegmentos(uint32_t pid){
 
 void liberarTablaDeSegmentos(uint32_t pid){
 	int posDeTabla = posTablaEnLista(listaDeTablas,pid);
+	if(posDeTabla != -1){
 	t_tabla* tablaALiberar= list_get(listaDeTablas, posDeTabla);
 	int tamTabla = list_size(tablaALiberar->segmentos);
 	//Marco como libres a los segmentos del proceso
-	for(int i=1;i<tamTabla;i++){
+	for(int i=1;i<tamTabla;i++){ //VER ESTO ULTIMO URGENTE!!!
 		t_segmento* segmentoEnTabla= list_get(tablaALiberar->segmentos, i);
-		int pos = buscarPosSegmento(segmentoEnTabla->ID, pid, listaDeSegmentos);
-		t_segmento* segmentoEnLista= list_get(listaDeSegmentos, pos);
-        segmentoEnLista->estaEnMemoria=0;
+		deleteSegment(segmentoEnTabla->ID, pid);
+		//int pos = buscarPosSegmento(segmentoEnTabla->ID, pid, listaDeSegmentos);
+		//t_segmento* segmentoEnLista= list_get(listaDeSegmentos, pos);
+       // segmentoEnLista->estaEnMemoria=0;
 		//list_replace(listaDeSegmentos, pos, segmento); //NO USAR REPLACE PARA ACTUALIZAR PORQUE GENERA INCONSISTENCIA: DEJAR LO DE ARRIBA
 	}
-	list_remove_and_destroy_element(listaDeTablas,posDeTabla, (void*)destruirTabla);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
+	list_destroy(tablaALiberar->segmentos);
+	list_remove(listaDeTablas,posDeTabla);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
 	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
+	}
+	else{
+		log_info(loggerMemoria, "No se encontro la tabla del proceso a elimina");}
 }
 
 t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la tabla actualizada
 	//Se pone el segmento como libre en la Lista de Segmentos
 	int pos = buscarPosSegmento(id, pid ,listaDeSegmentos);
+	int posDeTabla = posTablaEnLista(listaDeTablas,pid);//Primero se busca la tabla en la lista global de tablas
+	t_tabla* tablaDeSegmentosAActualizar = list_get(listaDeTablas,posDeTabla);
+
+	if(pos!= -1){
 	t_segmento* segmentoAEliminar = list_get(listaDeSegmentos,pos);
 
 	t_segmento* segAux = malloc(sizeof(t_segmento));
@@ -193,16 +203,13 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 	segAux->tamanioInfo=0;
 	//Ver si eliminamos la info en memoria Contigua correspondiente a ese Segmento//
 
-	list_remove(listaDeSegmentos,pos);
+	t_segmento* seg = list_remove(listaDeSegmentos,pos);
+	//free(seg);
 	logearListaDeSegmentos("la lista de seg cuando lo remuevo al segAEliminar");
 
 	list_add_in_index(listaDeSegmentos, pos, segAux);
 	logearListaDeSegmentos("la lista de seg cuando agrego segAux");
-
 	//Actualizo la tabla de segmentos del proceso: Eliminando ese segmento de la tabla
-	int posDeTabla = posTablaEnLista(listaDeTablas,pid);//Primero se busca la tabla en la lista global de tablas
-	t_tabla* tablaDeSegmentosAActualizar = list_get(listaDeTablas,posDeTabla);
-
 	//Se busca el segmento en la Tabla de segmentos
 	t_list* segmentos = tablaDeSegmentosAActualizar->segmentos;
 	int posSegEnTabla = buscarPosSegmento(id, pid, segmentos);
@@ -212,7 +219,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 	//Busco si los huecos aledaños estan libres para consolidar
 	unirHuecosAledanios(segAux, pos);
 	logearListaDeSegmentos("La lista de seg cuando se elimina un segmento de la tabla");
-
+	}
     return tablaDeSegmentosAActualizar;
 }
 
