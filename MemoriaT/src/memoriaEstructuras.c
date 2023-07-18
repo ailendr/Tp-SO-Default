@@ -206,7 +206,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 	segAux->tamanioInfo=0;
 	//Ver si eliminamos la info en memoria Contigua correspondiente a ese Segmento//
 
-	t_segmento* seg = list_remove(listaDeSegmentos,pos);
+	list_remove(listaDeSegmentos,pos);
 	//free(seg);
 	logearListaDeSegmentos("la lista de seg cuando lo remuevo al segAEliminar");
 
@@ -286,8 +286,8 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	int posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
     usleep(retardoMemoria());
-		if(operacion == MOV_IN || F_WRITE){ //Consultar si la cantidad de lo que leo de meoria es el offset o se lee a partir del offset? si es asi entonces cuanto tamaño leo??????
-			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Ver si se pisa lo que habia en registro pq capaz q enviamos cualquier cosa
+		if(operacion == MOV_IN || F_WRITE){
+			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			enviar_mensaje(registro, socket);
 		}
 
