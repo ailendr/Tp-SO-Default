@@ -130,15 +130,14 @@ int enviarPaquete(t_paquete* paquete, int socket_cliente, t_log* logger,char* no
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
 	int returnSend = send(socket_cliente, a_enviar, bytes, 0);
-
 	free(a_enviar);
+	eliminar_paquete(paquete); //En caso de error o q salga bien que tambien libere el paquete
 
 	if(returnSend == -1){
 		log_info(logger, "Error al enviar el Paquete de %s:", nombrePaq);
 		return -1;
 	}else{
 		log_info(logger, "He podido enviar el Paquete de %s", nombrePaq );
-		eliminar_paquete(paquete);
 	}
 
 	return 0;

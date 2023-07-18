@@ -77,19 +77,19 @@ void instruccionAEjecutar() {
 		ultimoEjecutado->contexto = contextoActualizado;
 //Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
-		t_instruccion* intruccion ;
+		t_instruccion* instruccion;
 		switch(codigo){
 			case EXIT:
 				log_info(loggerKernel, "Intruccion EXIT");
-				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
-				free(instruccionExit);
+				 instruccion= obtenerInstruccion(socketCPU,0);
+				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
-				t_instruccion* instruccionYield = obtenerInstruccion(socketCPU,0);
-				free(instruccionYield);
+				 instruccion = obtenerInstruccion(socketCPU,0);
+				free(instruccion);
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
 				//sem_post(&cpuLibre);
@@ -98,27 +98,27 @@ void instruccionAEjecutar() {
 
 			case WAIT:
 				log_info(loggerKernel, "Intruccion WAIT");
-				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
-				log_info(loggerKernel, "Recurso a consumir : %s", instruccionWait->param1);
-				char* recursoAConsumir = instruccionWait->param1;
+				instruccion = obtenerInstruccion(socketCPU,1);
+				log_info(loggerKernel, "Recurso a consumir : %s", instruccion->param1);
+				char* recursoAConsumir = instruccion->param1;
 				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
-				free(instruccionWait);
+				free(instruccion);
 				//sem_post(&planiCortoPlazo);
 				break;
 			case SIGNAL:
 				log_info(loggerKernel, "Intruccion SIGNAL");
-				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
-				char* recursoALiberar = instruccionSignal->param1;
-				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
+				instruccion = obtenerInstruccion(socketCPU,1);
+				char* recursoALiberar = instruccion->param1;
+				free(instruccion); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
 				implementacionWyS(recursoALiberar, 2, contextoActualizado);
 
 				break;
 			case IO:
 				log_info(loggerKernel, "Intruccion IO");
 				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
-				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
-				char* tiempo = instruccionIO->param1;
-				free(instruccionIO);//Hay q liberar puntero
+				instruccion = obtenerInstruccion(socketCPU,1);
+				char* tiempo = instruccion->param1;
+				free(instruccion);//Hay q liberar puntero
 				log_info(loggerKernel, "PID: %d - Ejecuta IO: %d", ultimoEjecutado->contexto->pid, atoi(tiempo));
 				t_parametroIO* parametro = malloc(sizeof(t_parametroIO)) ;
 				parametro->tiempoDeBloqueo = atoi(tiempo);
@@ -129,43 +129,43 @@ void instruccionAEjecutar() {
 				break;
 			case MOV_IN:
 				log_info(loggerKernel, "Intruccion MOV_IN Fallida");
-				t_instruccion* instruccionMI = obtenerInstruccion(socketCPU,2);
-				free(instruccionMI);
+				instruccion = obtenerInstruccion(socketCPU,2);
+				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 				//sem_post(&planiCortoPlazo);
 
 				break;
 			case MOV_OUT:
 				log_info(loggerKernel, "Intruccion MOV_OUT Fallida");
-				t_instruccion* instruccionMO = obtenerInstruccion(socketCPU,2);
-				free(instruccionMO);
+				instruccion= obtenerInstruccion(socketCPU,2);
+				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case CREATE_SEGMENT://El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Create Segment");
-				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);// No se estaba recibiendo bien el pid porq en Cpu no se ponia el pid: ARREGLADO
-				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccionCS->nombre);
-				int idSegmentoCS = atoi(instruccionCS->param1);
-				int tamanioSegmento = atoi(instruccionCS->param2);
+				instruccion = obtenerInstruccion(socketCPU,2);// No se estaba recibiendo bien el pid porq en Cpu no se ponia el pid: ARREGLADO
+				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccion->nombre);
+				int idSegmentoCS = atoi(instruccion->param1);
+				int tamanioSegmento = atoi(instruccion->param2);
 				log_info(loggerKernel,"PID: %d - Crear Segmento - Id: %d - Tamaño: %d", contextoActualizado->pid,idSegmentoCS,tamanioSegmento);
 				//Serializamos y enviamos a memoria//
-				t_paquete* paqueteCS = serializarInstruccion(instruccionCS);
+				t_paquete* paqueteCS = serializarInstruccion(instruccion);
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
                 //Funcion que recibe un sed y valida si Memoria pudo crear un segmento//
-				validarCS(socketMemoria, contextoActualizado, instruccionCS);
-				free(instruccionCS);
+				validarCS(socketMemoria, contextoActualizado, instruccion);
+				free(instruccion);
 
 				break;
 			case DELETE_SEGMENT: //El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Delete Segmente");
-				t_instruccion* instruccionDS = obtenerInstruccion(socketCPU,1);
-				int idSegmentoDS = atoi(instruccionDS->param1);
+				instruccion = obtenerInstruccion(socketCPU,1);
+				int idSegmentoDS = atoi(instruccion->param1);
 				log_info(loggerKernel, "PID: %d - Eliminar Segmento - Id Segmento: %d",contextoActualizado->pid,idSegmentoDS);
 				//Serializamos y enviamos a memoria//
-				t_paquete* paqueteDS = serializarInstruccion(instruccionDS);
+				t_paquete* paqueteDS = serializarInstruccion(instruccion);
 				validarEnvioDePaquete(paqueteDS, socketMemoria, loggerKernel, configKernel, "Instruccion Delete Segment");
-				free(instruccionDS);
+				free(instruccion);
 				//Recibimos la tabla de segmentos actualizada//
 				recibirYAsignarTablaDeSegmentos(ultimoEjecutado);
 				//El proceso sigue en ejecucion asi que lo volvemos a enviar a cpu
@@ -181,21 +181,24 @@ void instruccionAEjecutar() {
 				break;
 			case F_READ:
 				log_info(loggerKernel, "Intruccion F READ");
-				t_instruccion* instruccionFR = obtenerInstruccion(socketCPU,3);
-                validarRyW(instruccionFR->param2);
+				instruccion = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccion->param2);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
-                implementacionF(instruccionFR);
+                implementacionF(instruccion);
 				break;
 			case F_WRITE:
 				log_info(loggerKernel, "Intruccion F WRITE");
-				t_instruccion* instruccionFW = obtenerInstruccion(socketCPU,3);
-                validarRyW(instruccionFW->param2);
-                implementacionF(instruccionFW);
+				instruccion = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccion->param2);
+                implementacionF(instruccion);
 
 				break;
 			case F_TRUNCATE:
 				break;
-
+			case(-1):
+				log_info(loggerKernel, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+				//ver que hacer cuando pasa esto
+			break;
 			default:
 				break;
 		}
@@ -382,8 +385,8 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 
 //Validacion para CreateSegment//
 void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instruccion){
-	uint32_t mensaje = 0;
-	recv(socketMemoria, &mensaje, sizeof(uint32_t),0);
+
+	int mensaje = recibir_operacion(socketMemoria);
 	switch (mensaje) {
 		case COMPACTAR:
 			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
@@ -404,5 +407,10 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instr
 			procesoAEjecutar(contexto);
 			instruccionAEjecutar();
 			break;
+		case(-1):
+			log_info(loggerKernel, "Error al recibir el mensaje de Memoria. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+			//ver que hacer cuando pasa esto
+			break;
+
 	}
 }

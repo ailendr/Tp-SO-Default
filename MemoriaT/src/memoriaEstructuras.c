@@ -267,8 +267,8 @@ void compactar() {
 
 void validarNumSegmento(int numSeg, int socket){
 	if(numSeg >= cantSegmentos()){
-    op_code valorOp = ERROR;
-    send(socket, &valorOp, sizeof(op_code), 0);
+    int valorOp = ERROR;
+    send(socket, &valorOp, sizeof(int), 0);
 	}
 }
 
@@ -278,23 +278,18 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	char* desplazamiento = direccionFisica[2];
 	int numSegmento= atoi(numSeg);
 	int offset = atoi(desplazamiento);
-	validarNumSegmento(numSegmento, socket);
 	int posDeTabla = posTablaEnLista(listaDeTablas, pid);
 	t_tabla* tabla = list_get(listaDeTablas, posDeTabla);
 	int posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
     usleep(retardoMemoria());
-		if(operacion == MOV_IN){ //Consultar si la cantidad de lo que leo de meoria es el offset o se lee a partir del offset? si es asi entonces cuanto tamaño leo??????
-			memcpy(&registro, memoriaContigua + segmento->base, offset);
+		if(operacion == MOV_IN || F_WRITE){ //Consultar si la cantidad de lo que leo de meoria es el offset o se lee a partir del offset? si es asi entonces cuanto tamaño leo??????
+			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Ver si se pisa lo que habia en registro pq capaz q enviamos cualquier cosa
 			enviar_mensaje(registro, socket);
 		}
-	   if(operacion == F_WRITE){
-			memcpy(&registro, memoriaContigua + segmento->base+offset, bytes);
-            enviar_mensaje(registro, socket);
-	   }
 
-	 if(operacion == MOV_OUT ||operacion == F_READ){//similar a FRead
-			memcpy(memoriaContigua + segmento->base+ offset, &registro, strlen(registro));
+	 if(operacion == MOV_OUT ||operacion == F_READ){
+			memcpy(memoriaContigua + segmento->base+ offset, &registro, strlen(registro)); //Ver si habria que agregar un +1
             escribirMemoria( segmento, strlen(registro));
 		}
 
