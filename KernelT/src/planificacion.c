@@ -191,7 +191,6 @@ void instruccionAEjecutar() {
 				break;
 			case F_TRUNCATE:
 				break;
-
 			default:
 				break;
 		}

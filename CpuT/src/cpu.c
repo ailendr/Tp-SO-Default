@@ -56,17 +56,24 @@ int main(/*int argc, char** argv*/) {
 			while (verificador == 0){
 				instr = fetch (contextoRecibido);
 				nuevaInstr = decode (instr, contextoRecibido);
-				verificador = execute (nuevaInstr, contextoRecibido);
+				/*
+				if (nuevaInstr->param1 == "-1" || nuevaInstr->param2 == "-1" ){
+					log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>",contextoRecibido->pid);
+					log_info(loggerCPU, "   -> Instruccion: %s", instr);
+					verificador = -1;
+					nuevaInstr -> param1 = "SEGMENTATION FAULT";
+				} else {
+				*/
+					verificador = execute (nuevaInstr, contextoRecibido);
+				//}
 			}
 
 			verificador = 0;
 
 			paqueteC = serializarContexto(contextoRecibido);
 			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
-			//TODO VALIDACION
 			paqueteI = serializarInstruccion(nuevaInstr);
 			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
-			//TODO VALIDACION
 
 		} else {
 			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");

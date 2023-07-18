@@ -23,7 +23,7 @@ char* fetch (t_contextoEjec* cont) {
 
 t_instruccion* decode (char* instruccion, t_contextoEjec* contextoRecibido) {
 
-	t_instruccion* nuevaInstruccion = malloc (sizeof(t_instruccion));
+	t_instruccion* nuevaInstruccion;
 
 	char** token = string_split(instruccion, " ");
 
@@ -51,12 +51,12 @@ t_instruccion* decode (char* instruccion, t_contextoEjec* contextoRecibido) {
 
 	if (nombreI == MOV_IN || nombreI == F_READ || nombreI == F_WRITE){
 		aux = nuevaInstruccion->param2;
-		//nuevaInstruccion->param2 = mmu(aux);
+		nuevaInstruccion->param2 = mmu(aux, contextoRecibido->pid);
 	}
 
 	if (nombreI == MOV_OUT){
 		aux = nuevaInstruccion->param1;
-		//nuevaInstruccion->param1 = mmu(aux);
+		nuevaInstruccion->param1 = mmu(aux, contextoRecibido->pid);
 	}
 
 
@@ -139,7 +139,6 @@ void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 
 	paqueteI = serializarInstruccion(instruccion);
 	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
-	//TODO VALIDACION
 
 	valorGuardar = recibir_mensaje(socketMemoria);
 	instruccion->param2 = valorGuardar;
