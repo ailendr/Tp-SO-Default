@@ -117,7 +117,7 @@ void unirHuecosAledanios(t_segmento* segmento, int pos){
 		 segmento->base=segmentoAnterior->base;
 		 segmento->tamanio = segmento->tamanio + segmentoAnterior->tamanio;
 		 list_remove_and_destroy_element(listaDeSegmentos,pos-1,(void*)destruirSegmento);
-		 posSiguiente = pos;
+		 posSiguiente = pos; // ESTO PA Q ES ?
 	 }
 	 if(huecoLibre(segmentoSiguiente)){
 		 segmento->tamanio += segmentoSiguiente->tamanio;
@@ -126,6 +126,7 @@ void unirHuecosAledanios(t_segmento* segmento, int pos){
 	 }
 }
 
+//ESTA FUNC YA NO SE USA
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
 	int tam=list_size(tablaDeSegmentos);
 	for (int i=1; i<tam; i++){
@@ -167,9 +168,11 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	t_tabla* tablaALiberar= list_get(listaDeTablas, posDeTabla);
 	int tamTabla = list_size(tablaALiberar->segmentos);
 	//Marco como libres a los segmentos del proceso
-	for(int i=1;i<tamTabla;i++){ //VER ESTO ULTIMO URGENTE!!!
+	for(int i=1;i<tamTabla;i++){
 		t_segmento* segmentoEnTabla= list_get(tablaALiberar->segmentos, i);
-		deleteSegment(segmentoEnTabla->ID, pid);
+		deleteSegment(segmentoEnTabla->ID, pid); //1)opcion: si dentro de delete segment lo borramos de la tabla -> decrementamos porq la tabla se va achicando
+		i--;                                     //2)opcion : no removemos ni destruimos el seg de la tabla sino que le podemos un id basura y lo marcamos como libre
+		tamTabla--;
 		//int pos = buscarPosSegmento(segmentoEnTabla->ID, pid, listaDeSegmentos);
 		//t_segmento* segmentoEnLista= list_get(listaDeSegmentos, pos);
        // segmentoEnLista->estaEnMemoria=0;
