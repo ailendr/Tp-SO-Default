@@ -107,7 +107,8 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
        pthread_mutex_lock(&mutexListaDeProcesos);
       // t_pcb* proceso = list_get(listaDeProcesos, pos);
        //destruirTabla(proceso->tablaSegmentos);
-       list_remove_and_destroy_element(listaDeProcesos, pos,(void *)destruirProceso);
+      t_pcb* proceso = list_remove(listaDeProcesos, pos);
+       destruirProceso(proceso);
        mostrarListaDeProcesos(); //solo para debugguear
        pthread_mutex_unlock(&mutexListaDeProcesos);
 

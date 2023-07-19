@@ -331,8 +331,8 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	t_tabla* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
 	free(bufferTabla);
 	//---------------//
+	proceso->tablaSegmentos = tablaDeSegmentos;
 	loggearTablaDeSegmentos(tablaDeSegmentos, loggerKernel);
-	asignarMemoria(proceso, tablaDeSegmentos);
 
 }
 

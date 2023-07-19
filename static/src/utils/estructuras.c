@@ -31,9 +31,9 @@ void destruirProceso(t_pcb* self){
 }
 
 void destruirContexto(t_contextoEjec* self){
-	self->pid=0;
+	//self->pid=0;
 	list_destroy_and_destroy_elements(self->instrucciones, (void*) destruirInstruccion);
-	self->PC=0;
+	//self->PC=0;
 /*
 	self->AX="";
 	self->BX="";

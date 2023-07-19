@@ -229,6 +229,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 
 void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
+    usleep(retardoCompactacion()*1000);
 	logearListaDeSegmentos("Antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//Es mejor destruir los elementos tambien por si queda algo
@@ -286,7 +287,7 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	t_tabla* tabla = list_get(listaDeTablas, posDeTabla);
 	int posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
-    usleep(retardoMemoria());
+    usleep(retardoMemoria()*1000);
 		if(operacion == MOV_IN || F_WRITE){
 			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			enviar_mensaje(registro, socket);
