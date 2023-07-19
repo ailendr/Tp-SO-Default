@@ -110,31 +110,32 @@ void actualizarUltimoSegmentoLibre(){
 void unirHuecosAledanios(t_segmento* segmento, int pos){
 	int posAnterior = pos -1;
 	int posSiguiente = pos + 1;
+	t_segmento* segmentoSiguiente;
 	t_segmento* segmentoAnterior =list_get(listaDeSegmentos, posAnterior);
-	t_segmento* segmentoSiguiente = list_get(listaDeSegmentos, posSiguiente);
+	int tamLista = list_size(listaDeSegmentos);
+
+	if(posSiguiente!=tamLista){
+	segmentoSiguiente = list_get(listaDeSegmentos, posSiguiente);
+
+	 if(huecoLibre(segmentoSiguiente)){
+			 segmento->tamanio += segmentoSiguiente->tamanio;
+			 segmento->limite=segmentoSiguiente->limite;
+			 list_remove_and_destroy_element(listaDeSegmentos,posSiguiente,(void*)destruirSegmento);
+		 }
+	}
 
 	 if(huecoLibre(segmentoAnterior)){
 		 segmento->base=segmentoAnterior->base;
 		 segmento->tamanio = segmento->tamanio + segmentoAnterior->tamanio;
 		 list_remove_and_destroy_element(listaDeSegmentos,pos-1,(void*)destruirSegmento);
-		 posSiguiente = pos; // ESTO PA Q ES ?
+		 //posSiguiente = pos;
 	 }
-	 if(huecoLibre(segmentoSiguiente)){
+
+	 /*if(huecoLibre(segmentoSiguiente)){
 		 segmento->tamanio += segmentoSiguiente->tamanio;
 		 segmento->limite=segmentoSiguiente->limite;
 		 list_remove_and_destroy_element(listaDeSegmentos,posSiguiente,(void*)destruirSegmento);
-	 }
-}
-
-//ESTA FUNC YA NO SE USA
-void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos){
-	int tam=list_size(tablaDeSegmentos);
-	for (int i=1; i<tam; i++){
-		t_segmento* segmento = list_get(tablaDeSegmentos, i);
-		int posListaSeg = buscarPosSegmento(segmento->ID, segmento->PID, listaDeSegmentos);
-		t_segmento* segActualizado = list_get(listaDeSegmentos, posListaSeg);
-	    list_replace_and_destroy_element(tablaDeSegmentos, i,segActualizado,(void*)destruirSegmento);
-	}
+	 }*/
 }
 
 void logearListaDeSegmentos(char* mensaje){
@@ -208,10 +209,10 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 
 	list_remove(listaDeSegmentos,pos);
 	//free(seg);
-	logearListaDeSegmentos("la lista de seg cuando lo remuevo al segAEliminar");
+	//logearListaDeSegmentos("la lista de seg cuando lo remuevo al segAEliminar");
 
 	list_add_in_index(listaDeSegmentos, pos, segAux);
-	logearListaDeSegmentos("la lista de seg cuando agrego segAux");
+	//logearListaDeSegmentos("la lista de seg cuando agrego segAux");
 	//Actualizo la tabla de segmentos del proceso: Eliminando ese segmento de la tabla
 	//Se busca el segmento en la Tabla de segmentos
 	t_list* segmentos = tablaDeSegmentosAActualizar->segmentos;

@@ -38,7 +38,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 				segmentoLibre= list_replace(listaDeSegmentos, posSegLibre,nuevoSegmento);
 				segmentoLibre->base=nuevoSegmento->limite;
 				segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
-				segmentoLibre->limite = segLibre->base + segLibre->tamanio; //Podria ir en vez de segLibre->base : TAMMEMORIA pero si hay un hueco libre no funcaria
+				segmentoLibre->limite = segLibre->base + segLibre->tamanio;
 				segmentoLibre->ID=-1; //agrego esto pero NO
 				segmentoLibre->PID=-1;//idem
 
@@ -47,6 +47,11 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 				//int pos = buscarPosSegmento(nuevoSegmento->ID,nuevoSegmento->PID, listaDeSegmentos);
 				list_add_in_index(listaDeSegmentos,posSegLibre+1,segmentoLibre);
              }
+            else{
+            	list_replace_and_destroy_element(listaDeSegmentos, posSegLibre, nuevoSegmento,(void*)destruirSegmento);
+            }
+
+
 
 			//Actualizo tabla de segmentos
 			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
@@ -55,7 +60,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, nuevoSegmento->tamanio);
 			logearListaDeSegmentos("Despues de mover los segmentos");
-
+			log_info(loggerMemoria, "Memoria disponible:%d", memoriaDisponible());
 			return OK;
 		}
 		else {
@@ -64,6 +69,7 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 	}
 	else{
+		log_info(loggerMemoria,"No se pudo crear segmento, no hay memoria suficiente");
 		destruirSegmento(nuevoSegmento); //antes de tirar error liberamos la memoria q le reservamos
 		return ERROR;
 

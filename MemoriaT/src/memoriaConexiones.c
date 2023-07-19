@@ -153,7 +153,7 @@ void atenderPeticionesKernel(int* socketKernel){
 		 	t_segmento* nuevoSegmento = malloc(sizeof(t_segmento));
 		 	 nuevoSegmento->PID = instruccion->pid;
 		 	 nuevoSegmento->ID = idSegmentoCS;
-		 	 logearListaDeSegmentos("Antes de Realizar Create Segment");
+		 	 //logearListaDeSegmentos("Antes de Realizar Create Segment");
 		 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 		 	 send(socket, &mensaje, sizeof(uint32_t),0);
 		 	 free(instruccion);
@@ -186,7 +186,7 @@ void atenderPeticionesKernel(int* socketKernel){
 				break;
 			case(-1):
 				 log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
-				 //ver como proseguir
+				 exit(1);
 				break;
 			default:
 				break;
