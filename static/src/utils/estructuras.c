@@ -57,8 +57,8 @@ void destruirInstruccion(char* self){ //Hago esto porque al deserializar se pide
 }
 
 void destruirTabla(t_tabla* self){
-	list_destroy_and_destroy_elements(self->segmentos, (void*) destruirSegmento); //Elimino la lista donde estan los segmentos
-	self->PID = 0;
+	//list_destroy_and_destroy_elements(self->segmentos, (void*) destruirSegmento); //Elimino la lista donde estan los segmentos
+	//self->PID = 0;
 	free(self);
 
 }
