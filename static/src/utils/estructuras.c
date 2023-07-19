@@ -79,7 +79,7 @@ int posTablaEnLista(t_list* listaDeTablas,uint32_t pid){
 
 void loggearTablaDeSegmentos(t_tabla* tabla, t_log* logger){
 	int tamanio = list_size(tabla->segmentos);
-		log_info(logger, "La Tabla de Segmentos contiene :");
+		log_info(logger, "La Tabla de Segmentos del PID <%d> contiene :", tabla->PID);
 			for (int i = 0; i < tamanio; i++){
 				 t_segmento* segmento= list_get(tabla->segmentos,i);
 				 log_info(logger, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria);

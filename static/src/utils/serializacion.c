@@ -266,8 +266,8 @@ t_instruccion* obtenerInstruccion(int socket, int cantParam){
 void serializarTablaDeSegmentos(t_tabla* tabla, t_buffer* buffer){
 	    int tamanio = list_size(tabla->segmentos);
 	  	buffer->stream = realloc(buffer->stream, buffer->size + sizeof(uint32_t) );
-		memcpy(buffer->stream + 0, &(tabla->PID), sizeof(uint32_t));
-		buffer->size = sizeof(uint32_t);
+		memcpy(buffer->stream + buffer->size, &(tabla->PID), sizeof(uint32_t));
+		buffer->size += sizeof(uint32_t);
 		for(int i=0; i<tamanio; i++){ //Mando el segmento Cero como uno mas y que tenga el PID con basura o lo puedo hacer aparte para evitar mandar el (segmento->pid) a piacere
 			t_segmento* segmento = list_get(tabla->segmentos,i);
 			serializarSegmento(segmento,buffer);
@@ -278,7 +278,7 @@ t_tabla* deserializarTablaDeSegmentos(void* buffer,int* desplazamiento, int size
         t_tabla* tablaDeSegmentos = malloc(sizeof(t_tabla));
         tablaDeSegmentos->segmentos = list_create();
 		memcpy(&(tablaDeSegmentos->PID), buffer + *desplazamiento, sizeof(uint32_t));
-        *desplazamiento = sizeof(uint32_t);
+        *desplazamiento += sizeof(uint32_t);
 
         while(*desplazamiento<size){
 		t_segmento* segmento = deserializarSegmento(buffer, desplazamiento);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
@@ -329,7 +329,13 @@ t_buffer* serializarListaDeTablas(t_list* listaDeTablas){
 		buffer->stream = NULL;
 		for(int i=0; i<tamanio; i++){
 			t_tabla* tablaDeSeg = list_get(listaDeTablas,i);
+			int cantSeg = list_size(tablaDeSeg->segmentos);
+			int sizeTabla = sizeof(uint32_t)+ sizeof(uint32_t)*6*cantSeg;
+		  	buffer->stream = realloc(buffer->stream, buffer->size + sizeof(int));
+			memcpy(buffer->stream + buffer->size, &sizeTabla, sizeof(int));
+			buffer->size += sizeof(int);
 	        serializarTablaDeSegmentos(tablaDeSeg, buffer);
+	        //buffer->size y agregarlo al buffer
 		}
 	return buffer;
 }
@@ -340,8 +346,11 @@ t_list* deserializarListaDeTablas(int socket){
 		t_list* listaDeTablas = list_create();
 		void* bufferListaDeTablas= recibir_buffer(&size,socket);
 		while(desplazamiento<size){
-		t_tabla* tablaDeSeg = deserializarTablaDeSegmentos(bufferListaDeTablas,&desplazamiento,size);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
-		list_add(listaDeTablas,tablaDeSeg);
+			int tamTabla;
+		   memcpy(&tamTabla, bufferListaDeTablas+desplazamiento, sizeof(int));
+		   desplazamiento += sizeof(int);
+		   t_tabla* tablaDeSeg = deserializarTablaDeSegmentos(bufferListaDeTablas,&desplazamiento,tamTabla);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
+		   list_add(listaDeTablas,tablaDeSeg);
 		}
 		free(bufferListaDeTablas);
 		return listaDeTablas;

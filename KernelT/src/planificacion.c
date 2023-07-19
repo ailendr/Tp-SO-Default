@@ -389,6 +389,7 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instr
 	int mensaje = recibir_operacion(socketMemoria);
 	switch (mensaje) {
 		case COMPACTAR:
+			log_info(loggerKernel, "Respuesta de Create Segment: COMPACTAR");
 			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
 			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
 			send(socketMemoria, &habilitado, sizeof(int),0);
@@ -400,10 +401,11 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instr
 
 			break;
 		case ERROR:
+			log_info(loggerKernel, "Respuesta de Create Segment: NO HAY MEMORIA SUFICIENTE");
 			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
 			break;
 		case OK: //hasta que le encontremos un uso a la base
-			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
+			log_info(loggerKernel, "Respuesta de Create Segment: SEGMENTO CREADO CON EXITO");
 			procesoAEjecutar(contexto);
 			instruccionAEjecutar();
 			break;
