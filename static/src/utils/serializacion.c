@@ -278,7 +278,7 @@ t_tabla* deserializarTablaDeSegmentos(void* buffer,int* desplazamiento, int size
         t_tabla* tablaDeSegmentos = malloc(sizeof(t_tabla));
         tablaDeSegmentos->segmentos = list_create();
 		memcpy(&(tablaDeSegmentos->PID), buffer + *desplazamiento, sizeof(uint32_t));
-        *desplazamiento += sizeof(uint32_t);
+        *desplazamiento = sizeof(uint32_t);
 
         while(*desplazamiento<size){
 		t_segmento* segmento = deserializarSegmento(buffer, desplazamiento);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
@@ -349,12 +349,25 @@ t_list* deserializarListaDeTablas(int socket){
 			int tamTabla;
 		   memcpy(&tamTabla, bufferListaDeTablas+desplazamiento, sizeof(int));
 		   desplazamiento += sizeof(int);
-		   t_tabla* tablaDeSeg = deserializarTablaDeSegmentos(bufferListaDeTablas,&desplazamiento,tamTabla);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
+		   t_tabla* tablaDeSeg = deserializarTabla(bufferListaDeTablas,&desplazamiento,tamTabla);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
 		   list_add(listaDeTablas,tablaDeSeg);
 		}
 		free(bufferListaDeTablas);
 		return listaDeTablas;
 }
 
+t_tabla* deserializarTabla(void* buffer,int* desplazamiento, int tamTabla){
+		int offset = 0;
+		t_tabla* tablaDeSegmentos = malloc(sizeof(t_tabla));
+        tablaDeSegmentos->segmentos = list_create();
+		memcpy(&(tablaDeSegmentos->PID), buffer + *desplazamiento, sizeof(uint32_t));
+        *desplazamiento += sizeof(uint32_t);
+        offset += sizeof(uint32_t);
+        while(offset<tamTabla){
+		t_segmento* segmento = deserializarSegmento(buffer, desplazamiento);//Nota: Al debugguear fijarme si el desplazamiento incrementa correctamente sino pasarle la direc en memoria
+		offset += sizeof(uint32_t)*6;
+		list_add(tablaDeSegmentos->segmentos,segmento);
+		}
+		return tablaDeSegmentos;
 
-
+}

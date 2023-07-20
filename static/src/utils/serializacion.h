@@ -29,6 +29,7 @@ t_tabla* deserializarTablaDeSegmentos(void* buffer,int* desplazamiento, int size
 //Serializacion y deserializacion Lista de Tablas//
 t_buffer* serializarListaDeTablas(t_list* listaDeTablas);
 t_list* deserializarListaDeTablas(int socket);
+t_tabla* deserializarTabla(void* buffer,int* desplazamiento, int size);
 
 
 ///Hecho por naty///
