@@ -222,7 +222,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 
 	//Busco si los huecos aledaños estan libres para consolidar
 	unirHuecosAledanios(segAux, pos);
-	logearListaDeSegmentos("La lista de seg cuando se elimina un segmento de la tabla");
+	//logearListaDeSegmentos("La lista de seg cuando se elimina un segmento de la tabla");
 	}
     return tablaDeSegmentosAActualizar;
 }
