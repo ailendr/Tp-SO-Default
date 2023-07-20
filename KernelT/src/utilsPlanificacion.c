@@ -69,12 +69,14 @@ void tiempoEnCPU(t_pcb* proceso){
     struct timespec end;
     clock_gettime(CLOCK_REALTIME, &end);
 
-    long seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
-    long nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
-    double elapsed = seconds + nanoseconds*1e-9;
+    //float seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
+    //float nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
+    double elapsed = (end.tv_sec - proceso->llegadaACPU.tv_sec) + ((end.tv_nsec - proceso->llegadaACPU.tv_nsec)*1e-9);
 
     proceso->ultimaRafagaEjecutada=elapsed;
+    calcularNuevaEstimacion(proceso);
 	}
+
 }
 
 void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {

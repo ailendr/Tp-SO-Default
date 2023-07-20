@@ -45,16 +45,16 @@ void cortoPlazo() {
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		if(!list_is_empty(colaReady)){
-				ordenarReady();
-				t_pcb* procesoAEjec=extraerDeReady();
+				//ordenarReady();
+				t_pcb* procesoAEjec=obtenerProceso();
 				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 				procesoAEjecutar(contextoAEjec);
 				procesoAEjec->estadoPcb = EXEC;
 				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 				if(strcmp(Algoritmo(), "HRRN")==0){
-				procesoAEjec->llegadaACPU=tiempoActual();
-				//clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
+				//procesoAEjec->llegadaACPU=tiempoActual();
+				clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
 				}
 				//pthread_mutex_lock(&mutexUltimoEjecutado);
 				ultimoEjecutado = procesoAEjec;
@@ -217,7 +217,7 @@ void algoritmoFIFO() {
 	ultimoEjecutado = procesoAEjec;
 }
 
-
+/*
 void algoritmoHRRN(){
 	log_info(loggerKernel, "Empieza algoritmo HRRN");
 	t_pcb* procesoAEjec;
@@ -233,12 +233,12 @@ void algoritmoHRRN(){
 	logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
 	ultimoEjecutado = procesoAEjec;
-}
-
+}*/
+/*
 void ordenarReady(){
 	if (strcmp(Algoritmo(), "HRRN")==0){
 		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
-		list_iterate(colaReady, (void*) calcularNuevaEstimacion);
+		//list_iterate(colaReady, (void*) calcularNuevaEstimacion);
 		list_iterate(colaReady, (void*) calcularRR);
 		list_sort(colaReady, (void*)comparadorRR);
 		mostrarColaReady();
@@ -247,14 +247,16 @@ void ordenarReady(){
 		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
 }
 
-/*
+*/
+
+
 void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
     double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
     proceso->estimadoReady = nuevaEstimacion;
 }
 
-
+/*
 void calcularRR(t_pcb* proceso) {
 
     struct timespec end;
@@ -277,45 +279,67 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 */
 
 uint32_t tiempo_actual(){
-	/*en milisegundos*/
+	//en milisegundos
 	struct timeval hora_actual;
 	gettimeofday(&hora_actual, NULL);
 	uint32_t tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000);
 	return tiempo;
 }
 
+t_pcb* obtenerProceso(){
+	t_pcb* proceso;
+	if (strcmp(Algoritmo(), "HRRN")==0){
+		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
+		//list_iterate(colaReady, (void*) calcularNuevaEstimacion);
+		//list_iterate(colaReady, (void*) calcularRR);
+	    proceso =pcb_elegido_HRRN();
+	}
+	else {
+      log_info(loggerKernel, "Cola Ready ordenada por FIFO"); //se sabe q no ordena nada solo es un log
+	  proceso = extraerDeReady();
+	}
+	return proceso;
+}
+
 t_pcb* pcb_elegido_HRRN(){
 	int pos = 0;
 	float ratio_mayor = 0.0;
-	t_pcb* pcb; /*= malloc(sizeof(t_pcb));*/
-	struct timeval hora_actual;
-	gettimeofday(&hora_actual, NULL);
+	t_pcb* pcb;
+	struct timespec end;
+	//gettimeofday(&hora_actual, NULL);
+	clock_gettime(CLOCK_REALTIME, &end);
+
+
+
 	for (int i = 0; i < list_size(colaReady); i++) {
 			pcb = list_get(colaReady, i);
 
-		int tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000) - pcb->llegadaAReady;//pasaje a milisegundos
+		float wait = (end.tv_sec - pcb->llegadaAReady.tv_sec)+ 1e-9*(end.tv_nsec - pcb->llegadaAReady.tv_nsec); //en segundos
+	    //pcb->tiempoDeEspera = wait;
+		//proceso->RR = ((float) (pcb->estimadoReady + tiempo)) / (float) pcb->estimadoReady;
 		//int tiempo = (hora_actual.tv_sec * 1000000 + hora_actual.tv_usec) - pcb->tiempo_ready;
 		//int tiempo = (hora_actual.tv_sec + hora_actual.tv_sec) - pcb->tiempo_ready;
 
-		float ratio = ((float) (pcb->RR + tiempo)) / (float) pcb->RR;
+		float ratio = ((float) (pcb->estimadoReady + wait)) / (float) pcb->estimadoReady;
 		if (ratio > ratio_mayor){
 			ratio_mayor = ratio;
 			pos = i;
 		}
 
 
-		/*printf("\nPCB %d", pcb->pid);
-		printf("\nTiempo %d", tiempo);
-		printf("\nEstimado %d", pcb->estimado_rafaga);
-		printf("\nRatio %f\n", ratio);*/
+		//printf("\nPCB %d", pcb->pid);
+		//printf("\nTiempo %d", tiempo);
+		//printf("\nEstimado %d", pcb->estimado_rafaga);
+		//printf("\nRatio %f\n", ratio);
 
 	}
 	pcb = list_remove(colaReady, pos);
 	return pcb;
 }
 
+/*
 void estimar_rafaga(t_pcb* pcb){
-	/*cada vez que el proceso se desaloja de la cpu*/
+	//cada vez que el proceso se desaloja de la cpu
 	//uint32_t tiempo_viejo = pcb->tiempo_ready;
 	uint32_t estimadoAnterior = pcb->estimadoReady;
 	uint32_t tiempoActual = tiempo_actual();
@@ -327,7 +351,7 @@ void estimar_rafaga(t_pcb* pcb){
 	pcb->ultimaRafagaEjecutada = (alpha * estimadoAnterior + Alfa() * tiempoEnCPU);
 
 	//printf("\n\nestimado_viejo: %d,  estimado actual: %d, tiempo que tardo en cpu: %d\n\n", estimado_viejo, pcb->estimado_rafaga, tiempo_ejecucion);
-}
+}*/
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
 
