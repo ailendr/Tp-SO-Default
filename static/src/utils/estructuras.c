@@ -22,7 +22,6 @@ void destruirSegmento(t_segmento* self){
 
 void destruirProceso(t_pcb* self){
 	close(self->socketConsola);
-	//list_destroy_and_destroy_elements(self->tablaSegmentos, (void*) destruirTabla);
 	list_destroy(self->archAbiertos); //HAY QUE VER COMO FINALIZAMOS LOS ARCHIVOS ABIERTOS
 	destruirContexto(self->contexto);
 	free(self->contexto);
@@ -57,7 +56,7 @@ void destruirInstruccion(char* self){ //Hago esto porque al deserializar se pide
 }
 
 void destruirTabla(t_tabla* self){
-	//list_destroy_and_destroy_elements(self->segmentos, (void*) destruirSegmento); //Elimino la lista donde estan los segmentos
+	list_destroy_and_destroy_elements(self->segmentos, (void*) destruirSegmento); //Elimino la lista donde estan los segmentos
 	//self->PID = 0;
 	free(self);
 
