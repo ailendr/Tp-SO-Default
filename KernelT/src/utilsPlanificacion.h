@@ -31,6 +31,8 @@ void cortoPlazo();
 
 void procesoAEjecutar(t_contextoEjec* procesoAEjecutar);
 void tiempoEnCPU(t_pcb* proceso);
+void calcularNuevaEstimacion(t_pcb* proceso);
+
 void finalizarProceso(t_pcb* procesoAFinalizar, char* motivoDeFin);
 
 

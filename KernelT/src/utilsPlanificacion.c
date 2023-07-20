@@ -79,6 +79,12 @@ void tiempoEnCPU(t_pcb* proceso){
 
 }
 
+void calcularNuevaEstimacion(t_pcb* proceso) {
+	double alfa = Alfa();
+    double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
+    proceso->estimadoReady = nuevaEstimacion;
+}
+
 void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
 
 	t_paquete *paqueteDeContexto = serializarContexto(procesoAEjecutar); // "Pone el contexto en un paquete"

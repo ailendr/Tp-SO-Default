@@ -250,11 +250,7 @@ void ordenarReady(){
 */
 
 
-void calcularNuevaEstimacion(t_pcb* proceso) {
-	double alfa = Alfa();
-    double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
-    proceso->estimadoReady = nuevaEstimacion;
-}
+
 
 /*
 void calcularRR(t_pcb* proceso) {

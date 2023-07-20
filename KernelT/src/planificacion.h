@@ -21,7 +21,6 @@ void algoritmoFIFO();
 void instruccionAEjecutar();
 //PARA HRRN
 //void algoritmoHRRN();
-void calcularNuevaEstimacion(t_pcb* proceso);
 void calcularRR(t_pcb* proceso);
 bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);
 uint32_t tiempo_actual();
