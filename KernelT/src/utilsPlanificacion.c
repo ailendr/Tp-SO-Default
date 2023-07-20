@@ -242,6 +242,15 @@ void mostrarListaDeProcesos(){
 		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
 	}
 }
+
+void mostrarColaReady(){
+	int tamanio = list_size(colaReady);
+	for(int i=0; i<tamanio; i++){
+		t_pcb* proceso = list_get(colaReady,i);
+		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
+	}
+}
+
 //Logueo de las instrucciones para verificar que esta todo ok//
 void loggearListaDeIntrucciones(t_list* instrucciones){
 	int tamanioListaInstrucciones = list_size(instrucciones);

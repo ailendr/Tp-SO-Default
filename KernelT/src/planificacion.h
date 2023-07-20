@@ -24,6 +24,7 @@ void instruccionAEjecutar();
 void calcularNuevaEstimacion(t_pcb* proceso);
 void calcularRR(t_pcb* proceso);
 bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);
+uint32_t tiempo_actual();
 
 void generarProceso(int* socket_cliente);
 t_list*  obtenerInstrucciones(int socket_cliente);

@@ -23,6 +23,7 @@ void agregarAEstadoReady(t_pcb* procesoListo);
 t_pcb* extraerDeNew();
 t_pcb* extraerDeReady();
 void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado);
+void mostrarColaReady();
 
 //lo pongo aca porq largo plazo los usa//
 void largoPlazo();

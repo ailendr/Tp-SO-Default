@@ -53,7 +53,8 @@ void cortoPlazo() {
 				procesoAEjec->estadoPcb = EXEC;
 				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 				if(strcmp(Algoritmo(), "HRRN")==0){
-				clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
+				procesoAEjec->llegadaACPU=tiempoActual();
+				//clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
 				}
 				//pthread_mutex_lock(&mutexUltimoEjecutado);
 				ultimoEjecutado = procesoAEjec;
@@ -240,11 +241,13 @@ void ordenarReady(){
 		list_iterate(colaReady, (void*) calcularNuevaEstimacion);
 		list_iterate(colaReady, (void*) calcularRR);
 		list_sort(colaReady, (void*)comparadorRR);
+		mostrarColaReady();
 	}
 	else {
 		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
 }
 
+/*
 void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
     double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
@@ -271,7 +274,60 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
     return proceso1->RR >= proceso2->RR;
 
 }
+*/
 
+uint32_t tiempo_actual(){
+	/*en milisegundos*/
+	struct timeval hora_actual;
+	gettimeofday(&hora_actual, NULL);
+	uint32_t tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000);
+	return tiempo;
+}
+
+t_pcb* pcb_elegido_HRRN(){
+	int pos = 0;
+	float ratio_mayor = 0.0;
+	t_pcb* pcb; /*= malloc(sizeof(t_pcb));*/
+	struct timeval hora_actual;
+	gettimeofday(&hora_actual, NULL);
+	for (int i = 0; i < list_size(colaReady); i++) {
+			pcb = list_get(colaReady, i);
+
+		int tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000) - pcb->llegadaAReady;//pasaje a milisegundos
+		//int tiempo = (hora_actual.tv_sec * 1000000 + hora_actual.tv_usec) - pcb->tiempo_ready;
+		//int tiempo = (hora_actual.tv_sec + hora_actual.tv_sec) - pcb->tiempo_ready;
+
+		float ratio = ((float) (pcb->RR + tiempo)) / (float) pcb->RR;
+		if (ratio > ratio_mayor){
+			ratio_mayor = ratio;
+			pos = i;
+		}
+
+
+		/*printf("\nPCB %d", pcb->pid);
+		printf("\nTiempo %d", tiempo);
+		printf("\nEstimado %d", pcb->estimado_rafaga);
+		printf("\nRatio %f\n", ratio);*/
+
+	}
+	pcb = list_remove(colaReady, pos);
+	return pcb;
+}
+
+void estimar_rafaga(t_pcb* pcb){
+	/*cada vez que el proceso se desaloja de la cpu*/
+	//uint32_t tiempo_viejo = pcb->tiempo_ready;
+	uint32_t estimadoAnterior = pcb->estimadoReady;
+	uint32_t tiempoActual = tiempo_actual();
+	uint32_t tiempoEnCPU = tiempoActual - pcb->ultimaRafagaEjecutada;
+	//pcb->tiempo_ready = tiempo.tv_sec * 1000 + tiempo.tv_usec / 1000; // milisec
+	//pcb->tiempo_ready = tiempo.tv_sec * 1000000 + tiempo.tv_usec; //micro
+	//pcb->tiempo_ready = tiempo.tv_sec; //seg
+	float alpha = 1 - Alfa();
+	pcb->ultimaRafagaEjecutada = (alpha * estimadoAnterior + Alfa() * tiempoEnCPU);
+
+	//printf("\n\nestimado_viejo: %d,  estimado actual: %d, tiempo que tardo en cpu: %d\n\n", estimado_viejo, pcb->estimado_rafaga, tiempo_ejecucion);
+}
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
 
