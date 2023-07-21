@@ -9,7 +9,7 @@
 #define SRC_MEMORIACONFIG_H_
 
 #include <utils/modulo.h>
-
+#include <commons/string.h>
 extern t_log* loggerMemoria;
 extern t_config* configMemoria;
 

@@ -15,12 +15,13 @@ void destruirSegmento(t_segmento* self){
 	self->base=0;
 	self->tamanio=0;
 	self->estaEnMemoria= 0;
+	self->tieneInfo = NULL;
+	self->tamanioInfo = 0;
 	free(self);
 }
 
 void destruirProceso(t_pcb* self){
 	close(self->socketConsola);
-	list_destroy_and_destroy_elements(self->tablaSegmentos, (void*) destruirSegmento);
 	list_destroy(self->archAbiertos); //HAY QUE VER COMO FINALIZAMOS LOS ARCHIVOS ABIERTOS
 	destruirContexto(self->contexto);
 	free(self->contexto);
@@ -29,9 +30,9 @@ void destruirProceso(t_pcb* self){
 }
 
 void destruirContexto(t_contextoEjec* self){
-	self->pid=0;
+	//self->pid=0;
 	list_destroy_and_destroy_elements(self->instrucciones, (void*) destruirInstruccion);
-	self->PC=0;
+	//self->PC=0;
 /*
 	self->AX="";
 	self->BX="";
@@ -54,19 +55,38 @@ void destruirInstruccion(char* self){ //Hago esto porque al deserializar se pide
 	free(self);
 }
 
-//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
+void destruirTabla(t_tabla* self){
+	list_destroy_and_destroy_elements(self->segmentos, (void*) destruirSegmento); //Elimino la lista donde estan los segmentos
+	//self->PID = 0;
+	free(self);
+
+}
+
+
+//LO PONGO ACA PORQ LO USARÁ KERNEL
+//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta
 int posTablaEnLista(t_list* listaDeTablas,uint32_t pid){
 	int tamanio = list_size(listaDeTablas);
 	for(int i=0; i< tamanio; i++){
-		t_list* tabla = list_get(listaDeTablas,i);
-        if(pidEnTabla(tabla,pid)){
+		t_tabla* tabla = list_get(listaDeTablas,i);
+        if(tabla->PID == pid){
         	return i;
         	}
 		}
 	return -1;
 }
 
-//Similar al Any Satisfy para ver si esta los segmentos con ese pid entonces la tabla corresponde a ese pid//
+void loggearTablaDeSegmentos(t_tabla* tabla, t_log* logger){
+	int tamanio = list_size(tabla->segmentos);
+		log_info(logger, "La Tabla de Segmentos del PID <%d> contiene :", tabla->PID);
+			for (int i = 0; i < tamanio; i++){
+				 t_segmento* segmento= list_get(tabla->segmentos,i);
+				 log_info(logger, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria);
+			}
+	}
+
+
+/*//Similar al Any Satisfy para ver si esta los segmentos con ese pid entonces la tabla corresponde a ese pid//
 bool pidEnTabla(t_list* tabla, uint32_t pid){
 	int tam = list_size(tabla);
 	int cant = 0;
@@ -78,4 +98,4 @@ bool pidEnTabla(t_list* tabla, uint32_t pid){
 	}
 
 	return cant>0;
-}
+}*/

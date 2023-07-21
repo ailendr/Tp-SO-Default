@@ -69,12 +69,20 @@ void tiempoEnCPU(t_pcb* proceso){
     struct timespec end;
     clock_gettime(CLOCK_REALTIME, &end);
 
-    long seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
-    long nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
-    double elapsed = seconds + nanoseconds*1e-9;
+    //float seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
+    //float nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
+    double elapsed = (end.tv_sec - proceso->llegadaACPU.tv_sec) + ((end.tv_nsec - proceso->llegadaACPU.tv_nsec)*1e-9);
 
     proceso->ultimaRafagaEjecutada=elapsed;
+    calcularNuevaEstimacion(proceso);
 	}
+
+}
+
+void calcularNuevaEstimacion(t_pcb* proceso) {
+	double alfa = Alfa();
+    double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
+    proceso->estimadoReady = nuevaEstimacion;
 }
 
 void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
@@ -102,53 +110,19 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 
 	int pidAEliminar = procesoAFinalizar->contexto->pid;
 	int pos = posProcesoAEliminar(listaDeProcesos,pidAEliminar); //Esto lo hago porque list_remove_and.. remueve el elemento y corre la posicion para que no quede vacia, o sea , no queda una posicion sin nada adentro
-    list_remove_and_destroy_element(listaDeProcesos, pos,(void *)destruirProceso);
-	mostrarListaDeProcesos(); //solo para debugguear
+   if(pos != -1){
+       destruirTabla(procesoAFinalizar->tablaSegmentos);
+       pthread_mutex_lock(&mutexListaDeProcesos);
+       list_remove_and_destroy_element(listaDeProcesos, pos, (void*) destruirProceso);
+       mostrarListaDeProcesos(); //solo para debugguear
+       pthread_mutex_unlock(&mutexListaDeProcesos);
+
     sem_post(&multiprogramacion);
+   }
+   else {
+	   log_info(loggerKernel, "ERROR: No se encuentra el proceso a eliminar");
+   }
 }
-
-///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado){
-	/*1ero buscar el recurso: si no está finaliza el proceso
-	 -----------                         si esta decrementa o incrementa la instancia*/
-	int posicionRecurso = recursoDisponible(nombreRecurso);
-		if(posicionRecurso ==-1){
-			finalizarProceso(ultimoEjecutado, "Recurso No Existente");
-		}
-		else{
-			int* pvalor = list_get(listaDeInstancias,posicionRecurso);
-			int valor = *pvalor;
-			//free(pvalor); Preguntar como liberar una lista de punteross
-			switch (nombreInstruccion){
-			case 1: //1=WAIT
-				valor --;
-				log_info(loggerKernel, "PID: %d - WAIT: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
-				 if(valor<0){
-				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
-				queue_push(colaDeBloqueo, ultimoEjecutado);
-				tiempoEnCPU(ultimoEjecutado);
-				ultimoEjecutado->estadoPcb = BLOCK;
-				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
-				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
-				 }
-				 else{
-					 procesoAEjecutar(contextoActualizado); //Sigue en cpu
-					 }
-				break;
-			case 2://2=SIGNAL
-				valor ++;
-				log_info(loggerKernel, "PID: %d - SIGNAL: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, valor);
-				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
-				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
-				agregarAEstadoReady(procesoDesbloqueado);
-				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
-				sem_post(&planiCortoPlazo);
-
-				procesoAEjecutar(contextoActualizado);//Sigue en cpu
-				break;
-			 }
-			}
-		}
 
 ////---Funcion de IO---///
 void bloquearHilo(t_parametroIO* parametro){
@@ -181,38 +155,20 @@ void implementacionF(t_instruccion* instruccion){
 	tiempoEnCPU(ultimoEjecutado);
 	free(instruccion);
 }
-//Validacion para CreateSegment//
-void validarCS(int socketMemoria, t_contextoEjec* contexto){
-	uint32_t mensaje = 0;
-	recv(socketMemoria, &mensaje, sizeof(uint32_t),0);
-	switch (mensaje) {
-		case COMPACTAR:
-			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
-			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
-			send(socketMemoria, &habilitado, sizeof(int),0);
-			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
-			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
-			procesoAEjecutar(contexto);
-			break;
-		case ERROR:
-			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
-			break;
-		case OK: //hasta que le encontremos un uso a la base
-			log_info(loggerKernel, "Segmento creado con Exito en Memoria");
-			procesoAEjecutar(contexto);
-			break;
-	}
-}
+
 //Actualizar la tabla de segmentos de todos los procesos//
 void actualizarTablaEnProcesos(t_list* listaDeTablas){
 	int tamanio = list_size(listaDeProcesos);
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso =list_get(listaDeProcesos,i);
 		int posDeTabla = posTablaEnLista(listaDeTablas, proceso->contexto->pid);
-		  t_list* tablaDeSegmentos = list_get(listaDeTablas,posDeTabla);
+		  t_tabla* tablaDeSegmentos = list_get(listaDeTablas,posDeTabla);
 		  proceso->tablaSegmentos = tablaDeSegmentos;
+          loggearTablaDeSegmentos(tablaDeSegmentos, loggerKernel);
+
 		}
 	}
+
 
 
 t_list* crearListaDeBloqueo(){
@@ -268,15 +224,7 @@ int recursoDisponible(char* nombre){
 	return -1;
 }
 
-//Logueo de procesos en sistema //
-//Logueo de Lista de Procesos
-void mostrarListaDeProcesos(){
-	int tamanio = list_size(listaDeProcesos);
-	for(int i=0; i<tamanio; i++){
-		t_pcb* proceso = list_get(listaDeProcesos,i);
-		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
-	}
-}
+
 
 
 int posProcesoAEliminar(t_list* listaDeProcesos, int pidAEliminar ){
@@ -291,6 +239,34 @@ int posProcesoAEliminar(t_list* listaDeProcesos, int pidAEliminar ){
 		}
 		return -1;
 
+}
+
+//Logueo de procesos en sistema //
+//Logueo de Lista de Procesos
+void mostrarListaDeProcesos(){
+	int tamanio = list_size(listaDeProcesos);
+	for(int i=0; i<tamanio; i++){
+		t_pcb* proceso = list_get(listaDeProcesos,i);
+		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
+	}
+}
+
+void mostrarColaReady(){
+	int tamanio = list_size(colaReady);
+	for(int i=0; i<tamanio; i++){
+		t_pcb* proceso = list_get(colaReady,i);
+		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
+	}
+}
+
+//Logueo de las instrucciones para verificar que esta todo ok//
+void loggearListaDeIntrucciones(t_list* instrucciones){
+	int tamanioListaInstrucciones = list_size(instrucciones);
+	log_info(loggerKernel, "La lista de instrucciones del proceso %d es:", pid);
+		for (int i = 0; i < tamanioListaInstrucciones; i++){
+			 char* instruccion= list_get(instrucciones,i);
+			 log_info(loggerKernel, "%s", instruccion);
+		}
 }
 
 

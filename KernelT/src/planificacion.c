@@ -19,8 +19,10 @@ void largoPlazo() {
 		sem_wait(&multiprogramacion);
 		log_info(loggerKernel, "Pase el gr de multiprogramacion");//Siempre que entra aca se descuenta el gr de multiprogramacion en el sistema
 		proceso = extraerDeNew(colaNew);
+		pthread_mutex_lock(&mutexListaDeProcesos);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
         mostrarListaDeProcesos();
+        pthread_mutex_unlock(&mutexListaDeProcesos);
         log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
         t_instruccion* instruc = malloc(sizeof(t_instruccion));
         instruc->nombre = CREAR_TABLA;
@@ -43,14 +45,15 @@ void cortoPlazo() {
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		if(!list_is_empty(colaReady)){
-				ordenarReady();
-				t_pcb* procesoAEjec=extraerDeReady();
+				//ordenarReady();
+				t_pcb* procesoAEjec=obtenerProceso();
 				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 				procesoAEjecutar(contextoAEjec);
 				procesoAEjec->estadoPcb = EXEC;
 				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 				if(strcmp(Algoritmo(), "HRRN")==0){
+				//procesoAEjec->llegadaACPU=tiempoActual();
 				clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
 				}
 				//pthread_mutex_lock(&mutexUltimoEjecutado);
@@ -75,18 +78,19 @@ void instruccionAEjecutar() {
 		ultimoEjecutado->contexto = contextoActualizado;
 //Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
+		t_instruccion* instruccion;
 		switch(codigo){
 			case EXIT:
 				log_info(loggerKernel, "Intruccion EXIT");
-				t_instruccion* instruccionExit= obtenerInstruccion(socketCPU,0);
-				free(instruccionExit);
+				 instruccion= obtenerInstruccion(socketCPU,0);
+				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
-				t_instruccion* instruccionYield = obtenerInstruccion(socketCPU,0);
-				free(instruccionYield);
+				 instruccion = obtenerInstruccion(socketCPU,0);
+				free(instruccion);
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
 				//sem_post(&cpuLibre);
@@ -95,27 +99,27 @@ void instruccionAEjecutar() {
 
 			case WAIT:
 				log_info(loggerKernel, "Intruccion WAIT");
-				t_instruccion* instruccionWait = obtenerInstruccion(socketCPU,1);
-				log_info(loggerKernel, "Recurso a consumir : %s", instruccionWait->param1);
-				char* recursoAConsumir = instruccionWait->param1;
+				instruccion = obtenerInstruccion(socketCPU,1);
+				log_info(loggerKernel, "Recurso a consumir : %s", instruccion->param1);
+				char* recursoAConsumir = instruccion->param1;
 				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
-				free(instruccionWait);
+				free(instruccion);
 				//sem_post(&planiCortoPlazo);
 				break;
 			case SIGNAL:
 				log_info(loggerKernel, "Intruccion SIGNAL");
-				t_instruccion* instruccionSignal = obtenerInstruccion(socketCPU,1);
-				char* recursoALiberar = instruccionSignal->param1;
-				free(instruccionSignal); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
+				instruccion = obtenerInstruccion(socketCPU,1);
+				char* recursoALiberar = instruccion->param1;
+				free(instruccion); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
 				implementacionWyS(recursoALiberar, 2, contextoActualizado);
 
 				break;
 			case IO:
 				log_info(loggerKernel, "Intruccion IO");
 				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
-				t_instruccion* instruccionIO = obtenerInstruccion(socketCPU,1);
-				char* tiempo = instruccionIO->param1;
-				free(instruccionIO);//Hay q liberar puntero
+				instruccion = obtenerInstruccion(socketCPU,1);
+				char* tiempo = instruccion->param1;
+				free(instruccion);//Hay q liberar puntero
 				log_info(loggerKernel, "PID: %d - Ejecuta IO: %d", ultimoEjecutado->contexto->pid, atoi(tiempo));
 				t_parametroIO* parametro = malloc(sizeof(t_parametroIO)) ;
 				parametro->tiempoDeBloqueo = atoi(tiempo);
@@ -126,47 +130,48 @@ void instruccionAEjecutar() {
 				break;
 			case MOV_IN:
 				log_info(loggerKernel, "Intruccion MOV_IN Fallida");
-				t_instruccion* instruccionMI = obtenerInstruccion(socketCPU,2);
-				free(instruccionMI);
+				instruccion = obtenerInstruccion(socketCPU,2);
+				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 				//sem_post(&planiCortoPlazo);
 
 				break;
 			case MOV_OUT:
 				log_info(loggerKernel, "Intruccion MOV_OUT Fallida");
-				t_instruccion* instruccionMO = obtenerInstruccion(socketCPU,2);
-				free(instruccionMO);
+				instruccion= obtenerInstruccion(socketCPU,2);
+				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case CREATE_SEGMENT://El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Create Segment");
-				t_instruccion* instruccionCS = obtenerInstruccion(socketCPU,2);// No se estaba recibiendo bien el pid porq en Cpu no se ponia el pid: ARREGLADO
-				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccionCS->nombre);
-				int idSegmentoCS = atoi(instruccionCS->param1);
-				int tamanioSegmento = atoi(instruccionCS->param2);
+				instruccion = obtenerInstruccion(socketCPU,2);// No se estaba recibiendo bien el pid porq en Cpu no se ponia el pid: ARREGLADO
+				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccion->nombre);
+				int idSegmentoCS = atoi(instruccion->param1);
+				int tamanioSegmento = atoi(instruccion->param2);
 				log_info(loggerKernel,"PID: %d - Crear Segmento - Id: %d - Tamaño: %d", contextoActualizado->pid,idSegmentoCS,tamanioSegmento);
 				//Serializamos y enviamos a memoria//
-				t_paquete* paqueteCS = serializarInstruccion(instruccionCS);
+				t_paquete* paqueteCS = serializarInstruccion(instruccion);
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
-				free(instruccionCS);
                 //Funcion que recibe un sed y valida si Memoria pudo crear un segmento//
-				validarCS(socketMemoria, contextoActualizado);
+				validarCS(socketMemoria, contextoActualizado, instruccion);
+				free(instruccion);
 
 				break;
 			case DELETE_SEGMENT: //El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Delete Segmente");
-				t_instruccion* instruccionDS = obtenerInstruccion(socketCPU,1);
-				int idSegmentoDS = atoi(instruccionDS->param1);
+				instruccion = obtenerInstruccion(socketCPU,1);
+				int idSegmentoDS = atoi(instruccion->param1);
 				log_info(loggerKernel, "PID: %d - Eliminar Segmento - Id Segmento: %d",contextoActualizado->pid,idSegmentoDS);
 				//Serializamos y enviamos a memoria//
-				t_paquete* paqueteDS = serializarInstruccion(instruccionDS);
+				t_paquete* paqueteDS = serializarInstruccion(instruccion);
 				validarEnvioDePaquete(paqueteDS, socketMemoria, loggerKernel, configKernel, "Instruccion Delete Segment");
-				free(instruccionDS);
+				free(instruccion);
 				//Recibimos la tabla de segmentos actualizada//
 				recibirYAsignarTablaDeSegmentos(ultimoEjecutado);
 				//El proceso sigue en ejecucion asi que lo volvemos a enviar a cpu
 				procesoAEjecutar(contextoActualizado);
+				instruccionAEjecutar();
 
 				break;
 			case F_OPEN:
@@ -177,22 +182,24 @@ void instruccionAEjecutar() {
 				break;
 			case F_READ:
 				log_info(loggerKernel, "Intruccion F READ");
-				t_instruccion* instruccionFR = obtenerInstruccion(socketCPU,3);
-                validarRyW(instruccionFR->param2);
+				instruccion = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccion->param2);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
-                implementacionF(instruccionFR);
+                implementacionF(instruccion);
 				break;
 			case F_WRITE:
 				log_info(loggerKernel, "Intruccion F WRITE");
-				t_instruccion* instruccionFW = obtenerInstruccion(socketCPU,3);
-                validarRyW(instruccionFW->param2);
-                implementacionF(instruccionFW);
+				instruccion = obtenerInstruccion(socketCPU,3);
+                validarRyW(instruccion->param2);
+                implementacionF(instruccion);
 
 				break;
 			case F_TRUNCATE:
 				break;
-			default:
-				break;
+			case(-1):
+				log_info(loggerKernel, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+				//ver que hacer cuando pasa esto
+			break;
 		}
 	}
 
@@ -208,7 +215,7 @@ void algoritmoFIFO() {
 	ultimoEjecutado = procesoAEjec;
 }
 
-
+/*
 void algoritmoHRRN(){
 	log_info(loggerKernel, "Empieza algoritmo HRRN");
 	t_pcb* procesoAEjec;
@@ -224,26 +231,26 @@ void algoritmoHRRN(){
 	logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
 	ultimoEjecutado = procesoAEjec;
-}
-
+}*/
+/*
 void ordenarReady(){
 	if (strcmp(Algoritmo(), "HRRN")==0){
 		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
-		list_iterate(colaReady, (void*) calcularNuevaEstimacion);
+		//list_iterate(colaReady, (void*) calcularNuevaEstimacion);
 		list_iterate(colaReady, (void*) calcularRR);
 		list_sort(colaReady, (void*)comparadorRR);
+		mostrarColaReady();
 	}
 	else {
 		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
 }
 
-void calcularNuevaEstimacion(t_pcb* proceso) {
-	double alfa = Alfa();
-    double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
-    proceso->estimadoReady = nuevaEstimacion;
-}
+*/
 
 
+
+
+/*
 void calcularRR(t_pcb* proceso) {
 
     struct timespec end;
@@ -263,7 +270,82 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
     return proceso1->RR >= proceso2->RR;
 
 }
+*/
 
+uint32_t tiempo_actual(){
+	//en milisegundos
+	struct timeval hora_actual;
+	gettimeofday(&hora_actual, NULL);
+	uint32_t tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000);
+	return tiempo;
+}
+
+t_pcb* obtenerProceso(){
+	t_pcb* proceso;
+	if (strcmp(Algoritmo(), "HRRN")==0){
+		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
+		//list_iterate(colaReady, (void*) calcularNuevaEstimacion);
+		//list_iterate(colaReady, (void*) calcularRR);
+	    proceso =pcb_elegido_HRRN();
+	}
+	else {
+      log_info(loggerKernel, "Cola Ready ordenada por FIFO"); //se sabe q no ordena nada solo es un log
+	  proceso = extraerDeReady();
+	}
+	return proceso;
+}
+
+t_pcb* pcb_elegido_HRRN(){
+	int pos = 0;
+	float ratio_mayor = 0.0;
+	t_pcb* pcb;
+	struct timespec end;
+	//gettimeofday(&hora_actual, NULL);
+	clock_gettime(CLOCK_REALTIME, &end);
+
+
+
+	for (int i = 0; i < list_size(colaReady); i++) {
+			pcb = list_get(colaReady, i);
+
+		float wait = (end.tv_sec - pcb->llegadaAReady.tv_sec)+ 1e-9*(end.tv_nsec - pcb->llegadaAReady.tv_nsec); //en segundos
+	    //pcb->tiempoDeEspera = wait;
+		//proceso->RR = ((float) (pcb->estimadoReady + tiempo)) / (float) pcb->estimadoReady;
+		//int tiempo = (hora_actual.tv_sec * 1000000 + hora_actual.tv_usec) - pcb->tiempo_ready;
+		//int tiempo = (hora_actual.tv_sec + hora_actual.tv_sec) - pcb->tiempo_ready;
+
+		float ratio = ((float) (pcb->estimadoReady + wait)) / (float) pcb->estimadoReady;
+		if (ratio > ratio_mayor){
+			ratio_mayor = ratio;
+			pos = i;
+		}
+
+
+		//printf("\nPCB %d", pcb->pid);
+		//printf("\nTiempo %d", tiempo);
+		//printf("\nEstimado %d", pcb->estimado_rafaga);
+		//printf("\nRatio %f\n", ratio);
+
+	}
+	pcb = list_remove(colaReady, pos);
+	return pcb;
+}
+
+/*
+void estimar_rafaga(t_pcb* pcb){
+	//cada vez que el proceso se desaloja de la cpu
+	//uint32_t tiempo_viejo = pcb->tiempo_ready;
+	uint32_t estimadoAnterior = pcb->estimadoReady;
+	uint32_t tiempoActual = tiempo_actual();
+	uint32_t tiempoEnCPU = tiempoActual - pcb->ultimaRafagaEjecutada;
+	//pcb->tiempo_ready = tiempo.tv_sec * 1000 + tiempo.tv_usec / 1000; // milisec
+	//pcb->tiempo_ready = tiempo.tv_sec * 1000000 + tiempo.tv_usec; //micro
+	//pcb->tiempo_ready = tiempo.tv_sec; //seg
+	float alpha = 1 - Alfa();
+	pcb->ultimaRafagaEjecutada = (alpha * estimadoAnterior + Alfa() * tiempoEnCPU);
+
+	//printf("\n\nestimado_viejo: %d,  estimado actual: %d, tiempo que tardo en cpu: %d\n\n", estimado_viejo, pcb->estimado_rafaga, tiempo_ejecucion);
+}*/
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
 
@@ -309,23 +391,10 @@ void generarProceso(int *socket_cliente) {
 	}
 }
 
-void asignarMemoria(t_pcb *procesoNuevo, t_list *tablaDeSegmento) {
+void asignarMemoria(t_pcb *procesoNuevo, t_tabla *tablaDeSegmento) {
 	procesoNuevo->tablaSegmentos = tablaDeSegmento;
 
 }
-
-//Logueo de las instrucciones para verificar que esta todo ok//
-void loggearListaDeIntrucciones(t_list* instrucciones){
-	int tamanioListaInstrucciones = list_size(instrucciones);
-	log_info(loggerKernel, "La lista de instrucciones del proceso %d es:", pid);
-		for (int i = 0; i < tamanioListaInstrucciones; i++){
-			 char* instruccion= list_get(instrucciones,i);
-			 log_info(loggerKernel, "%s", instruccion);
-		}
-}
-
-
-
 
 //Recibir Tabla de segmentos//
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
@@ -333,21 +402,91 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 	 int size = 0;
 	 int desplazamiento = 0;
 	 void* bufferTabla = recibir_buffer(&size,socketMemoria);
-	t_list* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
+	t_tabla* tablaDeSegmentos = deserializarTablaDeSegmentos(bufferTabla,&desplazamiento,size);
 	free(bufferTabla);
 	//---------------//
-	t_segmento* segmentoCero = list_get(tablaDeSegmentos,0);
-	log_info(loggerKernel,"Tabla de Segmentos Recibida. La Tabla tiene un primer segmento de id: %d",segmentoCero->ID );
-	asignarMemoria(proceso, tablaDeSegmentos);
+	proceso->tablaSegmentos = tablaDeSegmentos;
+	loggearTablaDeSegmentos(tablaDeSegmentos, loggerKernel);
 
 }
 
+///UTILS DE INSTRUCCIONES///
+///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado){
+	/*1ero buscar el recurso: si no está finaliza el proceso
+	 -----------                         si esta decrementa o incrementa la instancia*/
+	int posicionRecurso = recursoDisponible(nombreRecurso);
+		if(posicionRecurso ==-1){
+			finalizarProceso(ultimoEjecutado, "Recurso No Existente");
+		}
+		else{
+			int* valor = list_get(listaDeInstancias,posicionRecurso);
+			//int valor = *pvalor;
+			//free(pvalor); Preguntar como liberar una lista de punteross
+			switch (nombreInstruccion){
+			case 1: //1=WAIT
+				*valor -= 1;
+				log_info(loggerKernel, "PID: %d - WAIT: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, *valor);
+				 if(*valor<0){
+				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
+				queue_push(colaDeBloqueo, ultimoEjecutado);
+				tiempoEnCPU(ultimoEjecutado);
+				ultimoEjecutado->estadoPcb = BLOCK;
+				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
+				 }
+				 else{
+					 procesoAEjecutar(contextoActualizado); //Sigue en cpu
+					 instruccionAEjecutar();
+					 }
+				break;
+			case 2://2=SIGNAL
+				*valor += 1;
+				log_info(loggerKernel, "PID: %d - SIGNAL: %s - Instancias: %d", ultimoEjecutado->contexto->pid, nombreRecurso, *valor);
+				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
+				if(!queue_is_empty(colaDeBloqueo)){
+				t_pcb* procesoDesbloqueado = queue_pop(colaDeBloqueo);
+				agregarAEstadoReady(procesoDesbloqueado);
+				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
+				sem_post(&planiCortoPlazo);
+				}
+				procesoAEjecutar(contextoActualizado);//Sigue en cpu
+				instruccionAEjecutar();
+				break;
+			 }
+			}
+		}
 
+//Validacion para CreateSegment//
+void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instruccion){
 
-//Habilita corto plazo solo si hay procesos en Ready// DUDA: QUE HACEMOS CUANDO NO HAY NADIE EN LA COLA READY?
-/*void habilitarCortoPlazo(){
+	int mensaje = recibir_operacion(socketMemoria);
+	switch (mensaje) {
+		case COMPACTAR:
+			log_info(loggerKernel, "Respuesta de Create Segment: COMPACTAR");
+			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
+			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
+			send(socketMemoria, &habilitado, sizeof(int),0);
+			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
+			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
+			t_paquete* paqueteCS = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
+			validarCS(socketMemoria, contexto,instruccion);
 
-	if(!list_is_empty(colaReady)){
-		sem_post(&planiCortoPlazo);
+			break;
+		case ERROR:
+			log_info(loggerKernel, "Respuesta de Create Segment: NO HAY MEMORIA SUFICIENTE");
+			finalizarProceso(ultimoEjecutado, "OUT OF MEMORY");
+			break;
+		case OK: //hasta que le encontremos un uso a la base
+			log_info(loggerKernel, "Respuesta de Create Segment: SEGMENTO CREADO CON EXITO");
+			procesoAEjecutar(contexto);
+			instruccionAEjecutar();
+			break;
+		case(-1):
+			log_info(loggerKernel, "Error al recibir el mensaje de Memoria. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+			//ver que hacer cuando pasa esto
+			break;
+
 	}
-}*/
+}
