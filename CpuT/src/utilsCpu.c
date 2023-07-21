@@ -37,7 +37,7 @@ int iniciarCpu (char* pathConfig){
 
 
 int iniciarSocketsCpu(){
-	/*
+
 	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
 	log_info(loggerCPU, "Realizando Conexion con Memoria");
 
@@ -61,8 +61,8 @@ int iniciarSocketsCpu(){
 
 	int tamSeg = tamSegmento();
 
-	send(socketMemoria, &tamSegs, sizeof(int), 0);
-	*/
+	send(socketMemoria, &tamSeg, sizeof(int), 0);
+
 	// CONEXION CON KERNEL -----------------------------------------------------------------------------
     log_info(loggerCPU, "---------------------------------------------------------------------------");
     log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel...");
@@ -92,9 +92,10 @@ char* mmu (char* direccionLogica, uint32_t id){
 	int numSegmento = 0;
 	int offset = 0;
 	t_instruccion* nuevaInstruccion;
+	int dirLogica = atoi(direccionLogica);
 
-	numSegmento = floor(direccionLogica/tamSegmento());
-	offset = direccionLogica % tamSegmento();
+	numSegmento = floor(dirLogica/tamSegmento());
+	offset = dirLogica % tamSegmento();
 
 	dirFisica = strcat (string_itoa(numSegmento), " ");
 	dirFisica = strcat (dirFisica, string_itoa(offset));
