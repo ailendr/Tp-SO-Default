@@ -36,7 +36,7 @@ int main(/*int argc, char** argv*/) {
 		int codigo = recibir_operacion(cliente);
 
 		if(codigo == -1) {
-			log_info(loggerCPU, "se cayo kernel");
+			log_info(loggerCPU, "Se cayo kernel");
 			break;
 		}
     
@@ -56,7 +56,16 @@ int main(/*int argc, char** argv*/) {
 			while (verificador == 0){
 				instr = fetch (contextoRecibido);
 				nuevaInstr = decode (instr, contextoRecibido);
-				verificador = execute (nuevaInstr, contextoRecibido);
+				/*
+				if (nuevaInstr->param1 == "-1" || nuevaInstr->param2 == "-1" ){
+					log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>",contextoRecibido->pid);
+					log_info(loggerCPU, "   -> Instruccion: %s", instr);
+					verificador = -1;
+					nuevaInstr -> param1 = "SEGMENTATION FAULT";
+				} else {
+				*/
+					verificador = execute (nuevaInstr, contextoRecibido);
+				//}
 			}
 
 			verificador = 0;

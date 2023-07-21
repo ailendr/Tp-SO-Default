@@ -200,8 +200,6 @@ void instruccionAEjecutar() {
 				log_info(loggerKernel, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
 				//ver que hacer cuando pasa esto
 			break;
-			default:
-				break;
 		}
 	}
 
