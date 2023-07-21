@@ -91,10 +91,11 @@ char* mmu (char* direccionLogica, uint32_t id){
 	char* dirFisica;
 	int numSegmento = 0;
 	int offset = 0;
-	t_instruccion* nuevaInstruccion;
+	t_instruccion* nuevaInstruccion = malloc(sizeof(t_instruccion*));
+	int dirLogica = atoi(direccionLogica);
 
-	numSegmento = floor(direccionLogica/tamSegmento());
-	offset = direccionLogica % tamSegmento();
+	numSegmento = floor(dirLogica/tamSegmento());
+	offset = dirLogica % tamSegmento();
 
 	dirFisica = strcat (string_itoa(numSegmento), " ");
 	dirFisica = strcat (dirFisica, string_itoa(offset));
@@ -120,4 +121,3 @@ char* mmu (char* direccionLogica, uint32_t id){
 	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
 	return dirFisica;
 }
-

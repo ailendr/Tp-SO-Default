@@ -51,5 +51,7 @@ void mostrarListaDeProcesos();
 void loggearListaDeIntrucciones(t_list* instrucciones);
 int posProcesoAEliminar(t_list* listaDeProcesos, int pid);
 
+float tiempoActualEnMiliseg();
+
 
 #endif /* SRC_UTILSPLANIFICACION_H_ */

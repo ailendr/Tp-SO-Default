@@ -50,12 +50,14 @@ void cortoPlazo() {
 				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 				procesoAEjecutar(contextoAEjec);
+
+				if(strcmp(Algoritmo(), "HRRN")==0){
+				procesoAEjec->llegadaACPU=tiempoActualEnMiliseg();
+				}
+
 				procesoAEjec->estadoPcb = EXEC;
 				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
-				if(strcmp(Algoritmo(), "HRRN")==0){
-				//procesoAEjec->llegadaACPU=tiempoActual();
-				clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));
-				}
+
 				//pthread_mutex_lock(&mutexUltimoEjecutado);
 				ultimoEjecutado = procesoAEjec;
 				//pthread_mutex_unlock(&mutexUltimoEjecutado);
@@ -297,35 +299,20 @@ t_pcb* obtenerProceso(){
 
 t_pcb* pcb_elegido_HRRN(){
 	int pos = 0;
+	float tiempoActual;
 	float ratio_mayor = 0.0;
 	t_pcb* pcb;
-	struct timespec end;
-	//gettimeofday(&hora_actual, NULL);
-	clock_gettime(CLOCK_REALTIME, &end);
-
-
 
 	for (int i = 0; i < list_size(colaReady); i++) {
 			pcb = list_get(colaReady, i);
-
-		float wait = (end.tv_sec - pcb->llegadaAReady.tv_sec)+ 1e-9*(end.tv_nsec - pcb->llegadaAReady.tv_nsec); //en segundos
-	    //pcb->tiempoDeEspera = wait;
-		//proceso->RR = ((float) (pcb->estimadoReady + tiempo)) / (float) pcb->estimadoReady;
-		//int tiempo = (hora_actual.tv_sec * 1000000 + hora_actual.tv_usec) - pcb->tiempo_ready;
-		//int tiempo = (hora_actual.tv_sec + hora_actual.tv_sec) - pcb->tiempo_ready;
-
-		float ratio = ((float) (pcb->estimadoReady + wait)) / (float) pcb->estimadoReady;
+			tiempoActual = tiempoActualEnMiliseg();
+		float wait = tiempoActual - pcb->llegadaAReady; //en milisegundos
+		float ratio =  (pcb->estimadoRafaga + wait) / (pcb->estimadoRafaga);
+		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d> con Ratio : <%.6f", i, pcb->contexto->pid, ratio);
 		if (ratio > ratio_mayor){
 			ratio_mayor = ratio;
 			pos = i;
 		}
-
-
-		//printf("\nPCB %d", pcb->pid);
-		//printf("\nTiempo %d", tiempo);
-		//printf("\nEstimado %d", pcb->estimado_rafaga);
-		//printf("\nRatio %f\n", ratio);
-
 	}
 	pcb = list_remove(colaReady, pos);
 	return pcb;

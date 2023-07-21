@@ -40,7 +40,9 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 	list_add(colaReady, procesoListo);
 	procesoListo->estadoPcb = READY;
 	if(strcmp("HRRN", Algoritmo())==0){
-		clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));}//Por HRRN
+		float arriboEnReady = tiempoActualEnMiliseg();
+		procesoListo->llegadaAReady = arriboEnReady;
+	}
 	pthread_mutex_unlock(&mutexReady);
 	log_info(loggerKernel,
 			"Cola Ready con algoritmo %s .Ingresa el proceso con id %d:",
@@ -66,23 +68,23 @@ void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado){
 
 void tiempoEnCPU(t_pcb* proceso){
 	if(strcmp("HRRN", Algoritmo())==0){
-    struct timespec end;
+    /*struct timespec end;
     clock_gettime(CLOCK_REALTIME, &end);
 
     //float seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
     //float nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
-    double elapsed = (end.tv_sec - proceso->llegadaACPU.tv_sec) + ((end.tv_nsec - proceso->llegadaACPU.tv_nsec)*1e-9);
-
-    proceso->ultimaRafagaEjecutada=elapsed;
+    double elapsed = (end.tv_sec - proceso->llegadaACPU.tv_sec) + ((end.tv_nsec - proceso->llegadaACPU.tv_nsec)*1e-9);*/
+		float tiempoActual = tiempoActualEnMiliseg();
+    proceso->ultimaRafagaEjecutada=tiempoActual - proceso->llegadaACPU;
     calcularNuevaEstimacion(proceso);
 	}
 
 }
 
 void calcularNuevaEstimacion(t_pcb* proceso) {
-	double alfa = Alfa();
-    double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoReady *(1 - alfa));
-    proceso->estimadoReady = nuevaEstimacion;
+	double alfa = (float)Alfa();
+    float nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoRafaga *(1 - alfa));
+    proceso->estimadoRafaga = nuevaEstimacion;
 }
 
 void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
@@ -255,7 +257,7 @@ void mostrarColaReady(){
 	int tamanio = list_size(colaReady);
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso = list_get(colaReady,i);
-		log_info(loggerKernel, "Posicion %d de la Lista con Proceso de id <%d>", i, proceso->contexto->pid);
+		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d>", i, proceso->contexto->pid);
 	}
 }
 
@@ -269,4 +271,10 @@ void loggearListaDeIntrucciones(t_list* instrucciones){
 		}
 }
 
+float tiempoActualEnMiliseg(){
+	struct timespec tiempoReal;
+	clock_gettime(CLOCK_REALTIME, &(tiempoReal));
+	float tiempo = (tiempoReal.tv_sec*1000) + (tiempoReal.tv_nsec*1e-6); //tiempo en milisegundos
+	 return tiempo;
+}
 

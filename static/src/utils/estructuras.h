@@ -100,14 +100,14 @@ typedef struct{
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;
 	t_tabla* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
-	double estimadoReady;//estimadorafaga
+	float estimadoRafaga;//estimadorafaga
 	t_list* archAbiertos;
 
-	uint32_t llegadaACPU;//timestamp
-	uint32_t llegadaAReady;//timestamp
-	double tiempoDeEspera;
-	double ultimaRafagaEjecutada;
-	double RR;
+	float llegadaACPU;//timestamp
+	float llegadaAReady;//timestamp
+	float tiempoDeEspera;
+	float ultimaRafagaEjecutada;
+	float RR;
 }t_pcb;
 
 
