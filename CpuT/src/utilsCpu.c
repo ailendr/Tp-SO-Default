@@ -87,12 +87,37 @@ int iniciarSocketsCpu(){
 	return 0;
 }
 
-char* mmu (char* direccionLogica){
-	char* direccionFisica;
+char* mmu (char* direccionLogica, uint32_t id){
+	char* dirFisica;
+	int numSegmento = 0;
+	int offset = 0;
+	t_instruccion* nuevaInstruccion;
 
+	numSegmento = floor(direccionLogica/tamSegmento());
+	offset = direccionLogica % tamSegmento();
 
+	dirFisica = strcat (string_itoa(numSegmento), " ");
+	dirFisica = strcat (dirFisica, string_itoa(offset));
+
+	nuevaInstruccion -> nombre = MENSAJE;
+	nuevaInstruccion -> pid = id;
+	nuevaInstruccion -> param1 = dirFisica;
+	nuevaInstruccion -> param2 = NULL;
+	nuevaInstruccion -> param3 = NULL;
+
+	t_paquete* paqueteI;
+	op_code* valorGuardar;
+
+	paqueteI = serializarInstruccion(nuevaInstruccion);
+	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
+
+	valorGuardar = recibir_operacion(socketMemoria);
+
+	if (valorGuardar == ERROR){
+		return "-1";
+	}
 
 	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
-	return direccionFisica;
+	return dirFisica;
 }
 
