@@ -45,7 +45,7 @@ void cortoPlazo() {
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		if(!list_is_empty(colaReady)){
-				mostrarColaReady();
+				//mostrarColaReady();
 				t_pcb* procesoAEjec=obtenerProceso();
 				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
@@ -185,15 +185,15 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_READ:
 				log_info(loggerKernel, "Intruccion F READ");
 				instruccion = obtenerInstruccion(socketCPU,3);
-                validarRyW(instruccion->param2);
+                validarRyW(instruccion->param2, ultimoEjecutado);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
-                implementacionF(instruccion);
+                implementacionF(instruccion, ultimoEjecutado);
 				break;
 			case F_WRITE:
 				log_info(loggerKernel, "Intruccion F WRITE");
 				instruccion = obtenerInstruccion(socketCPU,3);
-                validarRyW(instruccion->param2);
-                implementacionF(instruccion);
+                validarRyW(instruccion->param2, ultimoEjecutado);
+                implementacionF(instruccion, ultimoEjecutado);
 
 				break;
 			case F_TRUNCATE:
@@ -206,7 +206,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 	}
 
 //---ALGORITMOS---///
-void algoritmoFIFO() {
+/*void algoritmoFIFO() {
 	log_info(loggerKernel, "Empieza algoritmo FIFO");
 	t_pcb *procesoAEjec = extraerDeReady();
 	log_info(loggerKernel, "FIFO: Obtengo un proceso de ready");
@@ -215,7 +215,7 @@ void algoritmoFIFO() {
 	procesoAEjec->estadoPcb = EXEC;
 	logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 	ultimoEjecutado = procesoAEjec;
-}
+}*/
 
 /*
 void algoritmoHRRN(){

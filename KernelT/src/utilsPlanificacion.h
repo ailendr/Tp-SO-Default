@@ -37,8 +37,8 @@ void finalizarProceso(t_pcb* procesoAFinalizar, char* motivoDeFin);
 
 
 void bloquearHilo(t_parametroIO* parametro);
-void validarRyW(char* direccion);
-void implementacionF(t_instruccion* instruccion);
+void validarRyW(char* direccion,t_pcb* ultimoEjecutado);
+void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado);
 void actualizarTablaEnProcesos(t_list* listaDeTablas);
 
 t_list* crearListaDeBloqueo();

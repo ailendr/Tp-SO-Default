@@ -13,7 +13,6 @@ t_list* listaDeInstancias;
 t_queue *colaNew;
 t_list *colaReady;
 t_list* listaDeProcesos;//procesos admitidos en el sistema
-t_pcb *ultimoEjecutado;
 uint32_t pid = 0;
 
 void crearEstados() {
@@ -139,14 +138,14 @@ void bloquearHilo(t_parametroIO* parametro){
 	pthread_exit(0);
 }
 //Validacion para F Read y FWrite//
-void validarRyW(char* direccion){
+void validarRyW(char* direccion,t_pcb* ultimoEjecutado){
 	int direc = atoi(direccion);
 	if(direc == -1){
 		finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 	}
 }
 //Funcion General para la mayoria de isntrucciones q empiezan con F//
-void implementacionF(t_instruccion* instruccion){
+void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado){
 	t_paquete* paqueteF = serializarInstruccion(instruccion);
 	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion");
 	ultimoEjecutado->estadoPcb= BLOCK;
