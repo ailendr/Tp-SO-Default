@@ -18,7 +18,7 @@
 void ordenarReady();
 
 void algoritmoFIFO();
-void instruccionAEjecutar();
+void instruccionAEjecutar(t_pcb* ultimoEjecutado);
 //PARA HRRN
 //void algoritmoHRRN();
 void calcularRR(t_pcb* proceso);
@@ -36,8 +36,8 @@ void asignarMemoria(t_pcb* procesoNuevo, t_tabla* tablaDeSegmento);
 void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
 
 
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado);
-void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instruccion);
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion,  t_pcb* proceso);
+void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecutado);
 
 
 

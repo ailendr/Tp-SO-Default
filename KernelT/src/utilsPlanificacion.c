@@ -44,9 +44,7 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 		procesoListo->llegadaAReady = arriboEnReady;
 	}
 	pthread_mutex_unlock(&mutexReady);
-	log_info(loggerKernel,
-			"Cola Ready con algoritmo %s .Ingresa el proceso con id %d:",
-			Algoritmo(), procesoListo->contexto->pid);
+	mostrarColaReady();
 }
 
 t_pcb* extraerDeNew() {
@@ -130,15 +128,15 @@ void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
 void bloquearHilo(t_parametroIO* parametro){
     t_pcb* procesoBloqueado = parametro->procesoABloquear;
     int tiempoDeBloqueo = parametro->tiempoDeBloqueo;
-	tiempoEnCPU(procesoBloqueado);
 	procesoBloqueado->estadoPcb= BLOCK;
 	log_info(loggerKernel, "PID: %d - Bloqueado por: IO", procesoBloqueado->contexto->pid);
     logCambioDeEstado(procesoBloqueado, "EXEC", "BLOCK");
-	usleep(tiempoDeBloqueo);
+	sleep(tiempoDeBloqueo);
 	agregarAEstadoReady(procesoBloqueado); //Agrega a la cola y cambia el estado del pcb
 	logCambioDeEstado(procesoBloqueado, "BLOCK", "READY");
 	free(parametro);
 	sem_post(&planiCortoPlazo);
+	pthread_exit(0);
 }
 //Validacion para F Read y FWrite//
 void validarRyW(char* direccion){
@@ -255,6 +253,7 @@ void mostrarListaDeProcesos(){
 
 void mostrarColaReady(){
 	int tamanio = list_size(colaReady);
+	log_info(loggerKernel, "Cola Ready con algoritmo : <%s> ", Algoritmo());
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso = list_get(colaReady,i);
 		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d>", i, proceso->contexto->pid);

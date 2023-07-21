@@ -45,7 +45,7 @@ void cortoPlazo() {
 		sem_wait(&planiCortoPlazo);
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		if(!list_is_empty(colaReady)){
-				//ordenarReady();
+				mostrarColaReady();
 				t_pcb* procesoAEjec=obtenerProceso();
 				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
@@ -57,20 +57,18 @@ void cortoPlazo() {
 
 				procesoAEjec->estadoPcb = EXEC;
 				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
-
 				//pthread_mutex_lock(&mutexUltimoEjecutado);
-				ultimoEjecutado = procesoAEjec;
 				//pthread_mutex_unlock(&mutexUltimoEjecutado);
-				instruccionAEjecutar();
+				instruccionAEjecutar(procesoAEjec);
 
 			}
 			else{log_info(loggerKernel, "No hay procesos en Ready para extraer");}
 	}
 }
 
-void instruccionAEjecutar() {
+void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 		int tamanio = 0;
-//Recepcion del contexto//
+		//Recepcion del contexto//
 		int codContexto = recibir_operacion(socketCPU);
 		t_contextoEjec *contextoActualizado; //PROBADO: TIENE QUE IR SI O SI POR EL ORDEN EN EL QUE SE ENVIAN LAS COSAS
 		void *buffer = recibir_buffer(&tamanio, socketCPU);
@@ -78,7 +76,7 @@ void instruccionAEjecutar() {
 		contextoActualizado = deserializarContexto(buffer, tamanio);
 		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);
 		ultimoEjecutado->contexto = contextoActualizado;
-//Recepcion de una instruccion//
+		//Recepcion de una instruccion//
 		int codigo = recibir_operacion(socketCPU);
 		t_instruccion* instruccion;
 		switch(codigo){
@@ -104,7 +102,7 @@ void instruccionAEjecutar() {
 				instruccion = obtenerInstruccion(socketCPU,1);
 				log_info(loggerKernel, "Recurso a consumir : %s", instruccion->param1);
 				char* recursoAConsumir = instruccion->param1;
-				implementacionWyS(recursoAConsumir, 1, contextoActualizado);
+				implementacionWyS(recursoAConsumir, 1, ultimoEjecutado);
 				free(instruccion);
 				//sem_post(&planiCortoPlazo);
 				break;
@@ -113,7 +111,7 @@ void instruccionAEjecutar() {
 				instruccion = obtenerInstruccion(socketCPU,1);
 				char* recursoALiberar = instruccion->param1;
 				free(instruccion); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
-				implementacionWyS(recursoALiberar, 2, contextoActualizado);
+				implementacionWyS(recursoALiberar, 2, ultimoEjecutado);
 
 				break;
 			case IO:
@@ -125,7 +123,9 @@ void instruccionAEjecutar() {
 				log_info(loggerKernel, "PID: %d - Ejecuta IO: %d", ultimoEjecutado->contexto->pid, atoi(tiempo));
 				t_parametroIO* parametro = malloc(sizeof(t_parametroIO)) ;
 				parametro->tiempoDeBloqueo = atoi(tiempo);
+				//pthread_mutex_lock(&mutexUltimoEjecutado);
 				parametro->procesoABloquear = ultimoEjecutado;
+				//pthread_mutex_lock(&mutexUltimoEjecutado);
 				pthread_t hiloDeBloqueo; //crear hilo
 				pthread_create(&hiloDeBloqueo, NULL, (void*)bloquearHilo, (void*)parametro);
 				pthread_detach(hiloDeBloqueo);
@@ -156,7 +156,7 @@ void instruccionAEjecutar() {
 				t_paquete* paqueteCS = serializarInstruccion(instruccion);
 				validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
                 //Funcion que recibe un sed y valida si Memoria pudo crear un segmento//
-				validarCS(socketMemoria, contextoActualizado, instruccion);
+				validarCS(socketMemoria,instruccion, ultimoEjecutado);
 				free(instruccion);
 
 				break;
@@ -173,7 +173,7 @@ void instruccionAEjecutar() {
 				recibirYAsignarTablaDeSegmentos(ultimoEjecutado);
 				//El proceso sigue en ejecucion asi que lo volvemos a enviar a cpu
 				procesoAEjecutar(contextoActualizado);
-				instruccionAEjecutar();
+				instruccionAEjecutar(ultimoEjecutado);
 
 				break;
 			case F_OPEN:
@@ -399,7 +399,7 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso){
 
 ///UTILS DE INSTRUCCIONES///
 ///---------RECURSOS COMPARTIDOS PARA WAIT Y SIGNAL----///
-void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEjec* contextoActualizado){
+void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_pcb* ultimoEjecutado){
 	/*1ero buscar el recurso: si no está finaliza el proceso
 	 -----------                         si esta decrementa o incrementa la instancia*/
 	int posicionRecurso = recursoDisponible(nombreRecurso);
@@ -423,8 +423,8 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);
 				 }
 				 else{
-					 procesoAEjecutar(contextoActualizado); //Sigue en cpu
-					 instruccionAEjecutar();
+					 procesoAEjecutar(ultimoEjecutado->contexto); //Sigue en cpu
+					 instruccionAEjecutar(ultimoEjecutado);
 					 }
 				break;
 			case 2://2=SIGNAL
@@ -437,15 +437,15 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_contextoEj
 				logCambioDeEstado(procesoDesbloqueado,"BLOCK" ,"READY");
 				sem_post(&planiCortoPlazo);
 				}
-				procesoAEjecutar(contextoActualizado);//Sigue en cpu
-				instruccionAEjecutar();
+				procesoAEjecutar(ultimoEjecutado->contexto);//Sigue en cpu
+				instruccionAEjecutar(ultimoEjecutado);
 				break;
 			 }
 			}
 		}
 
 //Validacion para CreateSegment//
-void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instruccion){
+void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecutado){
 
 	int mensaje = recibir_operacion(socketMemoria);
 	switch (mensaje) {
@@ -458,7 +458,7 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instr
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
 			t_paquete* paqueteCS = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
-			validarCS(socketMemoria, contexto,instruccion);
+			validarCS(socketMemoria,instruccion,ultimoEjecutado);
 
 			break;
 		case ERROR:
@@ -467,8 +467,8 @@ void validarCS(int socketMemoria, t_contextoEjec* contexto, t_instruccion* instr
 			break;
 		case OK: //hasta que le encontremos un uso a la base
 			log_info(loggerKernel, "Respuesta de Create Segment: SEGMENTO CREADO CON EXITO");
-			procesoAEjecutar(contexto);
-			instruccionAEjecutar();
+			procesoAEjecutar(ultimoEjecutado->contexto);
+			instruccionAEjecutar(ultimoEjecutado);
 			break;
 		case(-1):
 			log_info(loggerKernel, "Error al recibir el mensaje de Memoria. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
