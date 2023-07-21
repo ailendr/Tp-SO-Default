@@ -89,7 +89,7 @@ void atenderModulos(int socket_servidor){
 	//NOTA: Podemos esperar el cliente y hacer el handshake tambien dentro de la func del hilo o antes
 	///---CLIENTE CPU---///
 	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
-/*	int socketCpu = esperar_cliente(socket_servidor, loggerMemoria);
+	int socketCpu = esperar_cliente(socket_servidor, loggerMemoria);
 	if(verificarSocket(socketCpu, loggerMemoria, configMemoria) == 1) {
 
 				   close(socket_servidor);
@@ -101,7 +101,7 @@ void atenderModulos(int socket_servidor){
 	pthread_create(&servidorDeCpu, NULL, (void*) atenderPeticionesCpu, (void*)&socketCpu);
 	pthread_detach(servidorDeCpu);
 
-
+/*
 	///---CLIENTE FILE SYSTEM---///
 	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
 
