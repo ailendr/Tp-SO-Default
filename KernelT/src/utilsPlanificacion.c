@@ -42,7 +42,6 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 		/*float ingresoAReady = tiempoActualEnMiliseg();
 		procesoListo->llegadaAReady = ingresoAReady;*/
 		clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));
-		calcularNuevaEstimacion(procesoListo);
 	}
 	pthread_mutex_unlock(&mutexReady);
 	mostrarColaReady();
