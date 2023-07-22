@@ -198,9 +198,9 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case F_TRUNCATE:
 				break;
-			case(-1):
+			/*case(-1):
 				log_info(loggerKernel, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
-				//ver que hacer cuando pasa esto
+				//ver que hacer cuando pasa esto*/
 			break;
 		}
 	}
@@ -299,16 +299,15 @@ t_pcb* obtenerProceso(){
 
 t_pcb* pcb_elegido_HRRN(){
 	int pos = 0;
-	float tiempoActual;
+	float tiempoActual = tiempoActualEnMiliseg();
 	float ratio_mayor = 0.0;
 	t_pcb* pcb;
-
 	for (int i = 0; i < list_size(colaReady); i++) {
 			pcb = list_get(colaReady, i);
-			tiempoActual = tiempoActualEnMiliseg();
 		float wait = tiempoActual - pcb->llegadaAReady; //en milisegundos
-		float ratio =  (pcb->estimadoRafaga + wait) / (pcb->estimadoRafaga);
-		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d> con Ratio : <%.6f", i, pcb->contexto->pid, ratio);
+		float ratio = (pcb->estimadoRafaga + wait) / (pcb->estimadoRafaga);
+		log_info(loggerKernel, "Posicion <%d> de Ready con Proceso de id <%d> ", i, pcb->contexto->pid);
+		log_info(loggerKernel, "con Ratio : <%.6f>", ratio);
 		if (ratio > ratio_mayor){
 			ratio_mayor = ratio;
 			pos = i;

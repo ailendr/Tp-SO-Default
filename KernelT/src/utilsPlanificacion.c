@@ -39,8 +39,8 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 	list_add(colaReady, procesoListo);
 	procesoListo->estadoPcb = READY;
 	if(strcmp("HRRN", Algoritmo())==0){
-		float arriboEnReady = tiempoActualEnMiliseg();
-		procesoListo->llegadaAReady = arriboEnReady;
+		float ingresoAReady = tiempoActualEnMiliseg();
+		procesoListo->llegadaAReady = ingresoAReady;
 	}
 	pthread_mutex_unlock(&mutexReady);
 	mostrarColaReady();
