@@ -10,9 +10,8 @@
 
 uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 	if(memoriaDisponible()>=tamanio ){ //Iba a validar que no pase los 16 segmentos por cada proceso pero en el tp seccion KERNEL dice que no se pedira crear un id del seg superior al arch de config
+		nuevoSegmento->tamanio = tamanio;
 		algAsignacion algoritmo= asignarAlgoritmo();
-		t_list* listaHuecosLibres = list_filter(listaDeSegmentos, (void*)huecoLibre);
-		int tamanio=list_size(listaHuecosLibres);
 		int tamSegmento = nuevoSegmento->tamanio;
 		int posSegLibre;
 		switch(algoritmo){
@@ -20,35 +19,48 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			posSegLibre= FirstFit(tamSegmento);
 		break;
 		case bestFit:
-			posSegLibre= WorstYBest(tamSegmento, listaHuecosLibres, (void*)BestFit);
+			posSegLibre= WorstYBest(tamSegmento, listaDeSegmentos, (void*)BestFit);
 		break;
 		case worstFit:
-			posSegLibre = WorstYBest(tamSegmento, listaHuecosLibres, (void*)WorstFit);
+			posSegLibre = WorstYBest(tamSegmento, listaDeSegmentos, (void*)WorstFit);
 		}
 		if(posSegLibre!=-1){
 			t_segmento* segLibre = list_get(listaDeSegmentos, posSegLibre);
 			nuevoSegmento->base=segLibre->base;
 			nuevoSegmento->limite =nuevoSegmento->base + nuevoSegmento->tamanio;
 			nuevoSegmento->estaEnMemoria=1;
-			//void *list_replace(t_list*, int index, void* element);
-			//No me gusta nada como se busca el hueco libre en la lista seg porq 1) que valor le ponemos al id y pid cuando creemos ese seg libre? si le ponemos -1 luego en la lista de segmentos habra mas de uno que cumpla y 2) si no se le pone nada al id y pid se llena de basura y cambia de valor siempre entonces imposible encontrarlo en la lista d seg
+			nuevoSegmento->tieneInfo=0;
+			nuevoSegmento->tamanioInfo=0;
 
-			t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
-			segmentoLibre= list_replace(listaDeSegmentos, posSegLibre,nuevoSegmento);
-			segmentoLibre->base=nuevoSegmento->limite+1;
-			segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
-			segmentoLibre->limite = segLibre->base + segLibre->tamanio;
-			segmentoLibre->ID=-1; //agrego esto pero NO
-			segmentoLibre->PID=-1;//idem
-			//muevo de a un lugar la pos de los segmentos desde seglibre
-			actualizarListaDeSegmentos(nuevoSegmento, segmentoLibre);
+            if(nuevoSegmento->tamanio < segLibre->tamanio){
+
+				t_segmento* segmentoLibre = malloc(sizeof(t_segmento));
+				segmentoLibre= list_replace(listaDeSegmentos, posSegLibre,nuevoSegmento);
+				segmentoLibre->base=nuevoSegmento->limite;
+				segmentoLibre->tamanio = segLibre->tamanio - nuevoSegmento->tamanio;
+				segmentoLibre->limite = segLibre->base + segLibre->tamanio;
+				segmentoLibre->ID=-1; //agrego esto pero NO
+				segmentoLibre->PID=-1;//idem
+
+				//logearListaDeSegmentos("despues de asignar la pos del segLibre al segNuevo: "
+				//muevo de a un lugar la pos de los segmentos desde seglibre
+				//int pos = buscarPosSegmento(nuevoSegmento->ID,nuevoSegmento->PID, listaDeSegmentos);
+				list_add_in_index(listaDeSegmentos,posSegLibre+1,segmentoLibre);
+             }
+            else{
+            	list_replace_and_destroy_element(listaDeSegmentos, posSegLibre, nuevoSegmento,(void*)destruirSegmento);
+            }
+
+
+
 			//Actualizo tabla de segmentos
 			int posDeTabla = posTablaEnLista(listaDeTablas,nuevoSegmento->PID);
-			t_list* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
-			list_add(tablaDeSegmentos, nuevoSegmento);
+			t_tabla* tablaDeSegmentos = list_get(listaDeTablas, posDeTabla);//Ver esto al debugguear
+			list_add(tablaDeSegmentos->segmentos, nuevoSegmento);
 
-			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, tamanio);
-
+			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, nuevoSegmento->tamanio);
+			logearListaDeSegmentos("Despues de mover los segmentos");
+			log_info(loggerMemoria, "Memoria disponible:%d", memoriaDisponible());
 			return OK;
 		}
 		else {
@@ -57,21 +69,13 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 
 	}
 	else{
+		log_info(loggerMemoria,"No se pudo crear segmento, no hay memoria suficiente");
+		destruirSegmento(nuevoSegmento); //antes de tirar error liberamos la memoria q le reservamos
 		return ERROR;
 
 	}
 }
 
-/*
-void actualizarListaDeSegmentos(int pos, t_segmento* segmento){
-	int tamLista=list_size(listaDeSegmentos);
-	t_segmento* segmentoAux;
-	for(int i=pos;i<=tamLista;i++){
-		segmentoAux=list_replace(listaDeSegmentos, i, segmento);
-		segmento = segmentoAux;
-	}
-}
-*/
 algAsignacion asignarAlgoritmo(){
 	algAsignacion algoritmo;
 	if (strcmp(algoritmoAsignacion(), "FIRST") == 0) algoritmo = firstFit;
@@ -89,8 +93,9 @@ int FirstFit(uint32_t tamSegmento){
 int huecoLibreDisponible(uint32_t tamSegmento, t_list* listaDeSegmentos){
 	int tamanioLista = list_size(listaDeSegmentos);
 	int i =0;
-		while(i <= tamanioLista){
-			t_segmento* huecoFree= list_get(listaDeSegmentos, i);
+	//logearListaDeSegmentos("Antes de retornar un hueco libre");
+		while(i < tamanioLista){
+			t_segmento* huecoFree= list_get(listaDeSegmentos, i); //rompe acá con un segundo createSegment
 			if(tamSegmento <= huecoFree->tamanio && huecoLibre(huecoFree)){
 				return i;
 				}
@@ -109,41 +114,34 @@ bool WorstFit(t_segmento* segmento1, t_segmento* segmento2){
 		return segmento1->tamanio >= segmento2->tamanio;
 }
 
-
 int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t_segmento* seg1, t_segmento* seg2)){
-	int tamanio = list_size(listaDeSegmentos);
-	t_segmento* huecoFree1 = NULL;
-	//int i =0;
-	//int j=1;
-	int iterador = 0;
-	while(iterador < tamanio ){
-		t_segmento* segmento=list_get(listaDeSegmentos, iterador);
-		if(huecoLibre(segmento)){
-        huecoFree1 = segmento;
-        return iterador;
-		}
-	}
-	return 0;
-}
-	/* TODO
-	t_segmento* segmento1=list_get(listaHuecosLibres, i);
-	t_segmento* segmento2=list_get(listaHuecosLibres, j);
-	while(i<=tamanioLista && j< tamanioLista){
-		if(segmento1->tamanio>=tamSegmento && algoritmo(segmento1, segmento2)){
-			huecoLibre = segmento1;
-			segmento2 = list_get(listaHuecosLibres, j++);
-		}else if(segmento2->tamanio >= tamSegmento){
-			huecoLibre = segmento2;
-			segmento1 = list_get(listaHuecosLibres, i++);
-		}
-		else {
-			i++; j++;
-		}
-	}
-	return huecoLibre;
-}*/
+	int tamanio =list_size(listaDeSegmentos);
+	t_segmento* segmento;
+	t_segmento* huecoFree;
 
-/*/Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
+	int primerHuecoLibre = huecoLibreDisponible(tamSegmento, listaDeSegmentos);//Busco el primer hueco libre en el que entre para comparar
+	huecoFree=list_get(listaDeSegmentos, primerHuecoLibre);
+
+	int pos = primerHuecoLibre; //Lo hago por el caso cuando no tenemos segmentos o no borramos ninguno todavia y asigna segmentoLibre
+	for (int i=primerHuecoLibre+1; i<tamanio; i++){
+		segmento=list_get(listaDeSegmentos, i);
+
+		if(huecoLibre(segmento) && segmento->tamanio >= tamSegmento){
+			if(algoritmo(segmento, huecoFree)){
+				huecoFree=segmento;
+				pos=i;
+			}
+
+		}
+	}
+
+	return pos;
+}
+
+/*
+
+
+//Como removemos la tabla de segmentos de la lista de tablas tenemos que buscar en que posicion esta//
 int posTablaEnList(t_list* listaDeTablas,uint32_t pid){
 	int tamanio = list_size(listaDeTablas);
 	for(int i=0; i< tamanio; i++){

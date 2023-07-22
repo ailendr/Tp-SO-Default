@@ -31,9 +31,9 @@ t_contextoEjec* crearContexto(t_list* instrucciones, uint32_t pidDelContexto){
   	    t_pcb* pcb = malloc(sizeof(t_pcb));
   	    pcb->socketConsola = conexionConsola;
   	 	pcb->contexto = crearContexto(instrucciones, pidNuevo);
-  	 	pcb->tablaSegmentos = list_create();//recibir por parametro
+  	 //	pcb->tablaSegmentos = es una t_tabla q se le asigna en largo plazo cuando pide memoria;//
   	 //	pcb->estadoPcb = estado; El estado se pone en agregarANew
-  	 	pcb->estimadoReady = Estimacion(); //debe ser un globals
+  	 	pcb->estimadoRafaga = (float)Estimacion(); //debe ser un globals
   	 	pcb->archAbiertos = list_create();//recibir por parametro
   	 	pcb->RR=0;
   	 	pcb->tiempoDeEspera=0;

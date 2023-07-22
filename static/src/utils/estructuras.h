@@ -24,6 +24,7 @@
 #include <commons/config.h>
 #include <commons/collections/list.h>
 #include <time.h>
+#include <sys/time.h>
 
 
 typedef enum
@@ -51,6 +52,7 @@ typedef enum
 	ERROR,
 	OK,
 	CREAR_TABLA
+
 }op_code;
 
 typedef struct{
@@ -88,23 +90,25 @@ typedef enum{
 	} estadoPcb;
 
 typedef struct{
+	uint32_t PID;
+	t_list* segmentos;
+}t_tabla;
+
+
+typedef struct{
 	int socketConsola;
 	t_contextoEjec* contexto;
 	estadoPcb estadoPcb;
-	t_list* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
-	double estimadoReady;//estimadorafaga
+	t_tabla* tablaSegmentos; //Me imagino que va a ser una lista de struct Segmento a futuro
+	float estimadoRafaga;//estimadorafaga
 	t_list* archAbiertos;
 
-	struct timespec llegadaACPU;//timestamp
-	struct timespec llegadaAReady;//timestamp
-	double tiempoDeEspera;
-	double ultimaRafagaEjecutada;
-	double RR;
+	float llegadaACPU;//timestamp
+	float llegadaAReady;//timestamp
+	float tiempoDeEspera;
+	float ultimaRafagaEjecutada;
+	float RR;
 }t_pcb;
-
-
-
-
 
 
 typedef struct{
@@ -114,12 +118,19 @@ typedef struct{
 	uint32_t tamanio;
 	uint32_t limite;
 	uint32_t estaEnMemoria;
+	bool tieneInfo;
+	int tamanioInfo;
 }t_segmento;
 
+
+
+void destruirTabla(t_tabla* self);
 void destruirSegmento(t_segmento*);
 void destruirProceso(t_pcb*);
 void destruirContexto(t_contextoEjec* self);
 void destruirInstruccion(char* self);
-int posTablaEnLista(t_list* lista, uint32_t pid);
+int posTablaEnLista(t_list* listaDetablas, uint32_t pid);
 bool pidEnTabla(t_list* lista, uint32_t pid);
+void loggearTablaDeSegmentos(t_tabla* tabla, t_log* logger);
+
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */

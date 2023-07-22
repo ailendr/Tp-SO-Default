@@ -28,4 +28,5 @@ algAsignacion asignarAlgoritmo();
 uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio);
 
 
+
 #endif /* SRC_ALGORITMOSDEASIGNACION_H_ */

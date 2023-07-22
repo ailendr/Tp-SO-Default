@@ -9,6 +9,7 @@ pthread_mutex_t mutexReady;
 pthread_mutex_t mutexNew;
 pthread_mutex_t mutexPID;
 pthread_mutex_t mutexUltimoEjecutado;
+pthread_mutex_t mutexListaDeProcesos;
 
 
 void inicializarSemaforos(){
@@ -20,6 +21,8 @@ void inicializarSemaforos(){
 	pthread_mutex_init(&mutexNew, NULL);
 	pthread_mutex_init(&mutexPID, NULL);
 	pthread_mutex_init(&mutexUltimoEjecutado,NULL);
+	pthread_mutex_init(&mutexListaDeProcesos,NULL);
+
 
 }
 

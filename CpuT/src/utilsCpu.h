@@ -18,6 +18,6 @@ int iniciarCpu (char* pathConfig);
 
 int iniciarSocketsCpu();
 
-char* mmu (char* direccionLogica);
+char* mmu (char* direccionLogica, uint32_t id);
 
 #endif /* SRC_UTILSCPU_H_ */

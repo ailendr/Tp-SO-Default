@@ -28,14 +28,19 @@ bool huecoLibre(t_segmento* segmento);
 bool segmentoOcupado(t_segmento* segmento);
 void actualizarUltimoSegmentoLibre();
 int  buscarPosSegmento(uint32_t idSegmento, uint32_t pid, t_list* lista);
-void actualizarListaDeSegmentos(t_segmento* nuevoSegmento, t_segmento* huecoLibre);
 void logearListaDeSegmentos(char* mensaje);
+void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket, op_code operacion, int bytes);
+void escribirMemoria(t_segmento* segmento, int tamInfo);
+void validarNumSegmento(int numSeg, int socket);
+void escribir(t_segmento* segmento);
+
+
 
 //FUNCIONES DE MEMORIA
-t_list* crearTablaDeSegmentos(uint32_t pid);
+t_tabla* crearTablaDeSegmentos(uint32_t pid);
 void liberarTablaDeSegmentos(uint32_t pid);
-t_list* deleteSegment(uint32_t id, uint32_t pid); //Me sirve que retorne la tabla actualizada
-void unirHuecosAledanios(t_segmento* segmento);
+t_tabla* deleteSegment(uint32_t id, uint32_t pid); //Me sirve que retorne la tabla actualizada
+void unirHuecosAledanios(t_segmento* seg, int pos);
 void actualizarTablaDeSegmentos(t_list* tablaDeSegmentos);
 void compactar();
 

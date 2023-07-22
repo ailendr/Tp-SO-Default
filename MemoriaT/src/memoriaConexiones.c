@@ -7,41 +7,79 @@
 
 #include "memoriaConexiones.h"
 
-void atenderPeticionesCpu(int* socket){
-	/*uint32_t protocolo;
-	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
+void atenderPeticionesCpu(int* socketCpu){
+	int socket = * socketCpu;
 
-	switch(protocolo){
+while(1){
+	int codInstruccion;
+    codInstruccion = recibir_operacion(socket);
+    t_instruccion* instruccion;
+	switch(codInstruccion){
 	case(MOV_IN):
+		instruccion = obtenerInstruccion(socket, 2);
+	     char* cantBytes = instruccion->param1;
+	     int bytes = atoi(cantBytes); //Los bytes llegan el param 1 que es el Registro
+	implementarInstruccion(instruccion->param2,instruccion->pid, instruccion->param1,socket, MOV_IN, bytes);
+
+
 
 		break;
 
 	case(MOV_OUT):
+		instruccion = obtenerInstruccion(socket, 2);
+	implementarInstruccion(instruccion->param1, instruccion->pid, instruccion->param2,socket, MOV_OUT,0);
+
 
 		break;
+	case (MENSAJE):
+		instruccion = obtenerInstruccion(socket,1);
+	    char* direcF= instruccion->param1;
+	    char** direccionFisica = string_split(direcF, " ");
+		char* numSeg = direccionFisica[1];
+		int numSegmento= atoi(numSeg);
+		validarNumSegmento(numSegmento, socket); //Avisa a Cpu que es un segmento invalido
+		break;
+	case(-1):
+			log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+	//ver como proseguir
+	break;
 
 	default:
-		break;*/
-
+		break;
+		}
+	}
 }
 
-void atenderPeticionesFs(int* socket){
-	/*
-	uint32_t protocolo;
-	recv(socket, &protocolo, sizeof(uint32_t), MSG_WAITALL);
 
-	switch(protocolo){
+
+void atenderPeticionesFs(int* socketFs){
+   int socket = *socketFs;
+	while(1){
+		int codInstruccion;
+	    codInstruccion = recibir_operacion(socket);
+	    t_instruccion* instruccion;
+	switch(codInstruccion){
 	case(F_READ):
+			instruccion = obtenerInstruccion(socket, 3);
+		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_READ,0);
+
 
 		break;
 
 	case (F_WRITE):
+			instruccion = obtenerInstruccion(socket, 3);
+	        int bytes = atoi(instruccion->param3);
+		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_WRITE, bytes);
 
 		break;
-
+	case(-1):
+			log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+	//ver como proseguir
+		break;
 	default:
 		break;
-	}*/
+		}
+	}
 }
 
 
@@ -105,26 +143,27 @@ void atenderPeticionesKernel(int* socketKernel){
 	log_info(loggerMemoria, "Esperando Peticiones de Kernel");
 
 		while(1){
-	     int codInstruccion;
-	     codInstruccion = recibir_operacion(socket);
+	     int codInstruccion = recibir_operacion(socket);
+	     t_instruccion* instruccion;
 		 switch(codInstruccion){
 			case CREATE_SEGMENT:
-			t_instruccion* instruccionCS = obtenerInstruccion(socket,2); //Ahora recibe bien el PID venia arrastrando error desde la creacion en cpu
-			int idSegmentoCS = atoi(instruccionCS->param1);
-			int tamanioSegmento = atoi(instruccionCS->param2);
+				instruccion = obtenerInstruccion(socket,2); //Ahora recibe bien el PID venia arrastrando error desde la creacion en cpu
+			int idSegmentoCS = atoi(instruccion->param1);
+			int tamanioSegmento = atoi(instruccion->param2);
 		 	t_segmento* nuevoSegmento = malloc(sizeof(t_segmento));
-		 	 nuevoSegmento->PID = instruccionCS->pid;
+		 	 nuevoSegmento->PID = instruccion->pid;
 		 	 nuevoSegmento->ID = idSegmentoCS;
+		 	 //logearListaDeSegmentos("Antes de Realizar Create Segment");
 		 	 uint32_t mensaje = createSegment(nuevoSegmento, tamanioSegmento);
 		 	 send(socket, &mensaje, sizeof(uint32_t),0);
-		 	 free(instruccionCS);
+		 	 free(instruccion);
 				break;
 			case DELETE_SEGMENT:
-				t_instruccion* instruccionDS = obtenerInstruccion(socket,1);
-				int idSegmentoDS = atoi(instruccionDS->param1);
-				t_list* tablaActualizada = deleteSegment(idSegmentoDS, instruccionDS->pid);
+				instruccion = obtenerInstruccion(socket,1);
+				int idSegmentoDS = atoi(instruccion->param1);
+				t_tabla* tablaActualizada = deleteSegment(idSegmentoDS, instruccion->pid);
 			    enviarTablaDeSegmentos(tablaActualizada,socket);
-			    free(instruccionDS);
+			    free(instruccion);
 				break;
 
 			case COMPACTAR:
@@ -132,18 +171,22 @@ void atenderPeticionesKernel(int* socketKernel){
 					enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
 				break;
 			case EXIT:
-				t_instruccion* instrucEliminarTabla = obtenerInstruccion(socket,0);
-				liberarTablaDeSegmentos(instrucEliminarTabla->pid);
-				free(instrucEliminarTabla);
+				instruccion = obtenerInstruccion(socket,0);
+				liberarTablaDeSegmentos(instruccion->pid);
+				free(instruccion);
 				break;
 
 			case CREAR_TABLA:
-				t_instruccion* pedidocCrearTabla = obtenerInstruccion(socket,0);
-				t_list* tablaDeSegmentos = crearTablaDeSegmentos(pedidocCrearTabla->pid);
+				instruccion = obtenerInstruccion(socket,0);
+				t_tabla* tablaDeSegmentos = crearTablaDeSegmentos(instruccion->pid);
 				enviarTablaDeSegmentos(tablaDeSegmentos,socket);
-				free(pedidocCrearTabla);
+				free(instruccion);
 
 				break;
+			/*case(-1):
+				 log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+				 exit(1);
+				break;*/
 			default:
 				break;
 		 	 }
@@ -153,7 +196,7 @@ void atenderPeticionesKernel(int* socketKernel){
 
 
 //Solo para que no sea mucho codigo dentro de los cases//
-void enviarTablaDeSegmentos(t_list* tablaDeSegmentos, int socket){
+void enviarTablaDeSegmentos(t_tabla* tablaDeSegmentos, int socket){
 	t_buffer* bufferDeTabla = malloc(sizeof(t_buffer));
      bufferDeTabla->size = 0;
 	 bufferDeTabla->stream = NULL;
