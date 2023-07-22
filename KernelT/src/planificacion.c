@@ -67,29 +67,30 @@ void cortoPlazo() {
 }
 
 void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
-		int tamanio = 0;
+		int tamanioBuffer = 0;
+		int desplazamiento = 0;
 		//Recepcion del contexto//
-		int codContexto = recibir_operacion(socketCPU);
-		t_contextoEjec *contextoActualizado; //PROBADO: TIENE QUE IR SI O SI POR EL ORDEN EN EL QUE SE ENVIAN LAS COSAS
-		void *buffer = recibir_buffer(&tamanio, socketCPU);
-		log_info(loggerKernel, "Se recibio el buffer del Contexto");
-		contextoActualizado = deserializarContexto(buffer, tamanio);
+		int codContexto = recibir_operacion(socketCPU); //Se recibe un codigo :PAQUETE
+		void *buffer = recibir_buffer(&tamanioBuffer, socketCPU); //retorna el buffer y almacena el tamanio total del buffer
+		log_info(loggerKernel, "Se recibio el buffer del Contexto e Instruccion");
+		int tamContexto = recibirTamContexto(buffer, &desplazamiento);
+		t_contextoEjec* contextoActualizado = deserializarContexto(buffer, tamContexto, &desplazamiento);
 		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);
 		ultimoEjecutado->contexto = contextoActualizado;
 		//Recepcion de una instruccion//
-		int codigo = recibir_operacion(socketCPU);
+		int tipoInstruccion = recibirTipoInstruccion(buffer, &desplazamiento);
 		t_instruccion* instruccion;
-		switch(codigo){
+		switch(tipoInstruccion){
 			case EXIT:
 				log_info(loggerKernel, "Intruccion EXIT");
-				 instruccion= obtenerInstruccion(socketCPU,0);
+				 instruccion = deserializarInstruccionEstructura(buffer, 0, &desplazamiento);
 				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case YIELD:
 				log_info(loggerKernel, "Intruccion YIELD");
-				 instruccion = obtenerInstruccion(socketCPU,0);
+				 instruccion = deserializarInstruccionEstructura(buffer, 0, &desplazamiento);
 				free(instruccion);
 				tiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
@@ -99,7 +100,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 			case WAIT:
 				log_info(loggerKernel, "Intruccion WAIT");
-				instruccion = obtenerInstruccion(socketCPU,1);
+				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);;
 				log_info(loggerKernel, "Recurso a consumir : %s", instruccion->param1);
 				char* recursoAConsumir = instruccion->param1;
 				implementacionWyS(recursoAConsumir, 1, ultimoEjecutado);
@@ -108,7 +109,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case SIGNAL:
 				log_info(loggerKernel, "Intruccion SIGNAL");
-				instruccion = obtenerInstruccion(socketCPU,1);
+				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);;
 				char* recursoALiberar = instruccion->param1;
 				free(instruccion); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
 				implementacionWyS(recursoALiberar, 2, ultimoEjecutado);
@@ -117,7 +118,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case IO:
 				log_info(loggerKernel, "Intruccion IO");
 				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
-				instruccion = obtenerInstruccion(socketCPU,1);
+				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
 				char* tiempo = instruccion->param1;
 				free(instruccion);//Hay q liberar puntero
 				log_info(loggerKernel, "PID: %d - Ejecuta IO: %d", ultimoEjecutado->contexto->pid, atoi(tiempo));
@@ -132,7 +133,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case MOV_IN:
 				log_info(loggerKernel, "Intruccion MOV_IN Fallida");
-				instruccion = obtenerInstruccion(socketCPU,2);
+				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
 				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 				//sem_post(&planiCortoPlazo);
@@ -140,14 +141,14 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case MOV_OUT:
 				log_info(loggerKernel, "Intruccion MOV_OUT Fallida");
-				instruccion= obtenerInstruccion(socketCPU,2);
+				instruccion= deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
 				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case CREATE_SEGMENT://El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Create Segment");
-				instruccion = obtenerInstruccion(socketCPU,2);// No se estaba recibiendo bien el pid porq en Cpu no se ponia el pid: ARREGLADO
+				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
 				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccion->nombre);
 				int idSegmentoCS = atoi(instruccion->param1);
 				int tamanioSegmento = atoi(instruccion->param2);
@@ -162,7 +163,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case DELETE_SEGMENT: //El proceso sigue en cpu
 				log_info(loggerKernel, "Intruccion Delete Segmente");
-				instruccion = obtenerInstruccion(socketCPU,1);
+				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
 				int idSegmentoDS = atoi(instruccion->param1);
 				log_info(loggerKernel, "PID: %d - Eliminar Segmento - Id Segmento: %d",contextoActualizado->pid,idSegmentoDS);
 				//Serializamos y enviamos a memoria//
@@ -184,14 +185,14 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case F_READ:
 				log_info(loggerKernel, "Intruccion F READ");
-				instruccion = obtenerInstruccion(socketCPU,3);
+				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
                 validarRyW(instruccion->param2, ultimoEjecutado);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
                 implementacionF(instruccion, ultimoEjecutado);
 				break;
 			case F_WRITE:
 				log_info(loggerKernel, "Intruccion F WRITE");
-				instruccion = obtenerInstruccion(socketCPU,3);
+				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
                 validarRyW(instruccion->param2, ultimoEjecutado);
                 implementacionF(instruccion, ultimoEjecutado);
 
@@ -203,6 +204,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				//ver que hacer cuando pasa esto*/
 			break;
 		}
+		free(buffer);
 	}
 
 //---ALGORITMOS---///
