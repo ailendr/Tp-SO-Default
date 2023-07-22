@@ -12,7 +12,7 @@
 
 
 
-
+extern struct timespec begin, end;
 
 //Nuevos//
 void ordenarReady();
@@ -21,6 +21,7 @@ void algoritmoFIFO();
 void instruccionAEjecutar(t_pcb* ultimoEjecutado);
 //PARA HRRN
 //void algoritmoHRRN();
+void finTiempoEnCPU(t_pcb* proceso);
 void calcularRR(t_pcb* proceso);
 bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2);
 uint32_t tiempo_actual();

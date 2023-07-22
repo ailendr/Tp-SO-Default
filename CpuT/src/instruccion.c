@@ -43,7 +43,7 @@ t_instruccion* decode (char* instruccion, t_contextoEjec* contextoRecibido) {
 	op_code nombreI = nuevaInstruccion->nombre;
 
 	if (nombreI == SET){
-		sleep(retardo());
+		usleep(retardo()*1000);
 		log_info(loggerCPU, "Realizando el retardo en el SET");
 	}
 
