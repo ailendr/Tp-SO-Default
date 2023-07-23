@@ -9,6 +9,7 @@
 #define SRC_UTILSCPU_H_
 
 #include "./cpuConfig.h"
+#include <math.h>
 
 extern int servidorCpu;
 extern int socketMemoria;
