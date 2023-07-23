@@ -72,7 +72,8 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 		//Recepcion del contexto//
 		int codContexto = recibir_operacion(socketCPU); //Se recibe un codigo :PAQUETE
 		void *buffer = recibir_buffer(&tamanioBuffer, socketCPU); //retorna el buffer y almacena el tamanio total del buffer
-		log_info(loggerKernel, "Se recibio el buffer del Contexto e Instruccion");
+		if(codContexto == PAQUETE){
+			log_info(loggerKernel, "Se recibio el buffer del Contexto e Instruccion");}
 		int tamContexto = recibirTamContexto(buffer, &desplazamiento);
 		t_contextoEjec* contextoActualizado = deserializarContexto(buffer, tamContexto, &desplazamiento);
 		log_info(loggerKernel, "Contexto recibido con pid : %d", contextoActualizado->pid);

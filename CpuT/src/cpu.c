@@ -73,7 +73,7 @@ int main(/*int argc, char** argv*/) {
 
 			verificador = 0;
 
-			paqueteC = serializarContextoCompuesto(contextoRecibido, nuevaInstr);
+			paqueteC = serializarContextoCompuesto(contextoRecibido, nuevaInstr); //Serializa al contexto junto con la instruccion
 			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
 			//paqueteI = serializarInstruccion(nuevaInstr);
 			//validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
