@@ -59,32 +59,26 @@ int main(/*int argc, char** argv*/) {
 			while (verificador == 0){
 				instr = fetch (contextoRecibido);
 				nuevaInstr = decode (instr, contextoRecibido);
-				/*
 				if (nuevaInstr->param1 == "-1" || nuevaInstr->param2 == "-1" ){
-					log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>",contextoRecibido->pid);
-					log_info(loggerCPU, "   -> Instruccion: %s", instr);
 					verificador = -1;
-					nuevaInstr -> param1 = "SEGMENTATION FAULT";
-				} else {
-				*/
+					}
+				else {
 					verificador = execute (nuevaInstr, contextoRecibido);
-				//}
-			}
+					}
 
-			verificador = 0;
+				}
 
-			paqueteC = serializarContextoCompuesto(contextoRecibido, nuevaInstr); //Serializa al contexto junto con la instruccion
-			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
-			//paqueteI = serializarInstruccion(nuevaInstr);
-			//validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+				verificador = 0;
 
-		} else {
-			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
-		}
-		}
+				t_paquete* paqueteC = serializarContextoCompuesto(contextoRecibido, nuevaInstr);
+				validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
+
+				}
+				else {
+					log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
+					}
 	}
-	//free (paqueteI); esto no va porque enviarPaquete ya libera al paquete una vez enviado
-	//free (paqueteC);
+
 
 	log_info(loggerCPU, "Finalizando CPU...\n");
     terminarModulo(cliente,loggerCPU, configCPU);
