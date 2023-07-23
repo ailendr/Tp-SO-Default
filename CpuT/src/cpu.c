@@ -23,7 +23,7 @@ int main(/*int argc, char** argv*/) {
 
 	t_contextoEjec* contextoRecibido;
 
-	t_paquete* paqueteI;
+	//t_paquete* paqueteI;
 	t_paquete* paqueteC;
 
 	int verificador = 0;
@@ -47,8 +47,11 @@ int main(/*int argc, char** argv*/) {
 		else{
 		log_info(loggerCPU, "Se recibio el buffer del contexto");
 		buffer = recibir_buffer(&tamanio, cliente);
-		contextoRecibido = deserializarContexto(buffer, tamanio);
-
+		//
+		int desplazamiento = 0; //el valor de desplazamiento va a cambiar despues de deserializarContexto pero aca no tiene valor util
+		contextoRecibido = deserializarContexto(buffer, tamanio, &desplazamiento);
+        free(buffer);
+		//
 		if (contextoRecibido->pid != -1){
 
 			log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
@@ -70,10 +73,10 @@ int main(/*int argc, char** argv*/) {
 
 			verificador = 0;
 
-			paqueteC = serializarContexto(contextoRecibido);
+			paqueteC = serializarContextoCompuesto(contextoRecibido, nuevaInstr); //Serializa al contexto junto con la instruccion
 			validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
-			paqueteI = serializarInstruccion(nuevaInstr);
-			validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
+			//paqueteI = serializarInstruccion(nuevaInstr);
+			//validarEnvioDePaquete(paqueteI, cliente, loggerCPU, configCPU, "Instruccion");
 
 		} else {
 			log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
