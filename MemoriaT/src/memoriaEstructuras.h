@@ -9,6 +9,7 @@
 #define SRC_MEMORIAESTRUCTURAS_H_
 
 #include "memoriaConfig.h"
+#include <pthread.h>
 
 
 extern t_list* listaDeSegmentos;

@@ -286,8 +286,8 @@ void validarNumSegmento(int numSeg, int socket){
 
 void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket, op_code operacion, int bytes){
 	char** direccionFisica = string_split(direcF, " ");
-	char* numSeg = direccionFisica[1];
-	char* desplazamiento = direccionFisica[2];
+	char* numSeg = direccionFisica[0];
+	char* desplazamiento = direccionFisica[1];
 	int numSegmento= atoi(numSeg);
 	int offset = atoi(desplazamiento);
 	int posDeTabla = posTablaEnLista(listaDeTablas, pid);

@@ -42,7 +42,7 @@ int main(/*int argc, char** argv*/) {
 
 	// INICIALIZAR ESTRUCTURAS ----------------------------------------------------------------------
 	iniciarEstructuras();
-	peticiones = list_create();
+	peticiones = queue_create();
 
 	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
 	sem_init(&nuevoPedido,0, 0);
@@ -57,11 +57,11 @@ int main(/*int argc, char** argv*/) {
 	pthread_detach(hiloAtencion);
 	pthread_detach(hiloEjecutor);
 
-
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
 
-	list_destroy(peticiones);
+	queue_destroy(peticiones);
+	finalizarListaFcb();
 	sem_destroy(&nuevoPedido);
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);

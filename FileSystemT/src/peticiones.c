@@ -24,8 +24,8 @@ void atenderPeticiones(){
 			log_info(loggerFS, "Kernel se desconecto, no se atienden mas peticiones");
 			newInstr->nombre = EXIT;
 			newInstr->pid = -1;
-			list_clean(peticiones);
-			list_add(peticiones, newInstr);
+			queue_clean(peticiones);
+			queue_push(peticiones, newInstr);
 		    sem_post(&nuevoPedido);
 			break;
 		}
@@ -60,7 +60,7 @@ void atenderPeticiones(){
 
 		if (cantParam != -1) {
 			newInstr = deserializarInstruccionEstructura(buffer, cantParam);
-		    list_add(peticiones, newInstr);
+			queue_push(peticiones, newInstr);
 		    sem_post(&nuevoPedido);
 		}
 	}
@@ -68,60 +68,62 @@ void atenderPeticiones(){
 
 void ejecutarPeticiones(){
 
-	t_list* aEjecutar;
 	t_instruccion* instruccion;
 	op_code nombre;
-	char nombreArchivo;
+	char* nombreArchivo;
 
 	t_paquete* paqueteI;
-
-	aEjecutar = list_create();
 
 	while(1){
 
 		sem_wait(&nuevoPedido);
 
-		aEjecutar = list_take_and_remove(peticiones, 1);
-		instruccion = list_get(aEjecutar, 0);
+		instruccion = queue_peek(peticiones);
+		queue_pop(peticiones);
 
 		nombre = instruccion->nombre;
-		nombreArchivo = instruccion -> param1;
 
 		if (nombre == EXIT){
 			log_info(loggerFS, "Finalice todas las peticiones pendientes. Finalizamos modulo");
 			break;
 		}
 
+		nombreArchivo = instruccion -> param1;
+
 		switch(nombre){
 			case F_READ:
-				//leerArchivo(archivo, direccionFisica, puntero, tamanio);
+				//TODO leerArchivo(instruccion);
 				break;
 			case F_WRITE:
-				//escribirArchivo();
+				//TODO escribirArchivo (instruccion);
 				break;
 			case F_OPEN:
-				if (abrirArchivo(nombreArchivo)){ /*si el archivo existe*/ //no se como hacer la exixtencia ya que la hace dentro de AbrirArchivo
-					//abrirArchivo(nombreArchivo);
-				}else{
-					crearArchivo(nombreArchivo);
+				if (posicionFCB (nombreArchivo) != -1){
+					abrirArchivo(nombreArchivo);
+				} else {
+					instruccion->param1 = "-1";
 				}
 				break;
+			/*
+			case F_CREATE:
+				//TODO Crear el f_create
+				crearArchivo(nombreArchivo);
+				break;
+			*/
 			case F_TRUNCATE:
-				//truncarArchivo(archivo);
+				//TODO truncarArchivo (nombreArchivo, instruccion -> param2);
 				break;
 			case F_CLOSE:
+				cerrarArchivo(nombreArchivo);
 				break;
 			case F_SEEK:
+				posicionarPuntero (nombreArchivo, instruccion->param2);
 				break;
 		}
 
 		paqueteI = serializarInstruccion(instruccion);
 		validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
-		//Ver que kernel lo reciba y empezar a trabajar desde ahi
+		//TODO Ver que kernel lo reciba y empezar a trabajar desde ahi
 	}
-
-	free (paqueteI);
-
-	list_destroy(aEjecutar);
 
 }

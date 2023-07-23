@@ -8,7 +8,6 @@
 #ifndef SRC_MEMORIACONEXIONES_H_
 #define SRC_MEMORIACONEXIONES_H_
 
-#include <pthread.h>
 #include "algoritmosDeAsignacion.h"
 
 

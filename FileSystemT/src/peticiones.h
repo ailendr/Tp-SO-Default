@@ -8,7 +8,7 @@
 #ifndef SRC_PETICIONES_H_
 #define SRC_PETICIONES_H_
 
-#include "bloques.h"
+#include "operaciones.h"
 #include <semaphore.h>
 #include <pthread.h>
 #include <stdint.h>

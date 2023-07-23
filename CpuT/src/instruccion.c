@@ -48,15 +48,22 @@ t_instruccion* decode (char* instruccion, t_contextoEjec* contextoRecibido) {
 	}
 
 	char* aux;
+	int tamBytes;
 
 	if (nombreI == MOV_IN || nombreI == F_READ || nombreI == F_WRITE){
 		aux = nuevaInstruccion->param2;
-		nuevaInstruccion->param2 = mmu(aux, contextoRecibido->pid);
+		if (nombreI == F_READ || nombreI == F_WRITE){
+			tamBytes = atoi(nuevaInstruccion->param3);
+		} else {
+			tamBytes = tamRegistro (nuevaInstruccion->param1);
+		}
+		nuevaInstruccion->param2 = mmu(aux, contextoRecibido->pid, tamBytes);
 	}
 
 	if (nombreI == MOV_OUT){
 		aux = nuevaInstruccion->param1;
-		nuevaInstruccion->param1 = mmu(aux, contextoRecibido->pid);
+		tamBytes = tamRegistro (nuevaInstruccion->param2);
+		nuevaInstruccion->param1 = mmu(aux, contextoRecibido->pid, tamBytes);
 	}
 
 
@@ -132,35 +139,26 @@ void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 	if (strcmp(instruccion->param1, "RDX") == 0) strcpy(contexto->RDX, instruccion->param2);
 
 	log_info(loggerCPU, "Se esta almacenando %s en %s", instruccion->param2, instruccion->param1);
-	}
+}
 
 void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 	t_paquete* paqueteI;
 	char* valorGuardar;
-	t_instruccion* newInst;
+	t_instruccion* newInst = malloc(sizeof(t_instruccion*));
 	newInst->nombre = instruccion->nombre;
-		newInst->pid = instruccion->pid;
-		newInst->param2 = instruccion->param2;
-		newInst->param3 = NULL;
+	newInst->pid = instruccion->pid;
+	newInst->param2 = instruccion->param2;
 
-		if (strcmp(instruccion->param1, "AX") == 0 || strcmp(instruccion->param1, "BX") == 0 || strcmp(instruccion->param1, "CX") == 0 || strcmp(instruccion->param1, "DX") == 0){
-				strcpy(newInst->param1, "4");
-		}
-		if (strcmp(instruccion->param1, "EAX") == 0 || strcmp(instruccion->param1, "EBX") == 0 || strcmp(instruccion->param1, "ECX") == 0 || strcmp(instruccion->param1, "EDX") == 0){
-				strcpy(newInst->param1, "8");
-		}
-		if (strcmp(instruccion->param1, "RAX") == 0 || strcmp(instruccion->param1, "RBX") == 0 || strcmp(instruccion->param1, "RCX") == 0 || strcmp(instruccion->param1, "RDX") == 0){
-				strcpy(newInst->param1, "16");
-		}
+	newInst->param1 = string_itoa(tamRegistro(instruccion->param1));
 
-		paqueteI = serializarInstruccion(newInst);
+	paqueteI = serializarInstruccion(newInst);
 
 	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
 
 	valorGuardar = recibir_mensaje(socketMemoria);
 	instruccion->param2 = valorGuardar;
 	set(instruccion, contexto);
-
+	free (newInst);
 }
 
 void moveOut (t_instruccion* instruccion, t_contextoEjec* contexto){

@@ -12,6 +12,8 @@
 #include <commons/bitarray.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <commons/collections/queue.h>
 
 #include "FSUtils.h"
 
@@ -37,13 +39,14 @@ typedef struct{
 	uint32_t tamanioArchivo;
 	uint32_t punteroDirecto;
 	uint32_t punteroIndirecto;
+	uint32_t punteroPosicion;
+	uint32_t abierto;
 }t_fcb;
 
 
 extern t_superbloque* superBloque;
 extern t_bitarray* bitMap;
-extern t_list* peticiones;
-
+extern t_queue* peticiones;
 
 
 void iniciarEstructuras();

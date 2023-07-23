@@ -15,6 +15,7 @@ void escribirBloque (void* contenido, uint32_t sizeContenido, uint32_t numeroBlo
 
     //chequear que este libre el bloque (bitMap)bitarray_set_bit
     memcpy(superBloque -> blockSize + offset, contenido, sizeContenido);
+
     log_info(loggerFS, "Se escribio un bloque");
 }
 
@@ -25,11 +26,11 @@ void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t 
 
     memcpy(superBloque -> blockSize + offset,contenido, sizeContenido);
 
+
 }
 
 void liberarBloque(uint32_t numeroBloque){
    //aca vaciar bloque
-  //bitarray_clean_bit(bitMap, numeroBloque);
    bitarray_clean_bit(bitMap, numeroBloque);
 }
 
