@@ -95,11 +95,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				log_info(loggerKernel, "Intruccion YIELD");
 				 instruccion = deserializarInstruccionEstructura(buffer, 0, &desplazamiento);
 				free(instruccion);
-				//tiempoEnCPU(ultimoEjecutado);
 				finTiempoEnCPU(ultimoEjecutado);
-				if(strcmp("HRRN", Algoritmo())==0){
-					calcularNuevaEstimacion(ultimoEjecutado);
-				}
 				agregarAEstadoReady(ultimoEjecutado);
 
 				//sem_post(&cpuLibre);
@@ -125,6 +121,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case IO:
 				log_info(loggerKernel, "Intruccion IO");
+				finTiempoEnCPU(ultimoEjecutado);
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
 				char* tiempo = instruccion->param1;
 				free(instruccion);//Hay q liberar puntero
@@ -245,19 +242,21 @@ void algoritmoHRRN(){
 }*/
 
 void finTiempoEnCPU(t_pcb* proceso){
+ if(strcmp("HRRN", Algoritmo())==0){
 
 	clock_gettime(CLOCK_REALTIME, &end);
-	long seconds = end.tv_sec - begin.tv_sec;
-	long nanoseconds = end.tv_nsec - begin.tv_nsec;
-	double elapsed = seconds + nanoseconds*1e-9;
+	double elapsed = ((end.tv_sec - begin.tv_sec)*1000) + ((end.tv_nsec - begin.tv_nsec)*1e-6);
 
 	proceso->ultimaRafagaEjecutada = elapsed;
+
+	calcularNuevaEstimacion(proceso);
+ }
+
 }
 
 void ordenarReady(){
 	if (strcmp(Algoritmo(), "HRRN")==0){
 		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
-		//list_iterate(colaReady, (void*) calcularNuevaEstimacion);
 		list_iterate(colaReady, (void*) calcularRR);
 		list_sort(colaReady, (void*)comparadorRR);
 		mostrarColaReady();
@@ -273,18 +272,16 @@ void calcularRR(t_pcb* proceso) {
 	struct timespec endd;
 	clock_gettime(CLOCK_REALTIME, &endd);
 
-	long seconds = endd.tv_sec - proceso->llegadaAReady.tv_sec;
-	long nanoseconds = endd.tv_nsec - proceso->llegadaAReady.tv_nsec;
-	double elapsed = seconds + nanoseconds*1e-9;
+	double elapsed = ((endd.tv_sec - (proceso->llegadaAReady.tv_sec))*1000) + ((endd.tv_nsec - (proceso->llegadaAReady.tv_nsec))*1e-6);
 
     proceso->tiempoDeEspera = elapsed;
-	proceso->RR = 1 + (proceso->tiempoDeEspera / proceso->estimadoRafaga);
+	proceso->RR = 1 + ((proceso->tiempoDeEspera )/ (proceso->estimadoRafaga));
 
 }
 
 bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 
-    return proceso1->RR >= proceso2->RR;
+    return (proceso1->RR) >= (proceso2->RR);
 
 }
 
@@ -432,7 +429,7 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_pcb* ultim
 				 if(*valor<0){
 				t_queue* colaDeBloqueo = (t_queue*)list_get(listaDeBloqueo, posicionRecurso);
 				queue_push(colaDeBloqueo, ultimoEjecutado);
-				tiempoEnCPU(ultimoEjecutado);
+				finTiempoEnCPU(ultimoEjecutado);
 				ultimoEjecutado->estadoPcb = BLOCK;
 				logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 				log_info(loggerKernel, "PID: %d -Bloqueado por %s:", ultimoEjecutado->contexto->pid, nombreRecurso);

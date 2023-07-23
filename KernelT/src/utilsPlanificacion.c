@@ -80,8 +80,8 @@ void tiempoEnCPU(t_pcb* proceso){
 }
 
 void calcularNuevaEstimacion(t_pcb* proceso) {
-	double alfa = (float)Alfa();
-    float nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoRafaga *(1 - alfa));
+	double alfa = Alfa();
+    double nuevaEstimacion = (alfa * proceso->ultimaRafagaEjecutada)+ (proceso->estimadoRafaga *(1 - alfa));
     proceso->estimadoRafaga = nuevaEstimacion;
 }
 

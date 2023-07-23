@@ -115,6 +115,7 @@ char* mmu (char* direccionLogica, uint32_t id){
 	valorGuardar = recibir_operacion(socketMemoria);
 
 	if (valorGuardar == ERROR){
+		log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>",nuevaInstruccion->pid);
 		return "-1";
 	}
 
