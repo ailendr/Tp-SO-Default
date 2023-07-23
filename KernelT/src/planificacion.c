@@ -7,7 +7,7 @@
 
 #include "planificacion.h"
 
-
+struct timespec begin, end;
 
 void largoPlazo() {
 	while (1) {
@@ -46,15 +46,17 @@ void cortoPlazo() {
 		log_info(loggerKernel, "Corto Plazo habilitado");
 		if(!list_is_empty(colaReady)){
 				//mostrarColaReady();
-				t_pcb* procesoAEjec=obtenerProceso();
+				ordenarReady();
+				t_pcb* procesoAEjec=list_remove(colaReady,0);
 				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 				procesoAEjecutar(contextoAEjec);
-
+				clock_gettime(CLOCK_REALTIME, &begin);
+/*
 				if(strcmp(Algoritmo(), "HRRN")==0){
 				procesoAEjec->llegadaACPU=tiempoActualEnMiliseg();
 				}
-
+*/
 				procesoAEjec->estadoPcb = EXEC;
 				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 				//pthread_mutex_lock(&mutexUltimoEjecutado);
@@ -93,8 +95,13 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				log_info(loggerKernel, "Intruccion YIELD");
 				 instruccion = deserializarInstruccionEstructura(buffer, 0, &desplazamiento);
 				free(instruccion);
-				tiempoEnCPU(ultimoEjecutado);
+				//tiempoEnCPU(ultimoEjecutado);
+				finTiempoEnCPU(ultimoEjecutado);
+				if(strcmp("HRRN", Algoritmo())==0){
+					calcularNuevaEstimacion(ultimoEjecutado);
+				}
 				agregarAEstadoReady(ultimoEjecutado);
+
 				//sem_post(&cpuLibre);
 				sem_post(&planiCortoPlazo);
 				break;
@@ -118,7 +125,6 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 			case IO:
 				log_info(loggerKernel, "Intruccion IO");
-				tiempoEnCPU(ultimoEjecutado); //no sé si ponerlo aca o donde tomarle el tiempo
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
 				char* tiempo = instruccion->param1;
 				free(instruccion);//Hay q liberar puntero
@@ -237,7 +243,17 @@ void algoritmoHRRN(){
 	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
 	ultimoEjecutado = procesoAEjec;
 }*/
-/*
+
+void finTiempoEnCPU(t_pcb* proceso){
+
+	clock_gettime(CLOCK_REALTIME, &end);
+	long seconds = end.tv_sec - begin.tv_sec;
+	long nanoseconds = end.tv_nsec - begin.tv_nsec;
+	double elapsed = seconds + nanoseconds*1e-9;
+
+	proceso->ultimaRafagaEjecutada = elapsed;
+}
+
 void ordenarReady(){
 	if (strcmp(Algoritmo(), "HRRN")==0){
 		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
@@ -250,23 +266,19 @@ void ordenarReady(){
 		log_info(loggerKernel, "Cola Ready ordenada por FIFO");} //se sabe q no ordena nada solo es un log
 }
 
-*/
 
 
-
-
-/*
 void calcularRR(t_pcb* proceso) {
 
-    struct timespec end;
-    clock_gettime(CLOCK_REALTIME, &end);
+	struct timespec endd;
+	clock_gettime(CLOCK_REALTIME, &endd);
 
-    long seconds = end.tv_sec - proceso->llegadaAReady.tv_sec;
-    long nanoseconds = end.tv_nsec - proceso->llegadaAReady.tv_nsec;
-    double elapsed = seconds + nanoseconds*1e-9;
+	long seconds = endd.tv_sec - proceso->llegadaAReady.tv_sec;
+	long nanoseconds = endd.tv_nsec - proceso->llegadaAReady.tv_nsec;
+	double elapsed = seconds + nanoseconds*1e-9;
 
     proceso->tiempoDeEspera = elapsed;
-	proceso->RR = 1 + (proceso->tiempoDeEspera / proceso->estimadoReady);
+	proceso->RR = 1 + (proceso->tiempoDeEspera / proceso->estimadoRafaga);
 
 }
 
@@ -275,7 +287,7 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
     return proceso1->RR >= proceso2->RR;
 
 }
-*/
+
 
 uint32_t tiempo_actual(){
 	//en milisegundos
@@ -284,7 +296,7 @@ uint32_t tiempo_actual(){
 	uint32_t tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000);
 	return tiempo;
 }
-
+/*
 t_pcb* obtenerProceso(){
 	t_pcb* proceso;
 	if (strcmp(Algoritmo(), "HRRN")==0){
@@ -298,15 +310,16 @@ t_pcb* obtenerProceso(){
 	  proceso = extraerDeReady();
 	}
 	return proceso;
-}
-
+}*/
+/*
 t_pcb* pcb_elegido_HRRN(){
 	int pos = 0;
 	float tiempoActual = tiempoActualEnMiliseg();
 	float ratio_mayor = 0.0;
 	t_pcb* pcb;
+
 	for (int i = 0; i < list_size(colaReady); i++) {
-			pcb = list_get(colaReady, i);
+		pcb = list_get(colaReady, i);
 		float wait = tiempoActual - pcb->llegadaAReady; //en milisegundos
 		float ratio = (pcb->estimadoRafaga + wait) / (pcb->estimadoRafaga);
 		log_info(loggerKernel, "Posicion <%d> de Ready con Proceso de id <%d> ", i, pcb->contexto->pid);
@@ -319,7 +332,7 @@ t_pcb* pcb_elegido_HRRN(){
 	pcb = list_remove(colaReady, pos);
 	return pcb;
 }
-
+*/
 /*
 void estimar_rafaga(t_pcb* pcb){
 	//cada vez que el proceso se desaloja de la cpu

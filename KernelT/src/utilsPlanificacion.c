@@ -39,8 +39,9 @@ void agregarAEstadoReady(t_pcb *procesoListo) {
 	list_add(colaReady, procesoListo);
 	procesoListo->estadoPcb = READY;
 	if(strcmp("HRRN", Algoritmo())==0){
-		float ingresoAReady = tiempoActualEnMiliseg();
-		procesoListo->llegadaAReady = ingresoAReady;
+		/*float ingresoAReady = tiempoActualEnMiliseg();
+		procesoListo->llegadaAReady = ingresoAReady;*/
+		clock_gettime(CLOCK_REALTIME, &(procesoListo->llegadaAReady));
 	}
 	pthread_mutex_unlock(&mutexReady);
 	mostrarColaReady();
@@ -255,7 +256,7 @@ void mostrarColaReady(){
 	log_info(loggerKernel, "Cola Ready con algoritmo : <%s> ", Algoritmo());
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso = list_get(colaReady,i);
-		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d>", i, proceso->contexto->pid);
+		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d>, ratio: %f", i, proceso->contexto->pid, proceso->RR);
 	}
 }
 
