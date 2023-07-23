@@ -131,17 +131,35 @@ void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 	if (strcmp(instruccion->param1, "RCX") == 0) strcpy(contexto->RCX, instruccion->param2);
 	if (strcmp(instruccion->param1, "RDX") == 0) strcpy(contexto->RDX, instruccion->param2);
 
+	log_info(loggerCPU, "Se esta almacenando %s en %s", instruccion->param2, instruccion->param1);
 }
 
 void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 	t_paquete* paqueteI;
 	char* valorGuardar;
+	t_instruccion* newInst;
 
-	paqueteI = serializarInstruccion(instruccion);
+	newInst->nombre = instruccion->nombre;
+	newInst->pid = instruccion->pid;
+	newInst->param2 = instruccion->param2;
+	newInst->param3 = NULL;
+
+	if (strcmp(instruccion->param1, "AX") == 0 || strcmp(instruccion->param1, "BX") == 0 || strcmp(instruccion->param1, "CX") == 0 || strcmp(instruccion->param1, "DX") == 0){
+			strcpy(newInst->param1, "4");
+	}
+	if (strcmp(instruccion->param1, "EAX") == 0 || strcmp(instruccion->param1, "EBX") == 0 || strcmp(instruccion->param1, "ECX") == 0 || strcmp(instruccion->param1, "EDX") == 0){
+			strcpy(newInst->param1, "8");
+	}
+	if (strcmp(instruccion->param1, "RAX") == 0 || strcmp(instruccion->param1, "RBX") == 0 || strcmp(instruccion->param1, "RCX") == 0 || strcmp(instruccion->param1, "RDX") == 0){
+			strcpy(newInst->param1, "16");
+	}
+
+	paqueteI = serializarInstruccion(newInst);
 	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
 
 	valorGuardar = recibir_mensaje(socketMemoria);
 	instruccion->param2 = valorGuardar;
+	log_info(loggerCPU, "Se esta almacenando %s", instruccion->param2);
 	set(instruccion, contexto);
 
 }
@@ -166,4 +184,5 @@ void moveOut (t_instruccion* instruccion, t_contextoEjec* contexto){
 	paqueteI = serializarInstruccion(instruccion);
 	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
 	//TODO VALIDACION
+	log_info(loggerCPU, "Se esta almaceno %s en Memoria", instruccion->param2);
 }
