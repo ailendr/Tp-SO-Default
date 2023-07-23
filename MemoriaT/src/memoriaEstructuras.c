@@ -13,6 +13,7 @@ t_list* listaDeSegmentos;
 
 /*Es para tener un hueco libre al principio cuando no hay segmentos y para cuando se compacte y queda contiguo el espacio libre*/
 t_segmento* segmentoLibre;
+pthread_mutex_t mutexEspacioUser;
 
 ///////////////////////////// ESTRUCTURAS DE MEMORIA/////////////////////////////////////////////////////////
 
@@ -27,6 +28,7 @@ void iniciarEstructuras(){
 	crearEspacioMemoria();
 	crearSegmentoCero();
 	actualizarUltimoSegmentoLibre();
+	pthread_mutex_init(&mutexEspacioUser, NULL);
 }
 
 void crearEspacioMemoria (){
@@ -271,9 +273,14 @@ void compactar() {
 
 
 void validarNumSegmento(int numSeg, int socket){
+    int valorOp;
 	if(numSeg >= cantSegmentos()){
-    int valorOp = ERROR;
+	valorOp= ERROR;
     send(socket, &valorOp, sizeof(int), 0);
+	}
+	else{
+		valorOp = OK;
+	    send(socket, &valorOp, sizeof(int), 0);
 	}
 }
 
@@ -289,13 +296,18 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
     usleep(retardoMemoria()*1000);
 		if(operacion == MOV_IN || F_WRITE){
+			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			pthread_mutex_unlock(&mutexEspacioUser);
 			enviar_mensaje(registro, socket);
 		}
 
 	 if(operacion == MOV_OUT ||operacion == F_READ){
+			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(memoriaContigua + segmento->base+ offset, &registro, strlen(registro)); //Ver si habria que agregar un +1
-            escribirMemoria( segmento, strlen(registro));
+			pthread_mutex_unlock(&mutexEspacioUser);
+
+			escribirMemoria( segmento, strlen(registro));
 		}
 
 }

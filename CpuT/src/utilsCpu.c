@@ -37,7 +37,7 @@ int iniciarCpu (char* pathConfig){
 
 
 int iniciarSocketsCpu(){
-	/*
+
 	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
 	log_info(loggerCPU, "Realizando Conexion con Memoria");
 
@@ -59,10 +59,6 @@ int iniciarSocketsCpu(){
 	}
 	log_info(loggerCPU, "Ok -> Conexion Memoria");
 
-	int tamSeg = tamSegmento();
-
-	send(socketMemoria, &tamSegs, sizeof(int), 0);
-	*/
 	// CONEXION CON KERNEL -----------------------------------------------------------------------------
     log_info(loggerCPU, "---------------------------------------------------------------------------");
     log_info(loggerCPU, "Iniciando Servidor para la conexion con el Kernel...");

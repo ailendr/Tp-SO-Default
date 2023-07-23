@@ -23,8 +23,6 @@ int main(/*int argc, char** argv*/) {
 
 	t_contextoEjec* contextoRecibido;
 
-	//t_paquete* paqueteI;
-	t_paquete* paqueteC;
 
 	int verificador = 0;
 
@@ -59,7 +57,7 @@ int main(/*int argc, char** argv*/) {
 			while (verificador == 0){
 				instr = fetch (contextoRecibido);
 				nuevaInstr = decode (instr, contextoRecibido);
-				if (nuevaInstr->param1 == "-1" || nuevaInstr->param2 == "-1" ){
+				if (strcmp(nuevaInstr->param1, "-1") == 0 || strcmp(nuevaInstr->param2, "-1") == 0){
 					verificador = -1;
 					}
 				else {
@@ -77,6 +75,7 @@ int main(/*int argc, char** argv*/) {
 				else {
 					log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
 					}
+			}
 	}
 
 
