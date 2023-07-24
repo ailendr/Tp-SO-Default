@@ -63,21 +63,23 @@ t_pcb* extraerDeReady() {
 void logCambioDeEstado(t_pcb* proceso, char* estadoAnterior, char* nuevoEstado){
 	log_info(loggerKernel, "PID:%d  - Estado Anterior: %s - Estado Actual: %s", proceso->contexto->pid, estadoAnterior, nuevoEstado);
 }
-
+/*
 void tiempoEnCPU(t_pcb* proceso){
 	if(strcmp("HRRN", Algoritmo())==0){
-    /*struct timespec end;
+    struct timespec end;
     clock_gettime(CLOCK_REALTIME, &end);
 
     //float seconds = end.tv_sec - proceso->llegadaACPU.tv_sec;
     //float nanoseconds = end.tv_nsec - proceso->llegadaACPU.tv_nsec;
-    double elapsed = (end.tv_sec - proceso->llegadaACPU.tv_sec) + ((end.tv_nsec - proceso->llegadaACPU.tv_nsec)*1e-9);*/
+    double elapsed = (end.tv_sec - proceso->llegadaACPU.tv_sec) + ((end.tv_nsec - proceso->llegadaACPU.tv_nsec)*1e-9);
 		float tiempoActual = tiempoActualEnMiliseg();
     proceso->ultimaRafagaEjecutada=tiempoActual - proceso->llegadaACPU;
     calcularNuevaEstimacion(proceso);
 	}
 
 }
+*/
+
 
 void calcularNuevaEstimacion(t_pcb* proceso) {
 	double alfa = Alfa();
@@ -144,16 +146,6 @@ void validarRyW(char* direccion,t_pcb* ultimoEjecutado){
 	if(direc == -1){
 		finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 	}
-}
-//Funcion General para la mayoria de isntrucciones q empiezan con F//
-void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado){
-	t_paquete* paqueteF = serializarInstruccion(instruccion);
-	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion");
-	ultimoEjecutado->estadoPcb= BLOCK;
-	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", ultimoEjecutado->contexto->pid, instruccion->param1);
-	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
-	tiempoEnCPU(ultimoEjecutado);
-	free(instruccion);
 }
 
 //Actualizar la tabla de segmentos de todos los procesos//

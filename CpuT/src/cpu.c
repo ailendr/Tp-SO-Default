@@ -57,7 +57,7 @@ int main(/*int argc, char** argv*/) {
 			while (verificador == 0){
 				instr = fetch (contextoRecibido);
 				nuevaInstr = decode (instr, contextoRecibido);
-				if (strcmp(nuevaInstr->param1, "-1") == 0 || strcmp(nuevaInstr->param2, "-1") == 0){
+				if (cantidadDeParametros(nuevaInstr->nombre) != 0 && (strcmp(nuevaInstr->param1, "-1") == 0 || strcmp(nuevaInstr->param2, "-1") == 0)){
 					verificador = -1;
 					}
 				else {

@@ -51,12 +51,7 @@ void cortoPlazo() {
 				log_info(loggerKernel, "%s: Obtengo el proceso %d de Ready", Algoritmo(), procesoAEjec->contexto->pid);
 				t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
 				procesoAEjecutar(contextoAEjec);
-				clock_gettime(CLOCK_REALTIME, &begin);
-/*
-				if(strcmp(Algoritmo(), "HRRN")==0){
-				procesoAEjec->llegadaACPU=tiempoActualEnMiliseg();
-				}
-*/
+				clock_gettime(CLOCK_REALTIME, &begin);//Tomo tiempo en que ingresó el proceso en CPU
 				procesoAEjec->estadoPcb = EXEC;
 				logCambioDeEstado(procesoAEjec, "READY", "EXEC");
 				//pthread_mutex_lock(&mutexUltimoEjecutado);
@@ -97,7 +92,6 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				free(instruccion);
 				finTiempoEnCPU(ultimoEjecutado);
 				agregarAEstadoReady(ultimoEjecutado);
-
 				//sem_post(&cpuLibre);
 				sem_post(&planiCortoPlazo);
 				break;
@@ -123,6 +117,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				log_info(loggerKernel, "Intruccion IO");
 				finTiempoEnCPU(ultimoEjecutado);
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
+				finTiempoEnCPU(ultimoEjecutado); // VEEEEER ESTOOOOOOOO
 				char* tiempo = instruccion->param1;
 				free(instruccion);//Hay q liberar puntero
 				log_info(loggerKernel, "PID: %d - Ejecuta IO: %d", ultimoEjecutado->contexto->pid, atoi(tiempo));
@@ -212,34 +207,6 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 	}
 
 //---ALGORITMOS---///
-/*void algoritmoFIFO() {
-	log_info(loggerKernel, "Empieza algoritmo FIFO");
-	t_pcb *procesoAEjec = extraerDeReady();
-	log_info(loggerKernel, "FIFO: Obtengo un proceso de ready");
-	t_contextoEjec *contextoAEjec = procesoAEjec->contexto;
-	procesoAEjecutar(contextoAEjec);
-	procesoAEjec->estadoPcb = EXEC;
-	logCambioDeEstado(procesoAEjec, "READY", "EXEC");
-	ultimoEjecutado = procesoAEjec;
-}*/
-
-/*
-void algoritmoHRRN(){
-	log_info(loggerKernel, "Empieza algoritmo HRRN");
-	t_pcb* procesoAEjec;
-	list_iterate(colaReady, (void*) calcularNuevaEstimacion);
-	list_iterate(colaReady, (void*) calcularRR);
-	list_sort(colaReady, (void*)comparadorRR);//Aca me ordena la lista por el comparador de RR
-	procesoAEjec=extraerDeReady();
-	log_info(loggerKernel, "HRRN: Obtengo un proceso de ready");
-
-	t_contextoEjec * contextoAEjec = procesoAEjec->contexto;
-	procesoAEjecutar(contextoAEjec);
-	procesoAEjec->estadoPcb=EXEC;
-	logCambioDeEstado(procesoAEjec, "READY", "EXEC");
-	clock_gettime(CLOCK_REALTIME, &(procesoAEjec->llegadaACPU));//Por HRRN
-	ultimoEjecutado = procesoAEjec;
-}*/
 
 void finTiempoEnCPU(t_pcb* proceso){
  if(strcmp("HRRN", Algoritmo())==0){
@@ -285,66 +252,6 @@ bool comparadorRR(t_pcb* proceso1, t_pcb* proceso2) {
 
 }
 
-
-uint32_t tiempo_actual(){
-	//en milisegundos
-	struct timeval hora_actual;
-	gettimeofday(&hora_actual, NULL);
-	uint32_t tiempo = (hora_actual.tv_sec * 1000 + hora_actual.tv_usec / 1000);
-	return tiempo;
-}
-/*
-t_pcb* obtenerProceso(){
-	t_pcb* proceso;
-	if (strcmp(Algoritmo(), "HRRN")==0){
-		log_info(loggerKernel, "Cola Ready ordenada por HRRN");
-		//list_iterate(colaReady, (void*) calcularNuevaEstimacion);
-		//list_iterate(colaReady, (void*) calcularRR);
-	    proceso =pcb_elegido_HRRN();
-	}
-	else {
-      log_info(loggerKernel, "Cola Ready ordenada por FIFO"); //se sabe q no ordena nada solo es un log
-	  proceso = extraerDeReady();
-	}
-	return proceso;
-}*/
-/*
-t_pcb* pcb_elegido_HRRN(){
-	int pos = 0;
-	float tiempoActual = tiempoActualEnMiliseg();
-	float ratio_mayor = 0.0;
-	t_pcb* pcb;
-
-	for (int i = 0; i < list_size(colaReady); i++) {
-		pcb = list_get(colaReady, i);
-		float wait = tiempoActual - pcb->llegadaAReady; //en milisegundos
-		float ratio = (pcb->estimadoRafaga + wait) / (pcb->estimadoRafaga);
-		log_info(loggerKernel, "Posicion <%d> de Ready con Proceso de id <%d> ", i, pcb->contexto->pid);
-		log_info(loggerKernel, "con Ratio : <%.6f>", ratio);
-		if (ratio > ratio_mayor){
-			ratio_mayor = ratio;
-			pos = i;
-		}
-	}
-	pcb = list_remove(colaReady, pos);
-	return pcb;
-}
-*/
-/*
-void estimar_rafaga(t_pcb* pcb){
-	//cada vez que el proceso se desaloja de la cpu
-	//uint32_t tiempo_viejo = pcb->tiempo_ready;
-	uint32_t estimadoAnterior = pcb->estimadoReady;
-	uint32_t tiempoActual = tiempo_actual();
-	uint32_t tiempoEnCPU = tiempoActual - pcb->ultimaRafagaEjecutada;
-	//pcb->tiempo_ready = tiempo.tv_sec * 1000 + tiempo.tv_usec / 1000; // milisec
-	//pcb->tiempo_ready = tiempo.tv_sec * 1000000 + tiempo.tv_usec; //micro
-	//pcb->tiempo_ready = tiempo.tv_sec; //seg
-	float alpha = 1 - Alfa();
-	pcb->ultimaRafagaEjecutada = (alpha * estimadoAnterior + Alfa() * tiempoEnCPU);
-
-	//printf("\n\nestimado_viejo: %d,  estimado actual: %d, tiempo que tardo en cpu: %d\n\n", estimado_viejo, pcb->estimado_rafaga, tiempo_ejecucion);
-}*/
 
 //////////////////////LISTA DE INSTRUCCIONES ,PROCESOS, E INSTRUCCION BY CPU////////////////////////////
 
@@ -488,4 +395,15 @@ void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecu
 			break;
 
 	}
+}
+
+//Funcion General para la mayoria de isntrucciones q empiezan con F//
+void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado){
+	t_paquete* paqueteF = serializarInstruccion(instruccion);
+	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion");
+	ultimoEjecutado->estadoPcb= BLOCK;
+	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", ultimoEjecutado->contexto->pid, instruccion->param1);
+	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
+	finTiempoEnCPU(ultimoEjecutado);
+	free(instruccion);
 }
