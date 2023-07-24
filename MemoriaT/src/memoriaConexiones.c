@@ -17,17 +17,19 @@ while(1){
 	switch(codInstruccion){
 	case(MOV_IN):
 		instruccion = obtenerInstruccion(socket, 2);
-	     char* cantBytes = instruccion->param1;
-	     int bytes = atoi(cantBytes); //Los bytes llegan el param 1 que es el Registro
-	implementarInstruccion(instruccion->param2,instruccion->pid, instruccion->param1,socket, MOV_IN, bytes);
-
+		char* cantBytes = instruccion->param1;
+		int bytes = atoi(cantBytes); //Los bytes llegan el param 1 que es el Registro
+		implementarInstruccion(instruccion->param2,instruccion->pid, instruccion->param1,socket, MOV_IN, bytes);
+		log_info(loggerMemoria, "“PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - Origen: <CPU>", instruccion->pid, instruccion->param2);
 
 
 		break;
 
 	case(MOV_OUT):
 		instruccion = obtenerInstruccion(socket, 2);
-	implementarInstruccion(instruccion->param1, instruccion->pid, instruccion->param2,socket, MOV_OUT,0);
+		implementarInstruccion(instruccion->param1, instruccion->pid, instruccion->param2,socket, MOV_OUT,0);
+		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - Origen: <CPU>", instruccion->pid, instruccion->param1);
+
 
 
 		break;
