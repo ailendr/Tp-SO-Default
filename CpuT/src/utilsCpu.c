@@ -112,7 +112,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	nuevaInstruccion -> nombre = MENSAJE;
 	nuevaInstruccion -> pid = id;
 	nuevaInstruccion -> param1 = dirFisica;
-	//nuevaInstruccion -> param2 = NULL;
+	nuevaInstruccion -> param2 = string_itoa(cantBytes);
 	//nuevaInstruccion -> param3 = NULL;
 
 	t_paquete* paqueteI;
