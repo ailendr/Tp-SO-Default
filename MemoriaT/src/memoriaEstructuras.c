@@ -294,21 +294,34 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	t_tabla* tabla = list_get(listaDeTablas, posDeTabla);
 	int posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
-    usleep(retardoMemoria()*1000);
 		if(operacion == MOV_IN || F_WRITE){
+			if(bytes+offset <segmento->limite){
+			usleep(retardoMemoria()*1000);
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
 			enviar_mensaje(registro, socket);
+		}else{
+			registro = "-1";
+			enviar_mensaje(registro, socket);
 		}
+	}
 
 	 if(operacion == MOV_OUT ||operacion == F_READ){
+		if(strlen(registro)+offset <segmento->limite){
+		 	usleep(retardoMemoria()*1000);
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(memoriaContigua + segmento->base+ offset, &registro, strlen(registro)); //Ver si habria que agregar un +1
 			pthread_mutex_unlock(&mutexEspacioUser);
-
 			escribirMemoria( segmento, strlen(registro));
-		}
+
+	 }else{
+		 registro = "-1";
+		 enviar_mensaje(registro, socket);
+	 }
+	}
+
+
 
 }
 

@@ -51,7 +51,8 @@ typedef enum
 	COMPACTAR,
 	ERROR,
 	OK,
-	CREAR_TABLA
+	CREAR_TABLA,
+	F_CREATE
 
 }op_code;
 
