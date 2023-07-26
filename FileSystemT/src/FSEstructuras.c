@@ -11,13 +11,6 @@ t_superbloque* superBloque;
 t_bitarray* bitMap;
 t_queue* peticiones;
 
-static t_superbloque* crearSuperbloque(uint32_t block_size, uint32_t block_count){
-	t_superbloque* sb;
-    sb -> blockSize = block_size;
-    sb -> blockCount = block_count;
-    return sb;
-}
-
 
 void iniciarEstructuras(){
 	char* archBloques = pathBloques();
@@ -71,9 +64,8 @@ void iniciarSuperBloque(){
 	int cantBloques =  config_get_int_value(rutaSuperBloque, "BLOCK_COUNT");
 	log_info(loggerFS, "El tamaño de bloque es: %d",tamBloque);
 	log_info(loggerFS, "La cantidad de bloques es: %d", cantBloques);
-	//superBloque -> blockSize = tamBloque;
-	//superBloque->blockCount = cantBloques;
-	crearSuperbloque(tamBloque, cantBloques);
+	superBloque -> blockSize = tamBloque;
+	superBloque->blockCount = cantBloques;
 }
 
 void iniciarArchivoDeBloques(char* pathArch){

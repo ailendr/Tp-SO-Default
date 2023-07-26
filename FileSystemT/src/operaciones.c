@@ -88,14 +88,22 @@ void truncarArchivo (char* nombreArchivo, uint32_t tamanio){
 	t_fcb* fcb;
 	int posicion = posicionFCB(nombreArchivo);
 	fcb = list_get(fcbs, posicion);
-	//verificar existencia
-	if(tamanio > fcb -> tamanioArchivo){
-		asignarBloques();
+
+	int diferencia = cantBloques(tamanio)-cantBloques(fcb -> tamanioArchivo);
+
+	if(cantBloques(tamanio) > cantBloques(fcb -> tamanioArchivo)){
+		agregarBloques(diferencia, fcb);
 	    fcb -> tamanioArchivo = tamanio;
-	}else{
-	//condicion de reducir (coinciderar que no se reduzca a un valor menor al tamanio del archivo)
-		fcb -> tamanioArchivo = tamanio;
 	}
+
+	if(cantBloques(tamanio) < cantBloques(fcb -> tamanioArchivo)){
+		eliminarBloques((-1)*diferencia, fcb);
+	    fcb -> tamanioArchivo = tamanio;
+	}
+
+	int offset = tamanio % superBloque->blockSize;
+
+	//TODO
 }
 
 void leerArchivo (t_instruccion* instruccion){
@@ -209,23 +217,19 @@ void almacenarFcb (t_fcb* fcb){
 	//Verificar si asi esta bien o es al reves
 }
 
-int cantidadDeBloquesAsignar(uint32_t tamanio){
+int cantBloques (uint32_t tamanio){
 	int cantidadDeBloques = 0;
-	float cantidadFloat;
-	uint32_t tamanioBloque = superBloque -> blockSize;
-	cantidadFloat = ceil((float)tamanio / tamanioBloque);
-
-	numSegmento = floor(dirLogica/tamSegmento());
-	offset = dirLogica % tamSegmento();
-
-	cantidadDeBloques = (int) cantidadFloat;
+	cantidadDeBloques = ceil(tamanio/superBloque->blockSize) + 1;
+	//El + 1 es por el bloque que tiene todos los punteros
 	return cantidadDeBloques;
 }
 
-void asignarBloques(int cantidadDeBloques){
-	//considerar si el archivo ya tiene bloques asignados()
-	//verificar que los bloques esten en 0 bitmap
-	//agregar en los punteros indirectos los nuevos bloques asignados
+void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
+
+}
+
+void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
+
 }
 
 // ___________________ FINALIZACION ___________________
