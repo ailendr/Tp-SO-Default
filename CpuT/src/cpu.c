@@ -40,30 +40,27 @@ int main(/*int argc, char** argv*/) {
     
 		if (codigo != CONTEXTO){
 			log_info(loggerCPU, "No se recibio un contexto");
+		} else {
 
-		}
-		else{
-		log_info(loggerCPU, "Se recibio el buffer del contexto");
-		buffer = recibir_buffer(&tamanio, cliente);
-		//
-		int desplazamiento = 0; //el valor de desplazamiento va a cambiar despues de deserializarContexto pero aca no tiene valor util
-		contextoRecibido = deserializarContexto(buffer, tamanio, &desplazamiento);
-        free(buffer);
-		//
-		if (contextoRecibido->pid != -1){
+			log_info(loggerCPU, "Se recibio el buffer del contexto");
+			buffer = recibir_buffer(&tamanio, cliente);
 
-			log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
+			int desplazamiento = 0;
+			contextoRecibido = deserializarContexto(buffer, tamanio, &desplazamiento);
+			free(buffer);
 
-			while (verificador == 0){
-				instr = fetch (contextoRecibido);
-				nuevaInstr = decode (instr, contextoRecibido);
-				if (cantidadDeParametros(nuevaInstr->nombre) != 0 && (strcmp(nuevaInstr->param1, "-1") == 0 || strcmp(nuevaInstr->param2, "-1") == 0)){
-					verificador = -1;
+			if (contextoRecibido->pid != -1){
+
+				log_info(loggerCPU, "Se recibio el proceso %d",contextoRecibido->pid);
+
+				while (verificador == 0){
+					instr = fetch (contextoRecibido);
+					nuevaInstr = decode (instr, contextoRecibido);
+					if (posibleSegFault (nuevaInstr) == 1){
+						verificador = -1;
+					} else {
+						verificador = execute (nuevaInstr, contextoRecibido);
 					}
-				else {
-					verificador = execute (nuevaInstr, contextoRecibido);
-					}
-
 				}
 
 				verificador = 0;
@@ -71,11 +68,10 @@ int main(/*int argc, char** argv*/) {
 				t_paquete* paqueteC = serializarContextoCompuesto(contextoRecibido, nuevaInstr);
 				validarEnvioDePaquete(paqueteC, cliente, loggerCPU, configCPU, "Contexto");
 
-				}
-				else {
-					log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
-					}
+			} else {
+				log_info(loggerCPU, "Se recibio un contexto sin PID. Revisar");
 			}
+		}
 	}
 
 

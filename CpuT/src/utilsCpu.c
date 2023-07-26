@@ -35,7 +35,6 @@ int iniciarCpu (char* pathConfig){
 
 }
 
-
 int iniciarSocketsCpu(){
 
 	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
@@ -144,3 +143,11 @@ int tamRegistro (char* registro){
 	return 0;
 }
 
+int posibleSegFault (t_instruccion* nuevaInstr){
+	if (cantidadDeParametros(nuevaInstr->nombre) == 0) return 0;
+	if (strcmp(nuevaInstr->param1, "-1") == 0) return 1;
+	if (cantidadDeParametros(nuevaInstr->nombre) > 1){
+		if (strcmp(nuevaInstr->param2, "-1") == 0) return 1;
+	}
+	return 0;
+}
