@@ -100,7 +100,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	log_info(loggerCPU, "DIRECCION FISICA: %s", dirFisica);
 
 	int cantBytes = 0;
-	cantBytes = offset + tam;
+	cantBytes = (offset - 1) + tam; //le resto un -1 porq tiene q escribir contando desde el byte del offset
 	log_info(loggerCPU, "CANT BYTES A LEER: %i", cantBytes);
 
 	if (cantBytes > (valorGuardar - 1)){
@@ -117,7 +117,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	t_paquete* paqueteI;
 
 	paqueteI = serializarInstruccion(nuevaInstruccion);
-	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
+	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Validacion de Direccion a Memoria");
 
 	valorGuardar = recibir_operacion(socketMemoria);
 
@@ -125,9 +125,10 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 		log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>", nuevaInstruccion->pid);
 		return "-1";
 	}
-
+	else if (valorGuardar == OK){
 	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
 	return dirFisica;
+	}
 }
 
 int tamRegistro (char* registro){
