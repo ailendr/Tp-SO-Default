@@ -9,8 +9,12 @@
 #define SRC_PLANIFICACION_H_
 #include "utilsPlanificacion.h"
 
+typedef struct{
+	uint32_t PID;
+	char* nombreArchivo;
+}t_archivos;
 
-
+extern t_list* archivos;
 
 extern struct timespec begin, end;
 
@@ -37,5 +41,6 @@ void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecu
 void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado);
 
 
+int archivoAbierto (char* nombre, int id);
 
 #endif /* SRC_PLANIFICACION_H_ */

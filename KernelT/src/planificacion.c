@@ -8,6 +8,7 @@
 #include "planificacion.h"
 
 struct timespec begin, end;
+extern t_list* archivos;
 
 void largoPlazo() {
 	while (1) {
@@ -177,6 +178,15 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case F_OPEN:
+				log_info(loggerKernel, "Intruccion Open File");
+				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
+				if (archivoAbierto(instruccion->param1, instruccion->pid) != -1){
+					log_info(loggerKernel, "Archivo: %s ya creado para <ID %i>", instruccion->param1, instruccion->pid);
+				} else {
+					t_paquete* paqueteDS = serializarInstruccion(instruccion);
+					validarEnvioDePaquete(paqueteDS, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
+				}
+				free(instruccion);
 				break;
 			case F_CLOSE:
 				break;
@@ -406,4 +416,21 @@ void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado){
 	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
 	finTiempoEnCPU(ultimoEjecutado);
 	free(instruccion);
+}
+
+// UTILS FILE SYSTEM
+int archivoAbierto (char* nombre, int id){
+    t_archivos* archivo;
+
+	int tamanioLista = list_size(archivos);
+
+	for(int j = 0; j < tamanioLista; j++){
+		archivo = list_get(archivos, j);
+
+		if(strcmp(archivo->nombreArchivo, nombre) == 0 && archivo->PID == id){
+			return j;
+		}
+
+	}
+    return -1;
 }
