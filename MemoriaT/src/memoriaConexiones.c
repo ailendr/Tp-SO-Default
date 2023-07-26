@@ -34,12 +34,10 @@ while(1){
 
 		break;
 	case (MENSAJE):
-		instruccion = obtenerInstruccion(socket,1);
+		instruccion = obtenerInstruccion(socket,2);
 	    char* direcF= instruccion->param1;
-	    char** direccionFisica = string_split(direcF, " ");
-		char* numSeg = direccionFisica[0];
-		int numSegmento= atoi(numSeg);
-		validarNumSegmento(numSegmento, socket); //Avisa a Cpu que es un segmento invalido
+	    int bytesATrasladar = atoi(instruccion->param2);
+		validarSegmento(instruccion->pid, direcF, bytesATrasladar,socket); //Avisa a Cpu que es un segmento invalido
 		break;
 	/*case(-1):
 			log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos

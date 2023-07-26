@@ -272,9 +272,16 @@ void compactar() {
 }
 
 
-void validarNumSegmento(int numSeg, int socket){
-    int valorOp;
-	if(numSeg >= cantSegmentos()){
+void validarSegmento(uint32_t pid, char* direcF,int bytes, int socket){
+	char** direccionFisica = string_split(direcF, " ");
+	char* numSeg = direccionFisica[0];
+	int numSegmento= atoi(numSeg);
+	char* desplazamiento = direccionFisica[1];
+	int offset = atoi(desplazamiento);
+	int posDeTabla = buscarPosSegmento(numSegmento, pid, listaDeSegmentos);
+	t_segmento* segmento = list_get(listaDeSegmentos, posDeTabla);
+    int valorOp = 0;
+	if(numSegmento >= cantSegmentos() || offset + bytes >= segmento->limite) { //mayor igual porq traslacion<limite del segmento
 	valorOp= ERROR;
     send(socket, &valorOp, sizeof(int), 0);
 	}
@@ -290,35 +297,27 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	char* desplazamiento = direccionFisica[1];
 	int numSegmento= atoi(numSeg);
 	int offset = atoi(desplazamiento);
-	int posDeTabla = posTablaEnLista(listaDeTablas, pid);
-	t_tabla* tabla = list_get(listaDeTablas, posDeTabla);
-	int posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
-	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
+	int posDeTabla = buscarPosSegmento(numSegmento, pid, listaDeSegmentos);
+	t_segmento* segmento = list_get(listaDeSegmentos, posDeTabla);
+	usleep(retardoMemoria()*1000);
+
 		if(operacion == MOV_IN || F_WRITE){
-			if(bytes+offset <segmento->limite){
-			usleep(retardoMemoria()*1000);
+            char* infoAEnviar = malloc(bytes); //probablemente haya q hacer eso para copiarle info de un cierto tamaño
 			pthread_mutex_lock(&mutexEspacioUser);
-			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			memcpy(&infoAEnviar, memoriaContigua + segmento->base + offset, bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
-			enviar_mensaje(registro, socket);
-		}else{
-			registro = "-1";
-			enviar_mensaje(registro, socket);
+			enviar_mensaje(infoAEnviar, socket);
+			free(infoAEnviar);
 		}
-	}
+
 
 	 if(operacion == MOV_OUT ||operacion == F_READ){
-		if(strlen(registro)+offset <segmento->limite){
 		 	usleep(retardoMemoria()*1000);
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(memoriaContigua + segmento->base+ offset, &registro, strlen(registro)); //Ver si habria que agregar un +1
 			pthread_mutex_unlock(&mutexEspacioUser);
 			escribirMemoria( segmento, strlen(registro));
 
-	 }else{
-		 registro = "-1";
-		 enviar_mensaje(registro, socket);
-	 }
 	}
 
 
