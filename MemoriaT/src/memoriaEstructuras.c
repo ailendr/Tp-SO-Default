@@ -145,7 +145,7 @@ void logearListaDeSegmentos(char* mensaje){
 	log_info(loggerMemoria, "Lista de segmentos %s: ", mensaje);
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
-		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria);
+		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d, Tam Info: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria, segmento->tamanioInfo);
 		log_info(loggerMemoria, "Pos en la lista: %d", i);
 	}
 }
@@ -286,15 +286,15 @@ void validarSegmento(uint32_t pid, char* direcF,int bytes, int socket){
 	}
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
     int valorOp = 0;
-	if(numSegmento >= cantSegmentos()){
-	valorOp= ERROR;
-    send(socket, &valorOp, sizeof(int), 0);
-	}
-
-	if(bytes >= (segmento->limite)) {
-		valorOp = ERROR;
+	if(numSegmento >= cantSegmentos() || bytes >= (segmento->limite)){
+		valorOp= -1;
 		send(socket, &valorOp, sizeof(int), 0);
 	}
+/*
+	if()) {
+		valorOp = -1;
+		send(socket, &valorOp, sizeof(int), 0);
+	}*/
 	else if ( numSegmento < cantSegmentos() && bytes < segmento->limite ){
 		valorOp = OK;
 	    send(socket, &valorOp, sizeof(int), 0);
@@ -319,22 +319,19 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 		if(operacion == MOV_IN || operacion == F_WRITE){
            // char* infoAEnviar = malloc(bytes); //probablemente haya q hacer eso para copiarle info de un cierto tamaño
 			pthread_mutex_lock(&mutexEspacioUser);
-			memcpy(&registro, memoriaContigua + segmento->base + offset, bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
 			enviar_mensaje(registro, socket);
 
 		}
 
-
 	 if(operacion == MOV_OUT ||operacion == F_READ){
 			pthread_mutex_lock(&mutexEspacioUser);
-			memcpy(memoriaContigua + segmento->base + offset, &registro, strlen(registro)); //Ver si habria que agregar un +1
+			memcpy(memoriaContigua + (segmento->base + (offset-1)), &registro, strlen(registro));
 			pthread_mutex_unlock(&mutexEspacioUser);
 			escribirMemoria( segmento, strlen(registro));
 
 	}
-
-
 
 }
 

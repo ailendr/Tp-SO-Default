@@ -88,6 +88,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	int offset = 0;
 	int valorGuardar = tamSegmento();
 	t_instruccion* nuevaInstruccion = malloc(sizeof(t_instruccion*));
+	char* retorno=NULL;
 
 	int dirLogica = atoi(direccionLogica);
 
@@ -105,7 +106,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 
 	if (cantBytes > (valorGuardar - 1)){
 		log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>", id);
-		return "-1";
+		retorno= "-1";
 	}
 
 	nuevaInstruccion -> nombre = MENSAJE;
@@ -119,16 +120,19 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	paqueteI = serializarInstruccion(nuevaInstruccion);
 	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Validacion de Direccion a Memoria");
 
-	valorGuardar = recibir_operacion(socketMemoria);
+	int valor =0;
+	valor= recibir_operacion(socketMemoria);
 
-	if (valorGuardar == ERROR){
+	if (valor == -1 || valor == 5){
 		log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>", nuevaInstruccion->pid);
-		return "-1";
+		retorno= "-1";
 	}
-	else if (valorGuardar == OK){
+	else if (valor == OK){
 	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
-	return dirFisica;
+	retorno= dirFisica;
 	}
+	return retorno;
+
 }
 
 int tamRegistro (char* registro){
