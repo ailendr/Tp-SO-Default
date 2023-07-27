@@ -161,9 +161,9 @@ void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 	instruccion->param2 = valorGuardar;
     log_info(loggerCPU, "El valor recibido de Memoria es: %s", instruccion->param2);
 
+	set(instruccion, contexto);
 	free(valorGuardar); //Se esta reservando malloc con recibir Mensaje :))
 	free (newInst);
-	set(instruccion, contexto);
     }
 }
 
