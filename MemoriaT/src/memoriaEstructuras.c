@@ -287,7 +287,7 @@ void validarSegmento(uint32_t pid, char* direcF,int bytes, int socket){
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
     int valorOp = 0;
 	if(numSegmento >= cantSegmentos() || bytes >= (segmento->limite)){
-		valorOp= -1;
+		valorOp = ERROR;
 		send(socket, &valorOp, sizeof(int), 0);
 	}
 /*

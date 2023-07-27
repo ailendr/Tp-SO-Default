@@ -123,7 +123,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	int valor =0;
 	valor= recibir_operacion(socketMemoria);
 
-	if (valor == -1 || valor == 5){
+	if (valor == ERROR){
 		log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>", nuevaInstruccion->pid);
 		retorno= "-1";
 	}
