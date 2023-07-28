@@ -231,7 +231,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 
 void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
-   // usleep(retardoCompactacion()*1000);
+    usleep(retardoCompactacion()*1000);
 	logearListaDeSegmentos("Antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//Es mejor destruir los elementos tambien por si queda algo
@@ -243,12 +243,11 @@ void compactar() {
 		t_segmento* segmento = list_get(listaAux, i);
 		t_segmento* segAnterior = list_get(listaAux, i-1);
 		if(segmento->tieneInfo){
-			char* info = malloc(segmento->tamanioInfo);
+			char* info;
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&info, memoriaContigua + ((segmento->base) - 1),segmento->tamanioInfo);
 			memcpy(memoriaContigua + ((segAnterior->limite) - 1), &info, segmento->tamanioInfo);
 			pthread_mutex_unlock(&mutexEspacioUser);
-			free(info);
 			}
 
 		segmento->base = segAnterior->limite;
