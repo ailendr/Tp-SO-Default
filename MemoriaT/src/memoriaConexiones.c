@@ -9,6 +9,7 @@
 
 void atenderPeticionesCpu(int* socketCpu){
 	int socket = * socketCpu;
+	log_info(loggerMemoria, "Esperando Peticiones de CPU");
 
 while(1){
 	int codInstruccion;
@@ -21,7 +22,7 @@ while(1){
 		int bytes = atoi(cantBytes); //Los bytes llegan el param 1 que es el Registro
 		implementarInstruccion(instruccion->param2,instruccion->pid, instruccion->param1,socket, MOV_IN, bytes);
 		log_info(loggerMemoria, "“PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - Origen: <CPU>", instruccion->pid, instruccion->param2);
-
+		free(instruccion);
 
 		break;
 
@@ -29,17 +30,16 @@ while(1){
 		instruccion = obtenerInstruccion(socket, 2);
 		implementarInstruccion(instruccion->param1, instruccion->pid, instruccion->param2,socket, MOV_OUT,0);
 		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - Origen: <CPU>", instruccion->pid, instruccion->param1);
-
+		free(instruccion);
 
 
 		break;
 	case (MENSAJE):
-		instruccion = obtenerInstruccion(socket,1);
+		instruccion = obtenerInstruccion(socket,2);
 	    char* direcF= instruccion->param1;
-	    char** direccionFisica = string_split(direcF, " ");
-		char* numSeg = direccionFisica[0];
-		int numSegmento= atoi(numSeg);
-		validarNumSegmento(numSegmento, socket); //Avisa a Cpu que es un segmento invalido
+	    int bytesATrasladar = atoi(instruccion->param2);
+		validarSegmento(instruccion->pid, direcF, bytesATrasladar,socket); //Avisa a Cpu que es un segmento invalido
+		free(instruccion);
 		break;
 	/*case(-1):
 			log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
@@ -56,6 +56,8 @@ while(1){
 
 void atenderPeticionesFs(int* socketFs){
    int socket = *socketFs;
+   log_info(loggerMemoria, "Esperando Peticiones de File System");
+
 	while(1){
 		int codInstruccion;
 	    codInstruccion = recibir_operacion(socket);
@@ -64,6 +66,7 @@ void atenderPeticionesFs(int* socketFs){
 	case(F_READ):
 			instruccion = obtenerInstruccion(socket, 3);
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_READ,0);
+		free(instruccion);
 
 
 		break;
@@ -72,12 +75,13 @@ void atenderPeticionesFs(int* socketFs){
 			instruccion = obtenerInstruccion(socket, 3);
 	        int bytes = atoi(instruccion->param3);
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_WRITE, bytes);
+		free(instruccion);
 
 		break;
-	case(-1):
+	/*case(-1):
 			log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
 	//ver como proseguir
-		break;
+		break;*/
 	default:
 		break;
 		}
@@ -107,7 +111,7 @@ void atenderModulos(int socket_servidor){
 	///---CLIENTE FILE SYSTEM---///
 	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
 
-	int socketFs= esperar_cliente(socket_servidor, loggerMemoria);
+	int socketFs = esperar_cliente(socket_servidor, loggerMemoria);
 	if(verificarSocket(socketFs, loggerMemoria, configMemoria) == 1) {
 
 				   close(socket_servidor);

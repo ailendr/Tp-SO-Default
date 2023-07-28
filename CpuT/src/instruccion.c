@@ -143,7 +143,7 @@ void set (t_instruccion* instruccion, t_contextoEjec* contexto){
 
 void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 	t_paquete* paqueteI;
-	char* valorGuardar;
+	//char* valorGuardar;
 	t_instruccion* newInst = malloc(sizeof(t_instruccion*));
 	newInst->nombre = instruccion->nombre;
 	newInst->pid = instruccion->pid;
@@ -153,12 +153,18 @@ void moveIn (t_instruccion* instruccion, t_contextoEjec* contexto){
 
 	paqueteI = serializarInstruccion(newInst);
 
-	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
-
-	valorGuardar = recibir_mensaje(socketMemoria);
+	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion MOV_IN a Memoria");
+    int codigo = recibir_operacion(socketMemoria);
+    if(codigo != (-1) && codigo == MENSAJE){
+	char* valorGuardar = recibir_mensaje(socketMemoria);
+    //log_info(loggerCPU, "El valor recibido de Memoria es: %s", valorGuardar);
 	instruccion->param2 = valorGuardar;
+    log_info(loggerCPU, "El valor recibido de Memoria es: %s", instruccion->param2);
+
 	set(instruccion, contexto);
+	free(valorGuardar); //Se esta reservando malloc con recibir Mensaje :))
 	free (newInst);
+    }
 }
 
 void moveOut (t_instruccion* instruccion, t_contextoEjec* contexto){
@@ -179,8 +185,8 @@ void moveOut (t_instruccion* instruccion, t_contextoEjec* contexto){
 	t_paquete* paqueteI;
 
 	paqueteI = serializarInstruccion(instruccion);
-	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
+	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion MOV_OUT a Memoria");
 	//TODO VALIDACION
-	log_info(loggerCPU, "Se esta almaceno %s en Memoria", instruccion->param2);
+	log_info(loggerCPU, "Se esta almacenando %s en Memoria", instruccion->param2);
 
 }

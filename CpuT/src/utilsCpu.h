@@ -21,5 +21,6 @@ int iniciarSocketsCpu();
 
 char* mmu (char* direccionLogica, uint32_t id, int tam);
 int tamRegistro (char* registro);
+int posibleSegFault (t_instruccion* nuevaInstr);
 
 #endif /* SRC_UTILSCPU_H_ */

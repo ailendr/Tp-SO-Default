@@ -8,12 +8,8 @@
 #ifndef SRC_FSUTILS_H_
 #define SRC_FSUTILS_H_
 
-#include <stdlib.h>
-#include "FSConfig.h"
+#include "peticiones.h"
 
-extern int servidorFS;
-extern int socketMemoria;
-extern int cliente;
 
 int iniciarMemoria ();
 int iniciarServKernel ();

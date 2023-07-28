@@ -111,7 +111,7 @@ bool BestFit(t_segmento* segmento1, t_segmento* segmento2){
 }
 
 bool WorstFit(t_segmento* segmento1, t_segmento* segmento2){
-		return segmento1->tamanio >= segmento2->tamanio;
+		return segmento1->tamanio > segmento2->tamanio;
 }
 
 int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t_segmento* seg1, t_segmento* seg2)){
@@ -127,7 +127,7 @@ int WorstYBest(uint32_t tamSegmento, t_list* listaDeSegmentos, bool(algoritmo)(t
 		segmento=list_get(listaDeSegmentos, i);
 
 		if(huecoLibre(segmento) && segmento->tamanio >= tamSegmento){
-			if(algoritmo(segmento, huecoFree)){
+			if(algoritmo(segmento, huecoFree)){ //como en worst compara por >= , deja este segundo segmento como el hueco libre
 				huecoFree=segmento;
 				pos=i;
 			}

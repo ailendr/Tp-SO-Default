@@ -35,7 +35,6 @@ int iniciarCpu (char* pathConfig){
 
 }
 
-
 int iniciarSocketsCpu(){
 
 	// CONEXION CON MEMORIA -----------------------------------------------------------------------------
@@ -89,6 +88,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	int offset = 0;
 	int valorGuardar = tamSegmento();
 	t_instruccion* nuevaInstruccion = malloc(sizeof(t_instruccion*));
+	char* retorno=NULL;
 
 	int dirLogica = atoi(direccionLogica);
 
@@ -101,12 +101,12 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	log_info(loggerCPU, "DIRECCION FISICA: %s", dirFisica);
 
 	int cantBytes = 0;
-	cantBytes = offset + tam;
+	cantBytes = (offset - 1) + tam; //le resto un -1 porq tiene q escribir contando desde el byte del offset
 	log_info(loggerCPU, "CANT BYTES A LEER: %i", cantBytes);
 
 	if (cantBytes > (valorGuardar - 1)){
 		log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>", id);
-		return "-1";
+		retorno= "-1";
 	}
 
 	nuevaInstruccion -> nombre = MENSAJE;
@@ -118,17 +118,21 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	t_paquete* paqueteI;
 
 	paqueteI = serializarInstruccion(nuevaInstruccion);
-	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Instruccion");
+	validarEnvioDePaquete(paqueteI, socketMemoria, loggerCPU, configCPU, "Validacion de Direccion a Memoria");
 
-	valorGuardar = recibir_operacion(socketMemoria);
+	int valor =0;
+	valor= recibir_operacion(socketMemoria);
 
-	if (valorGuardar == ERROR){
+	if (valor == ERROR){
 		log_info(loggerCPU, "SEGMENTATION FAULT: PCB <ID %d>", nuevaInstruccion->pid);
-		return "-1";
+		retorno= "-1";
 	}
-
+	else if (valor == OK){
 	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
-	return dirFisica;
+	retorno= dirFisica;
+	}
+	return retorno;
+
 }
 
 int tamRegistro (char* registro){
@@ -144,3 +148,11 @@ int tamRegistro (char* registro){
 	return 0;
 }
 
+int posibleSegFault (t_instruccion* nuevaInstr){
+	if (cantidadDeParametros(nuevaInstr->nombre) == 0) return 0;
+	if (strcmp(nuevaInstr->param1, "-1") == 0) return 1;
+	if (cantidadDeParametros(nuevaInstr->nombre) > 1){
+		if (strcmp(nuevaInstr->param2, "-1") == 0) return 1;
+	}
+	return 0;
+}

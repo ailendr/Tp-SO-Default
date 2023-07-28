@@ -10,7 +10,7 @@
 sem_t nuevoPedido;
 
 void atenderPeticiones(){
-
+   log_info(loggerFS, "Ejecuta Hilo Atender Peticiones numero : <%ld> ", pthread_self());
 	void* buffer = NULL;
 	int tamanio = 0;
 	int cantParam = 0;
@@ -69,6 +69,7 @@ void atenderPeticiones(){
 }
 
 void ejecutarPeticiones(){
+ log_info(loggerFS, "Ejecuta Hilo Ejecutar Peticiones numero : <%ld> ", pthread_self());
 
 	t_instruccion* instruccion;
 	op_code nombre;

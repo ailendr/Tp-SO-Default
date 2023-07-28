@@ -13,6 +13,11 @@
 
 extern t_log* loggerFS;
 extern t_config* configFS;
+//Agrego los sickets
+extern int servidorFS;
+extern int socketMemoria;
+extern int cliente;
+
 
 char* IP_Memoria();
 char* IP_Escucha();

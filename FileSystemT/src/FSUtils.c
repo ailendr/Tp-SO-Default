@@ -6,7 +6,7 @@
  */
 
 #include "FSUtils.h"
-
+//Agrego los sockets : Los extern estan en config.c
 int servidorFS;
 int socketMemoria;
 int cliente;
@@ -41,7 +41,10 @@ int iniciarServKernel (){
 		close (socketMemoria);
 		return EXIT_FAILURE;
 	}
+
 	log_info(loggerFS, "Esperando que se conecte Kernel");
+
+	while(1){
 
 	cliente = esperar_cliente(servidorFS, loggerFS);
 	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
@@ -52,6 +55,15 @@ int iniciarServKernel (){
 
 	recibirHandshake(cliente, HANDSHAKE_Kernel, loggerFS);
 	log_info(loggerFS, "Ok -> Servidor de Peticiones");
+	// INICIALIZAR HILO  ----------------------------------------------------------------------------
+    pthread_t hiloEjecutor;
+    pthread_t hiloAtencion;
 
+	pthread_create(&hiloAtencion,NULL,(void*)atenderPeticiones,NULL);
+	pthread_create(&hiloEjecutor,NULL,(void*)ejecutarPeticiones,NULL);
+
+	pthread_detach(hiloAtencion);
+	pthread_detach(hiloEjecutor);
+	}
 	return 0;
 }

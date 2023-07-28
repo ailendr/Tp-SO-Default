@@ -36,10 +36,6 @@ int main(/*int argc, char** argv*/) {
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
 
-	// REALIZAR LAS CONEXIONES CON EL CLIENTE Y EL SERVIDOR -----------------------------------------
-	iniciarMemoria ();
-	iniciarServKernel ();
-
 	// INICIALIZAR ESTRUCTURAS ----------------------------------------------------------------------
 	iniciarEstructuras();
 	peticiones = queue_create();
@@ -47,15 +43,11 @@ int main(/*int argc, char** argv*/) {
 	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
 	sem_init(&nuevoPedido,0, 0);
 
-	// INICIALIZAR HILO  ----------------------------------------------------------------------------
-    pthread_t hiloEjecutor;
-    pthread_t hiloAtencion;
 
-	pthread_create(&hiloAtencion,NULL,(void*)atenderPeticiones,NULL);
-	pthread_create(&hiloEjecutor,NULL,(void*)ejecutarPeticiones,NULL);
+	// REALIZAR LAS CONEXIONES CON EL CLIENTE Y EL SERVIDOR -----------------------------------------
+	iniciarMemoria ();
+	iniciarServKernel ();
 
-	pthread_detach(hiloAtencion);
-	pthread_detach(hiloEjecutor);
 
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
