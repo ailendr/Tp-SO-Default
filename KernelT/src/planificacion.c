@@ -197,15 +197,19 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_READ:
 				log_info(loggerKernel, "Intruccion F READ");
 				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
+				pthread_mutex_lock(&mutexOperacionFS);
                 validarRyW(instruccion->param2, ultimoEjecutado);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
                 implementacionF(instruccion, ultimoEjecutado);
+                pthread_mutex_unlock(&mutexOperacionFS);
 				break;
 			case F_WRITE:
 				log_info(loggerKernel, "Intruccion F WRITE");
 				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
+				pthread_mutex_lock(&mutexOperacionFS);
                 validarRyW(instruccion->param2, ultimoEjecutado);
                 implementacionF(instruccion, ultimoEjecutado);
+                pthread_mutex_unlock(&mutexOperacionFS);
 
 				break;
 			case F_TRUNCATE:
@@ -383,13 +387,16 @@ void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecu
 		case COMPACTAR:
 			log_info(loggerKernel, "Respuesta de Create Segment: COMPACTAR");
 			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
-			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
+			pthread_mutex_lock(&mutexOperacionFS);
+			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de O
 			send(socketMemoria, &habilitado, sizeof(int),0);
 			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
+			pthread_mutex_unlock(&mutexOperacionFS);
 			t_paquete* paqueteCS = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
 			validarCS(socketMemoria,instruccion,ultimoEjecutado);
+
 
 			break;
 		case ERROR:

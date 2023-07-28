@@ -14,6 +14,7 @@ t_list* listaDeSegmentos;
 /*Es para tener un hueco libre al principio cuando no hay segmentos y para cuando se compacte y queda contiguo el espacio libre*/
 t_segmento* segmentoLibre;
 pthread_mutex_t mutexEspacioUser;
+pthread_mutex_t mutexOperacionFS;
 
 ///////////////////////////// ESTRUCTURAS DE MEMORIA/////////////////////////////////////////////////////////
 
@@ -29,6 +30,7 @@ void iniciarEstructuras(){
 	crearSegmentoCero();
 	actualizarUltimoSegmentoLibre();
 	pthread_mutex_init(&mutexEspacioUser, NULL);
+	pthread_mutex_init(&mutexOperacionFS, NULL);
 }
 
 void crearEspacioMemoria (){

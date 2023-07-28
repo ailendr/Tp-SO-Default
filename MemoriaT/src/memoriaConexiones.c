@@ -173,6 +173,7 @@ void atenderPeticionesKernel(int* socketKernel){
 				break;
 
 			case COMPACTAR:
+
 					compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
 					enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
 				break;

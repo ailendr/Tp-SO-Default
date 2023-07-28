@@ -13,7 +13,7 @@ extern pthread_mutex_t mutexNew;
 extern pthread_mutex_t mutexPID;
 extern pthread_mutex_t mutexUltimoEjecutado;
 extern pthread_mutex_t mutexListaDeProcesos;
-
+extern pthread_mutex_t mutexOperacionFS;
 
 void inicializarSemaforos();
 void finalizarSemaforos();
