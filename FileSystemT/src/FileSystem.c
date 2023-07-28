@@ -61,7 +61,9 @@ int main(/*int argc, char** argv*/) {
 	log_info(loggerFS, "Finalizando File System...\n");
 
 	queue_destroy(peticiones);
-	finalizarListaFcb();
+	if (fcbs != NULL){
+		finalizarListaFcb();
+	}
 	sem_destroy(&nuevoPedido);
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
@@ -71,14 +73,3 @@ int main(/*int argc, char** argv*/) {
 
 	return EXIT_SUCCESS;
 }
-
- /*
-
-
-
-
-
-
-
-*/
-

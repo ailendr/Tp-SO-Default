@@ -11,22 +11,11 @@ t_superbloque* superBloque;
 t_bitarray* bitMap;
 t_queue* peticiones;
 
-static t_superbloque* crearSuperbloque(uint32_t block_size, uint32_t block_count){
-	t_superbloque* sb;
-    sb -> blockSize = block_size;
-    sb -> blockCount = block_count;
-    return sb;
-}
-
 
 void iniciarEstructuras(){
-	char* archBloques = pathBloques();
-	char* archBitmap = pathBitmap();
-
 	iniciarSuperBloque();
-	validarArchivo(archBloques, ARCHBLOQUES);
-	validarArchivo(archBitmap, BITMAP);
-
+	iniciarBitMap();
+	//validarArchivo(archBloques, ARCHBLOQUES);
 }
 
 void validarArchivo(char* pathArch, int estructura){
@@ -66,14 +55,42 @@ void validarArchivo(char* pathArch, int estructura){
 //////////////////////////////INICIALIZACION ESTRUCTURAS////////////////////////////////////////
 
 void iniciarSuperBloque(){
+	log_info(loggerFS, "Creando SuperBloque ....");
+	superBloque = malloc(sizeof(t_superbloque));
 	t_config * rutaSuperBloque= config_create(pathSuperBloque());
 	int tamBloque =  config_get_int_value(rutaSuperBloque, "BLOCK_SIZE");
 	int cantBloques =  config_get_int_value(rutaSuperBloque, "BLOCK_COUNT");
 	log_info(loggerFS, "El tamaño de bloque es: %d",tamBloque);
 	log_info(loggerFS, "La cantidad de bloques es: %d", cantBloques);
-	//superBloque -> blockSize = tamBloque;
-	//superBloque->blockCount = cantBloques;
-	crearSuperbloque(tamBloque, cantBloques);
+	superBloque -> blockSize = tamBloque;
+	superBloque->blockCount = cantBloques;
+	config_destroy(rutaSuperBloque);
+	log_info(loggerFS, "Ok -> Creacion Superbloque");
+}
+
+void iniciarBitMap(){
+	log_info(loggerFS, "Bajando Bitmap ....");
+	int bytes = superBloque->blockCount/8;
+	char* bitArray = malloc(bytes);
+	bitMap = bitarray_create_with_mode(bitArray, bytes, LSB_FIRST);
+
+	FILE* preGuardado = fopen(pathBitmap(), "rb+");
+
+	if (preGuardado != NULL){
+
+		log_info(loggerFS, "Recuperando los datos");
+		fread(bitMap->bitarray, 1, bytes, preGuardado);
+
+	} else {
+
+		preGuardado = fopen(pathBitmap(), "wb+");
+		log_info(loggerFS, "Creando el archivo");
+		strcpy(bitMap->bitarray, string_repeat('0', superBloque->blockCount));
+		fwrite(bitMap->bitarray, 1, bytes, preGuardado);
+
+	}
+	log_info(loggerFS, "Ok -> Creacion BitMap");
+	fclose(preGuardado);
 }
 
 void iniciarArchivoDeBloques(char* pathArch){
@@ -98,10 +115,3 @@ void iniciarArchivoDeBloques(char* pathArch){
 	//t_bloque* arrayBloques[superBloque->blockCount];
 }
 
-void iniciarBitMap(){
-	size_t bytes=superBloque->blockCount/8;
-	void* bitArray=malloc(bytes);
-	bitMap=bitarray_create_with_mode(bitArray, bytes, LSB_FIRST);
-	//uint32_t* mapeo = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED,/*descriptor*/,0);
-
-}

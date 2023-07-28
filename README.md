@@ -7,7 +7,6 @@ Tp-2023-1c-Default-2.0
 - Ailen Da Ruos Alvez De Olivera - _1692653_
 - Natalia Romina Vargas Montes - _1691211_
 - Carla Benitez - _1690590_
-- Manuel Pardo - _1687967_
 - Maria Daniela Mereles - _1672484_
 ## Ayudante:
 - Proximamente ...

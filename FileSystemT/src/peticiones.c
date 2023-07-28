@@ -14,8 +14,9 @@ void atenderPeticiones(){
 	void* buffer = NULL;
 	int tamanio = 0;
 	int cantParam = 0;
+	int desplazamiento = 0;
 
-	t_instruccion* newInstr;
+	t_instruccion* newInstr = malloc(sizeof(t_instruccion));
 
 	while (1){
 		int codigo = recibir_operacion(cliente);
@@ -59,8 +60,9 @@ void atenderPeticiones(){
 		}
 
 		if (cantParam != -1) {
-			newInstr = deserializarInstruccionEstructura(buffer, cantParam);
+			newInstr = deserializarInstruccionEstructura(buffer, cantParam, &desplazamiento);
 			queue_push(peticiones, newInstr);
+			free(buffer);
 		    sem_post(&nuevoPedido);
 		}
 	}

@@ -28,7 +28,7 @@ void iniciarConexionesDeKernel(){
 			  log_info(loggerKernel, "Enviando mensaje ");
 			    if (enviarProtocolo(socketCPU, HANDSHAKE_Kernel,loggerKernel) == -1) exit(1);
 
-			    /*
+
                //>>>>>>CONEXION CON FILE SYSTEM<<<<<<<<<
 
 
@@ -39,7 +39,7 @@ void iniciarConexionesDeKernel(){
 			  log_info(loggerKernel, "Enviando mensaje");
               if (enviarProtocolo(socketFs,HANDSHAKE_Kernel,loggerKernel) == -1) exit(1);
  			  log_info(loggerKernel, "Finalizando conexion con Fs \n");
-*/
+
 
 			   //>>>>>>CONEXION CON MEMORIA <<<<<<<<<
 
