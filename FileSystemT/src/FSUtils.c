@@ -27,17 +27,7 @@ int iniciarMemoria (){
         close (servidorFS);
         return EXIT_FAILURE;
     }
-    /* ESTO LO AGREGUE PORQ ROMPIA Y QUERIA VER ALGO, ES ABSOLUTAMENTE IGUAL A LO DE ARRIBA
-      char* ipMemoria = IP_Memoria();
-      char* puertoMemory = puertoMemoria();
-	  log_info(loggerFS, "Iniciando conexion con MEMORIA ... \n");
-	  socketMemoria = iniciarCliente(ipMemoria, puertoMemory, loggerFS);
-	  	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) exit(1);
 
-	  log_info(loggerFS, "Enviando mensaje");
-
-	  	if (enviarProtocolo(socketMemoria,HANDSHAKE_Fs, loggerFS) == -1) exit(1);
-*/
 	log_info(loggerFS, "Ok -> Conexion Memoria");
 
 	return 0;

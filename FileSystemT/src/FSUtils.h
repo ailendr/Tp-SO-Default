@@ -9,7 +9,6 @@
 #define SRC_FSUTILS_H_
 
 #include "peticiones.h"
-#include <pthread.h>
 
 
 int iniciarMemoria ();
