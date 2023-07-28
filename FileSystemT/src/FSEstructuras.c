@@ -95,17 +95,14 @@ void iniciarBitMap(){
 
 void iniciarArchivoDeBloques(char* pathArch){
 
-	int cantidadBloques = superBloque -> blockCount;
+	/*int cantidadBloques = superBloque -> blockCount;
 	int i = 0;
 
 	for(i; i<cantidadBloques; i++){
 
-	}
-
-
-
+	}*/
 	//--------------------------------------------------------------------------------------------------------
-	t_bloque* arrayBloques[cantidadBloques];
+	//t_bloque* arrayBloques[cantidadBloques];
 
 	//t_bloque* arrayBloques[cantidadBloques];
 	//log_info(loggerFS, "");
@@ -113,5 +110,7 @@ void iniciarArchivoDeBloques(char* pathArch){
 	//arrayBloques[cantidadBloques] -> tamBloque = superBloque->blockSize * superBloque->blockCount;
 	//tamanioDelArchivo = superBloque->blockSize * superBloque->blockCount;
 	//t_bloque* arrayBloques[superBloque->blockCount];
+
+
 }
 

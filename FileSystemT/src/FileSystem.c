@@ -36,16 +36,19 @@ int main(/*int argc, char** argv*/) {
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
 
-	// INICIALIZAR ESTRUCTURAS ----------------------------------------------------------------------
-	iniciarEstructuras();
-	peticiones = queue_create();
+
 
 	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
 	sem_init(&nuevoPedido,0, 0);
 
 
-	// REALIZAR LAS CONEXIONES CON EL CLIENTE Y EL SERVIDOR -----------------------------------------
+	// REALIZAR LAS CONEXIONES CON EL CLIENTE  -----------------------------------------
 	iniciarMemoria ();
+	// INICIALIZAR ESTRUCTURAS DESPUES DE SER CLIENTE DE MEMORIA  ----------------------------------------------------------------------
+	iniciarEstructuras();
+	peticiones = queue_create();
+	// REALIZAR LAS CONEXIONES COMO SERVIDOR  -----------------------------------------
+
 	iniciarServKernel ();
 
 
