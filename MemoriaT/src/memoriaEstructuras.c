@@ -244,8 +244,10 @@ void compactar() {
 		t_segmento* segAnterior = list_get(listaAux, i-1);
 		if(segmento->tieneInfo){
 			char* info = malloc(segmento->tamanioInfo);
-			memcpy(&info, memoriaContigua+segmento->base,segmento->tamanioInfo);
-			memcpy(memoriaContigua+segAnterior->limite, &info, segmento->tamanioInfo);
+			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(&info, memoriaContigua + ((segmento->base) - 1),segmento->tamanioInfo);
+			memcpy(memoriaContigua + ((segAnterior->limite) - 1), &info, segmento->tamanioInfo);
+			pthread_mutex_unlock(&mutexEspacioUser);
 			free(info);
 			}
 
