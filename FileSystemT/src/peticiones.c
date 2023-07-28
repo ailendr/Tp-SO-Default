@@ -16,7 +16,7 @@ void atenderPeticiones(){
 	int cantParam = 0;
 	int desplazamiento = 0;
 
-	t_instruccion* newInstr;
+	t_instruccion* newInstr = malloc(sizeof(t_instruccion));
 
 	while (1){
 		int codigo = recibir_operacion(cliente);

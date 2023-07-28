@@ -106,7 +106,7 @@ void atenderModulos(int socket_servidor){
 
 	///---CLIENTE FILE SYSTEM---///
 	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
-/*
+
 	int socketFs= esperar_cliente(socket_servidor, loggerMemoria);
 	if(verificarSocket(socketFs, loggerMemoria, configMemoria) == 1) {
 
@@ -119,7 +119,7 @@ void atenderModulos(int socket_servidor){
 	pthread_t servidorDeFs;
 	pthread_create(&servidorDeFs, NULL, (void*)atenderPeticionesFs, (void*)&socketFs);
 	pthread_detach(servidorDeFs);
-*/
+
 
 	///---CLIENTE KERNEL ---///
 	int socketKernel;

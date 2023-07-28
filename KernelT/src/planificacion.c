@@ -180,12 +180,14 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_OPEN:
 				log_info(loggerKernel, "Intruccion Open File");
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
+				/*
 				if (archivoAbierto(instruccion->param1, instruccion->pid) != -1){
 					log_info(loggerKernel, "Archivo: %s ya creado para <ID %i>", instruccion->param1, instruccion->pid);
 				} else {
 					t_paquete* paqueteDS = serializarInstruccion(instruccion);
 					validarEnvioDePaquete(paqueteDS, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
 				}
+				*/
 				free(instruccion);
 				break;
 			case F_CLOSE:
@@ -419,6 +421,7 @@ void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado){
 }
 
 // UTILS FILE SYSTEM
+/*
 int archivoAbierto (char* nombre, int id){
     t_archivos* archivo;
 
@@ -434,3 +437,4 @@ int archivoAbierto (char* nombre, int id){
 	}
     return -1;
 }
+*/
