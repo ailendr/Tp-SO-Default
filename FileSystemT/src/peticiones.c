@@ -11,10 +11,10 @@ sem_t nuevoPedido;
 
 void atenderPeticiones(){
    log_info(loggerFS, "Ejecuta Hilo Atender Peticiones numero : <%ld> ", pthread_self());
-	void* buffer = NULL;
-	int tamanio = 0;
+	//void* buffer = NULL;
+	//int tamanio = 0;
 	int cantParam = 0;
-	int desplazamiento = 0;
+	//int desplazamiento = 0;
 
 	t_instruccion* newInstr = malloc(sizeof(t_instruccion));
 
@@ -32,7 +32,7 @@ void atenderPeticiones(){
 		}
 
 		log_info(loggerFS, "Se recibio una peticion");
-		buffer = recibir_buffer(&tamanio, cliente);
+		//buffer = recibir_buffer(&tamanio, cliente);
 
 		switch (codigo){
 			case F_READ:
@@ -60,9 +60,12 @@ void atenderPeticiones(){
 		}
 
 		if (cantParam != -1) {
-			newInstr = deserializarInstruccionEstructura(buffer, cantParam, &desplazamiento);
-			queue_push(peticiones, newInstr);
-			free(buffer);
+			//Le pongo otra variable porq cuando se deserializa ya se hace malloc y newInstruc ya hizo malloc al comienzo
+			//newInstr
+			t_instruccion* nuevaInstruc = obtenerInstruccion(cliente, cantParam); //Esta funcion recibi un buffer , deserializa la instruccion y libera el buffer ;)
+			//deserializarInstruccionEstructura(buffer, cantParam, &desplazamiento);
+			queue_push(peticiones, nuevaInstruc);
+			//free(buffer);
 		    sem_post(&nuevoPedido);
 		}
 	}
@@ -72,7 +75,7 @@ void ejecutarPeticiones(){
  log_info(loggerFS, "Ejecuta Hilo Ejecutar Peticiones numero : <%ld> ", pthread_self());
 
 	t_instruccion* instruccion;
-	op_code nombre;
+	int nombre;
 	char* nombreArchivo;
 
 	t_paquete* paqueteI;
