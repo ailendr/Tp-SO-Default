@@ -10,8 +10,7 @@
 
 #include "operaciones.h"
 #include <semaphore.h>
-#include <pthread.h>
-#include <stdint.h>
+
 
 extern sem_t nuevoPedido;
 

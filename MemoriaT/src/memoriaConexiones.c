@@ -108,7 +108,7 @@ void atenderModulos(int socket_servidor){
 	///---CLIENTE FILE SYSTEM---///
 	//1)VERIFICO QUE LA CONEXION ESTE OK Y QUE EL PROTOCOLO SEA EL CORRECTO
 
-	int socketFs= esperar_cliente(socket_servidor, loggerMemoria);
+	int socketFs = esperar_cliente(socket_servidor, loggerMemoria);
 	if(verificarSocket(socketFs, loggerMemoria, configMemoria) == 1) {
 
 				   close(socket_servidor);
