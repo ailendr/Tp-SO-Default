@@ -53,7 +53,6 @@ extern t_list* peticiones;
 
 
 void iniciarEstructuras();
-void validarArchivo(char* pathArch, int estructura);
 void iniciarSuperBloque();
 void iniciarArchivoDeBloques();
 void iniciarBitMap();
