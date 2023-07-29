@@ -32,7 +32,7 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion,  t_pcb* proceso);
 void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecutado);
-void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado);
+void implementacionF(t_parametroFS* parametro);
 
 
 int archivoAbierto (char* nombre, int id);

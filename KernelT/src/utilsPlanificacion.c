@@ -247,10 +247,10 @@ void mostrarListaDeProcesos(){
 
 void mostrarColaReady(){
 	int tamanio = list_size(colaReady);
-	log_info(loggerKernel, "Cola Ready con algoritmo : <%s> ", Algoritmo());
+	log_info(loggerKernel, "Cola Ready con Algoritmo : <%s> ", Algoritmo());
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso = list_get(colaReady,i);
-		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d>, ratio: %f", i, proceso->contexto->pid, proceso->RR);
+		log_info(loggerKernel, "Posicion <%d> de Ready con Proceso de id <%d> ", i, proceso->contexto->pid);
 	}
 }
 
