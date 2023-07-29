@@ -80,3 +80,4 @@ int main(){
 void iterator(char* value) {
 	log_info(loggerKernel,"%s", value);
 }
+

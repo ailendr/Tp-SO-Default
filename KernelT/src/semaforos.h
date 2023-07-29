@@ -18,3 +18,4 @@ extern pthread_mutex_t mutexOperacionFS;
 
 void inicializarSemaforos();
 void finalizarSemaforos();
+

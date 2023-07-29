@@ -26,3 +26,4 @@ extern t_list* listaDeInstancias;
 extern t_list* listaDeColasPorArchivo;
 
 #endif /* SRC_KERNELGLOBALES_H_ */
+

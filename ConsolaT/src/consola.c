@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 	int conexionConKernel = 0;
 	char* pathConfig = argv[1];
 	char* pathInstrucciones = argv[2];
-  
+
 	configConsola = config_create(pathConfig);
 
 	if( verificarConfig (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;

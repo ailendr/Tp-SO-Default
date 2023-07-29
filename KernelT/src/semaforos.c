@@ -1,6 +1,5 @@
 #include "semaforos.h"
 
-
 sem_t planiLargoPlazo;
 sem_t planiCortoPlazo;
 sem_t multiprogramacion;///semaforo contador
@@ -37,3 +36,4 @@ void finalizarSemaforos(){
 	pthread_mutex_destroy(&mutexNew);
 	pthread_mutex_destroy(&mutexPID);
 }
+
