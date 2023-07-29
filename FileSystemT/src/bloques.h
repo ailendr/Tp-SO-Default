@@ -21,4 +21,7 @@ void escribirBloque (void* contenido, uint32_t sizeContenido, uint32_t numeroBlo
 void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t offset , uint32_t numeroBloque);
 void liberarBloque(uint32_t numeroBloque);
 
+void leerArchivoBloques(void* aLeer, int posicion, int cantidad);
+void escribirArchivoBloques(void* aEscribir, int posicion, int cantidad);
+
 #endif /* SRC_BLOQUES_H_ */
