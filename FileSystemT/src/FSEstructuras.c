@@ -80,7 +80,7 @@ void iniciarArchivoDeBloques(){
         fseek(archivo_bloques, tamanio_archivo - 1, SEEK_SET);
         fputc('\0', archivo_bloques);
 
-        log_info(loggerFS, "Archivo de Bloques creado");
+        log_info(loggerFS, "Archivo de Bloques Creado");
         log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
     } else {
 
