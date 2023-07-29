@@ -14,6 +14,7 @@ t_list* listaDeSegmentos;
 /*Es para tener un hueco libre al principio cuando no hay segmentos y para cuando se compacte y queda contiguo el espacio libre*/
 t_segmento* segmentoLibre;
 pthread_mutex_t mutexEspacioUser;
+pthread_mutex_t mutexOperacionFS;
 
 ///////////////////////////// ESTRUCTURAS DE MEMORIA/////////////////////////////////////////////////////////
 
@@ -29,6 +30,7 @@ void iniciarEstructuras(){
 	crearSegmentoCero();
 	actualizarUltimoSegmentoLibre();
 	pthread_mutex_init(&mutexEspacioUser, NULL);
+	pthread_mutex_init(&mutexOperacionFS, NULL);
 }
 
 void crearEspacioMemoria (){
@@ -145,7 +147,7 @@ void logearListaDeSegmentos(char* mensaje){
 	log_info(loggerMemoria, "Lista de segmentos %s: ", mensaje);
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
-		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d, Tam Info: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria, segmento->tamanioInfo);
+		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio);
 		log_info(loggerMemoria, "Pos en la lista: %d", i);
 	}
 }
@@ -232,7 +234,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
     usleep(retardoCompactacion()*1000);
-	logearListaDeSegmentos("Antes de compactar");
+	//logearListaDeSegmentos("Antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//Es mejor destruir los elementos tambien por si queda algo
 	list_add(listaDeSegmentos, segmentoCero);

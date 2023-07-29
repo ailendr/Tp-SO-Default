@@ -156,3 +156,4 @@ int posibleSegFault (t_instruccion* nuevaInstr){
 	}
 	return 0;
 }
+

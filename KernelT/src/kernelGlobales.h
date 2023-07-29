@@ -23,6 +23,11 @@ extern uint32_t pid;
 
 extern t_list* listaDeBloqueo;
 extern t_list* listaDeInstancias;
+extern t_list* listaDeColasPorArchivo;
 
+extern t_list* tablaGlobalDeArchivos;
+//extern t_list* listaDeTablasAxP; //Donde tenemos guardadas las tablas de archivos por proceso
+extern int operacionFS;
 
 #endif /* SRC_KERNELGLOBALES_H_ */
+

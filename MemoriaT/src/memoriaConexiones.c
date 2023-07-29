@@ -20,16 +20,16 @@ while(1){
 		instruccion = obtenerInstruccion(socket, 2);
 		char* cantBytes = instruccion->param1;
 		int bytes = atoi(cantBytes); //Los bytes llegan el param 1 que es el Registro
+		log_info(loggerMemoria, "PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - TAMAÑO_ <%d> - Origen: <CPU>", instruccion->pid, instruccion->param2, bytes);
 		implementarInstruccion(instruccion->param2,instruccion->pid, instruccion->param1,socket, MOV_IN, bytes);
-		log_info(loggerMemoria, "“PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - Origen: <CPU>", instruccion->pid, instruccion->param2);
 		free(instruccion);
 
 		break;
 
 	case(MOV_OUT):
 		instruccion = obtenerInstruccion(socket, 2);
+		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - TAMAÑO_ <%ld> - Origen: <CPU>", instruccion->pid, instruccion->param1, strlen(instruccion->param2));
 		implementarInstruccion(instruccion->param1, instruccion->pid, instruccion->param2,socket, MOV_OUT,0);
-		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - Origen: <CPU>", instruccion->pid, instruccion->param1);
 		free(instruccion);
 
 
@@ -64,17 +64,24 @@ void atenderPeticionesFs(int* socketFs){
 	    t_instruccion* instruccion;
 	switch(codInstruccion){
 	case(F_READ):
-			instruccion = obtenerInstruccion(socket, 3);
+		instruccion = obtenerInstruccion(socket, 3);
+		pthread_mutex_lock(&mutexOperacionFS);
+		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - TAMAÑO_ <%ld> -Origen: <FS>", instruccion->pid, instruccion->param1, strlen(instruccion->param2));
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_READ,0);
+		pthread_mutex_unlock(&mutexOperacionFS);
 		free(instruccion);
 
 
 		break;
 
 	case (F_WRITE):
-			instruccion = obtenerInstruccion(socket, 3);
-	        int bytes = atoi(instruccion->param3);
+		instruccion = obtenerInstruccion(socket, 3);
+	    pthread_mutex_lock(&mutexOperacionFS);
+	    int bytes = atoi(instruccion->param3);
+	    log_info(loggerMemoria, "PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - TAMAÑO_ <%d> - Origen: <FS>", instruccion->pid, instruccion->param2, bytes);
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_WRITE, bytes);
+		pthread_mutex_unlock(&mutexOperacionFS);
+
 		free(instruccion);
 
 		break;
@@ -173,8 +180,11 @@ void atenderPeticionesKernel(int* socketKernel){
 				break;
 
 			case COMPACTAR:
-					compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
-					enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
+				pthread_mutex_lock(&mutexOperacionFS);
+				compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
+				pthread_mutex_unlock(&mutexOperacionFS);
+
+				enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
 				break;
 			case EXIT:
 				instruccion = obtenerInstruccion(socket,0);
@@ -214,7 +224,6 @@ void enviarListaDeTablas(t_list* listaDeTablas, int socket){
 	t_buffer* bufferListaDeTablas = serializarListaDeTablas(listaDeTablas);
 	validarEnvioBuffer(bufferListaDeTablas, socket, "Lista de Tablas", loggerMemoria, configMemoria);
 }
-
 
 
 

@@ -8,7 +8,8 @@
 #include "planificacion.h"
 
 struct timespec begin, end;
-extern t_list* archivos;
+int operacionFS = 0;
+
 
 void largoPlazo() {
 	while (1) {
@@ -81,14 +82,14 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 		t_instruccion* instruccion;
 		switch(tipoInstruccion){
 			case EXIT:
-				log_info(loggerKernel, "Intruccion EXIT");
+				log_info(loggerKernel, "Instruccion EXIT");
 				 instruccion = deserializarInstruccionEstructura(buffer, 0, &desplazamiento);
 				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SUCCESS");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case YIELD:
-				log_info(loggerKernel, "Intruccion YIELD");
+				log_info(loggerKernel, "Instruccion YIELD");
 				 instruccion = deserializarInstruccionEstructura(buffer, 0, &desplazamiento);
 				free(instruccion);
 				finTiempoEnCPU(ultimoEjecutado);
@@ -98,7 +99,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				break;
 
 			case WAIT:
-				log_info(loggerKernel, "Intruccion WAIT");
+				log_info(loggerKernel, "Instruccion WAIT");
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);;
 				log_info(loggerKernel, "Recurso a consumir : %s", instruccion->param1);
 				char* recursoAConsumir = instruccion->param1;
@@ -107,7 +108,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				//sem_post(&planiCortoPlazo);
 				break;
 			case SIGNAL:
-				log_info(loggerKernel, "Intruccion SIGNAL");
+				log_info(loggerKernel, "Instruccion SIGNAL");
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);;
 				char* recursoALiberar = instruccion->param1;
 				free(instruccion); //Para mi hay q liberar el puntero a la instruccion, una vez q obtenemos el parametro
@@ -115,7 +116,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case IO:
-				log_info(loggerKernel, "Intruccion IO");
+				log_info(loggerKernel, "Instruccion IO");
 				finTiempoEnCPU(ultimoEjecutado);
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
 				finTiempoEnCPU(ultimoEjecutado); // VEEEEER ESTOOOOOOOO
@@ -132,7 +133,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				pthread_detach(hiloDeBloqueo);
 				break;
 			case MOV_IN:
-				log_info(loggerKernel, "Intruccion MOV_IN Fallida");
+				log_info(loggerKernel, "Instruccion MOV_IN Fallida");
 				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
 				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
@@ -140,14 +141,14 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case MOV_OUT:
-				log_info(loggerKernel, "Intruccion MOV_OUT Fallida");
+				log_info(loggerKernel, "Instruccion MOV_OUT Fallida");
 				instruccion= deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
 				free(instruccion);
 				finalizarProceso(ultimoEjecutado, "SEG_FAULT");
 				//sem_post(&planiCortoPlazo);
 				break;
 			case CREATE_SEGMENT://El proceso sigue en cpu
-				log_info(loggerKernel, "Intruccion Create Segment");
+				log_info(loggerKernel, "Instruccion Create Segment");
 				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
 				log_info (loggerKernel, "Codigo de operacion de instruc: %d", instruccion->nombre);
 				int idSegmentoCS = atoi(instruccion->param1);
@@ -162,7 +163,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case DELETE_SEGMENT: //El proceso sigue en cpu
-				log_info(loggerKernel, "Intruccion Delete Segmente");
+				log_info(loggerKernel, "Instruccion Delete Segmente");
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
 				int idSegmentoDS = atoi(instruccion->param1);
 				log_info(loggerKernel, "PID: %d - Eliminar Segmento - Id Segmento: %d",contextoActualizado->pid,idSegmentoDS);
@@ -178,37 +179,96 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case F_OPEN:
-				log_info(loggerKernel, "Intruccion Open File");
+				log_info(loggerKernel, "Instruccion F Open ");
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
-				/*
-				if (archivoAbierto(instruccion->param1, instruccion->pid) != -1){
-					log_info(loggerKernel, "Archivo: %s ya creado para <ID %i>", instruccion->param1, instruccion->pid);
-				} else {
-					t_paquete* paqueteDS = serializarInstruccion(instruccion);
-					validarEnvioDePaquete(paqueteDS, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
+				log_info(loggerKernel,"PID: <%d> - Abrir Archivo: <%s>", instruccion->pid, instruccion->param1);
+                int posArchivo = buscarArchivoEnTGAA(instruccion->param1);
+                t_paquete* paquete;
+                int recepcion;
+				if (posArchivo != -1){
+					log_info(loggerKernel, "Archivo: %s ya existente", instruccion->param1);
+					t_archivo* archivo = list_get(tablaGlobalDeArchivos, posArchivo);
+					archivo->contador += 1; //incremento el contador para ese archivo en la Tabla Global de Archivos Abiertos
+					agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0); //Agrega la entrada y posiciona el puntero en cero
+					bloquearProcesoPorArchivo(instruccion->param1, ultimoEjecutado);
+					paquete = serializarInstruccion(instruccion);
+					validarEnvioDePaquete(paquete, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
+					free(instruccion);
+				     recepcion = recibir_operacion(socketFs);
+					}
+				else { //si no existe en la TGAA
+					//1) Consulta si existe ese archivo
+					paquete = serializarInstruccion(instruccion);
+					validarEnvioDePaquete(paquete, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
+					recepcion = recibir_operacion(socketFs);
+						if(recepcion == ERROR ){ // Solo si no existe envia un F Create
+							t_instruccion* instrucFCreate = malloc(sizeof(t_instruccion));
+							instrucFCreate->nombre = F_CREATE;
+							instrucFCreate->param1 = instruccion->param1;
+							t_paquete* paq = serializarInstruccion(instrucFCreate);
+							validarEnvioDePaquete(paq, socketFs, loggerKernel, configKernel, "Instruccion F CREATE");
+							//Si es la primera vez que crea un archivo-> Debe iniciar una cola de block para ese archivo
+							crearColaBlockDeArchivo(instruccion->param1);
+
+							free(instrucFCreate);
+						}
+						//Exista o no exista debe hacer esto//
+						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
+						t_archivo* archivo = malloc (sizeof(t_archivo*));
+						archivo->nombreArchivo = instruccion->param1;
+						archivo->contador = 1;
+						list_add(tablaGlobalDeArchivos, archivo);
+						//Agrego entrada a la Tabla de Archivos para este proceso//
+						agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0);
+
+						free(instruccion); //ver si luego no genera inconsistencias
+						procesoAEjecutar(ultimoEjecutado->contexto);
+						instruccionAEjecutar(ultimoEjecutado);
+
+
 				}
-				*/
-				free(instruccion);
+
 				break;
 			case F_CLOSE:
 				break;
 			case F_SEEK:
 				break;
 			case F_READ:
-				log_info(loggerKernel, "Intruccion F READ");
+				log_info(loggerKernel, "Instruccion F READ");
 				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
                 validarRyW(instruccion->param2, ultimoEjecutado);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
-                implementacionF(instruccion, ultimoEjecutado);
-				break;
-			case F_WRITE:
-				log_info(loggerKernel, "Intruccion F WRITE");
-				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
-                validarRyW(instruccion->param2, ultimoEjecutado);
-                implementacionF(instruccion, ultimoEjecutado);
+                t_parametroFS* paramR = malloc(sizeof(t_parametroFS));
+                paramR->proceso = ultimoEjecutado;
+                paramR->instruccion=instruccion;
+                pthread_t hiloRead;
+        		pthread_create(&hiloRead, NULL ,(void*) implementacionF,(void*) paramR);
+                pthread_detach(hiloRead);
 
 				break;
+			case F_WRITE:
+				log_info(loggerKernel, "Instruccion F WRITE");
+				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
+                validarRyW(instruccion->param2, ultimoEjecutado);
+                //Serializa la instruccion ,la manda a FS y bloquea al proceso //
+				t_parametroFS* paramW = malloc(sizeof(t_parametroFS));
+				paramW->proceso = ultimoEjecutado;
+				paramW->instruccion=instruccion;
+				pthread_t hiloWrite;
+				pthread_create(&hiloWrite, NULL ,(void*) implementacionF,(void*) paramW);
+				pthread_detach(hiloWrite);
+				break;
 			case F_TRUNCATE:
+				log_info(loggerKernel, "Instruccion F TRUNCATE");
+				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
+				//Serializa la instruccion ,la manda a FS y bloquea al proceso //
+				t_parametroFS* paramT = malloc(sizeof(t_parametroFS));
+				paramT->proceso = ultimoEjecutado;
+				paramT->instruccion=instruccion;
+				pthread_t hiloTruncate;
+				pthread_create(&hiloTruncate, NULL ,(void*) implementacionF,(void*) paramT);
+				pthread_detach(hiloTruncate);
+
 				break;
 			/*case(-1):
 				log_info(loggerKernel, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
@@ -339,8 +399,6 @@ void implementacionWyS (char* nombreRecurso, int nombreInstruccion, t_pcb* ultim
 		}
 		else{
 			int* valor = list_get(listaDeInstancias,posicionRecurso);
-			//int valor = *pvalor;
-			//free(pvalor); Preguntar como liberar una lista de punteross
 			switch (nombreInstruccion){
 			case 1: //1=WAIT
 				*valor -= 1;
@@ -383,10 +441,17 @@ void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecu
 		case COMPACTAR:
 			log_info(loggerKernel, "Respuesta de Create Segment: COMPACTAR");
 			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
-			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de OK
+			if(operacionFS==1){
+			log_info(loggerKernel, "Compactacion: Esperando Fin de Operaciones de FS");
+					}
+			pthread_mutex_lock(&mutexOperacionFS);
+			log_info(loggerKernel, "Compactacion: Se solicito compactacion ");
+			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de O
 			send(socketMemoria, &habilitado, sizeof(int),0);
 			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
+			pthread_mutex_unlock(&mutexOperacionFS);
+			log_info(loggerKernel, "Se Finalizo el proceso de COMPACTACION");
 			t_paquete* paqueteCS = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
 			validarCS(socketMemoria,instruccion,ultimoEjecutado);
@@ -409,15 +474,31 @@ void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecu
 	}
 }
 
-//Funcion General para la mayoria de isntrucciones q empiezan con F//
-void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado){
+//----Funcion General para el hilo en Instruccion Fwrite, FRead, FTruncate---//
+void implementacionF(t_parametroFS* parametro){
+	t_pcb* proceso = parametro->proceso;
+	t_instruccion* instruccion = parametro->instruccion;
+	pthread_mutex_lock(&mutexOperacionFS);
+	operacionFS = 1;
 	t_paquete* paqueteF = serializarInstruccion(instruccion);
-	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion");
-	ultimoEjecutado->estadoPcb= BLOCK;
-	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", ultimoEjecutado->contexto->pid, instruccion->param1);
-	logCambioDeEstado(ultimoEjecutado, "EXEC", "BLOCK");
-	finTiempoEnCPU(ultimoEjecutado);
-	free(instruccion);
+	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion a File System");
+	proceso->estadoPcb= BLOCK;
+	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", proceso->contexto->pid, instruccion->param1);
+	logCambioDeEstado(proceso, "EXEC", "BLOCK");
+	finTiempoEnCPU(proceso);
+
+	int finOperacion = recibir_operacion(socketFs);
+	if(finOperacion == OK){
+		log_info(loggerKernel, "Finalizo la operacion en File System");
+	    logCambioDeEstado(proceso, "BLOCK", "READY");
+	}
+	pthread_mutex_unlock(&mutexOperacionFS);
+	agregarAEstadoReady(proceso);
+	operacionFS = 0;
+
+	free(parametro->instruccion);
+	free(parametro->proceso);
+	free(parametro);
 }
 
 // UTILS FILE SYSTEM
@@ -438,3 +519,4 @@ int archivoAbierto (char* nombre, int id){
     return -1;
 }
 */
+

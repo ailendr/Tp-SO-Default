@@ -38,6 +38,8 @@ int main(){
 
     crearEstados();
     crearEstructurasDeRecursos();
+    crearEstructurasDeArchivos();
+
 	inicializarSemaforos();
 
 
@@ -80,3 +82,4 @@ int main(){
 void iterator(char* value) {
 	log_info(loggerKernel,"%s", value);
 }
+

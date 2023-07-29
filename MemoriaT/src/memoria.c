@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "memoria.h"
 
+
 int main(void) {
 
 	printf("Hola soy Memoria y soy servidor de Kernel,Cpu y Fs \n ");
@@ -45,3 +46,4 @@ int main(void) {
 */
 	return EXIT_SUCCESS;
 }
+

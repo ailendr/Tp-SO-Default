@@ -18,4 +18,3 @@ char* IpKernel(){
 char* PuertoKernel(){
 	return config_get_string_value(configConsola, "PUERTO_KERNEL");
 }
-

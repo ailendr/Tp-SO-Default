@@ -66,3 +66,4 @@ void liberar_conexion(int socket);
 void terminarModulo(int conexion,t_log* log , t_config* config);
 
 #endif /* SRC_UTILS_SOCKETS_H_ */
+

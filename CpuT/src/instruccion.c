@@ -190,3 +190,4 @@ void moveOut (t_instruccion* instruccion, t_contextoEjec* contexto){
 	log_info(loggerCPU, "Se esta almacenando %s en Memoria", instruccion->param2);
 
 }
+
