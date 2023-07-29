@@ -67,7 +67,7 @@ void guardarBitMap(char* bitArray){
 
 void iniciarArchivoDeBloques(){
 	FILE* archivo_bloques = fopen(pathBloques(), "r+");
-   	int tamanio_archivo = cant_bloques * tamanio_bloque;
+   	int tamanio_archivo = superBloque -> blockCount * superBloque -> blockSize;
 
     if (archivo_bloques == NULL) {
         // El archivo no existe, se crea y se trunca al tamaño deseado
