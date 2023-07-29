@@ -39,15 +39,26 @@ int main(/*int argc, char** argv*/) {
 
 
 	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
-	sem_init(&nuevoPedido,0, 0);
+	sem_init(&nuevoPedido,0,0);
 
 
 	// REALIZAR LAS CONEXIONES CON EL CLIENTE  -----------------------------------------
-	iniciarMemoria ();
+	//iniciarMemoria ();
 	// INICIALIZAR ESTRUCTURAS DESPUES DE SER CLIENTE DE MEMORIA  ----------------------------------------------------------------------
 	iniciarEstructuras();
-	peticiones = queue_create();
+	peticiones = list_create();
+	fcbs = list_create();
 	// REALIZAR LAS CONEXIONES COMO SERVIDOR  -----------------------------------------
+
+	t_instruccion* nuevaInstruc2 = malloc(sizeof(t_instruccion));
+	nuevaInstruc2 -> nombre = F_OPEN;
+	nuevaInstruc2 -> pid = 1;
+	nuevaInstruc2 -> param1 = "NATYYYYYYYYYYYY.config";
+	sem_post(&nuevoPedido);
+
+	list_add(peticiones, nuevaInstruc2);
+
+	ejecutarPeticiones();
 
 	iniciarServKernel ();
 
@@ -55,7 +66,7 @@ int main(/*int argc, char** argv*/) {
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
 
-	queue_destroy(peticiones);
+	list_destroy(peticiones);
 	if (fcbs != NULL){
 		finalizarListaFcb();
 	}

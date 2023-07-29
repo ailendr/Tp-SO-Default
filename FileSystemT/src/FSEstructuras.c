@@ -9,7 +9,7 @@
 
 t_superbloque* superBloque;
 t_bitarray* bitMap;
-t_queue* peticiones;
+t_list* peticiones;
 
 
 void iniciarEstructuras(){

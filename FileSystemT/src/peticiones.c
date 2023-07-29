@@ -25,8 +25,8 @@ void atenderPeticiones(){
 			log_info(loggerFS, "Kernel se desconecto, no se atienden mas peticiones");
 			newInstr->nombre = EXIT;
 			newInstr->pid = -1;
-			queue_clean(peticiones);
-			queue_push(peticiones, newInstr);
+			list_clean(peticiones);
+			list_add(peticiones, newInstr);
 		    sem_post(&nuevoPedido);
 			break;
 		}
@@ -64,7 +64,7 @@ void atenderPeticiones(){
 			//newInstr
 			t_instruccion* nuevaInstruc = obtenerInstruccion(cliente, cantParam); //Esta funcion recibi un buffer , deserializa la instruccion y libera el buffer ;)
 			//deserializarInstruccionEstructura(buffer, cantParam, &desplazamiento);
-			queue_push(peticiones, nuevaInstruc);
+			list_add(peticiones, nuevaInstruc);
 			//free(buffer);
 		    sem_post(&nuevoPedido);
 		}
@@ -74,7 +74,7 @@ void atenderPeticiones(){
 void ejecutarPeticiones(){
  log_info(loggerFS, "Ejecuta Hilo Ejecutar Peticiones numero : <%ld> ", pthread_self());
 
-	t_instruccion* instruccion;
+	t_instruccion* instruccion = malloc (sizeof(t_instruccion));
 	int nombre;
 	char* nombreArchivo;
 
@@ -84,8 +84,7 @@ void ejecutarPeticiones(){
 
 		sem_wait(&nuevoPedido);
 
-		instruccion = queue_peek(peticiones);
-		queue_pop(peticiones);
+		instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
 		nombre = instruccion->nombre;
 
@@ -110,12 +109,10 @@ void ejecutarPeticiones(){
 					instruccion->param1 = "-1";
 				}
 				break;
-			/*
 			case F_CREATE:
 				//TODO Crear el f_create
 				crearArchivo(nombreArchivo);
 				break;
-			*/
 			case F_TRUNCATE:
 				//TODO truncarArchivo (nombreArchivo, instruccion -> param2);
 				break;
@@ -126,9 +123,10 @@ void ejecutarPeticiones(){
 				posicionarPuntero (nombreArchivo, instruccion->param2);
 				break;
 		}
+		log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
 
-		paqueteI = serializarInstruccion(instruccion);
-		validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
+		//paqueteI = serializarInstruccion(instruccion);
+		//validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
 		//TODO Ver que kernel lo reciba y empezar a trabajar desde ahi
 	}
 

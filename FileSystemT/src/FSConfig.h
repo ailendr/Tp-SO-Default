@@ -10,6 +10,7 @@
 
 #include <utils/modulo.h>
 #include <commons/string.h>
+#include <string.h>
 
 extern t_log* loggerFS;
 extern t_config* configFS;
