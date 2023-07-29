@@ -88,7 +88,7 @@ void ejecutarPeticiones(){
 	}
 
 	nombreArchivo = instruccion -> param1;
-	log_info(loggerFS, "PATH GUARDADO: %s", pathFCB());
+
 	switch(nombre){
 		case F_READ:
 			//TODO leerArchivo(instruccion);
@@ -101,6 +101,7 @@ void ejecutarPeticiones(){
 				abrirArchivo(nombreArchivo);
 			} else {
 				instruccion->param1 = "-1";
+				log_info(loggerFS, "ERROR: EL ARCHIVO NO EXISTENTE   Operacion: ABRIR (OPEN) -> Archivo: %s", nombreArchivo);
 			}
 			break;
 		case F_CREATE:
@@ -118,9 +119,9 @@ void ejecutarPeticiones(){
 			break;
 	}
 	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
-	log_info(loggerFS, "PATH GUARDADO: %s", pathFCB());
 
-	paqueteI = serializarInstruccion(instruccion);
-	validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
+
+	//paqueteI = serializarInstruccion(instruccion);
+	//validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
 
 }

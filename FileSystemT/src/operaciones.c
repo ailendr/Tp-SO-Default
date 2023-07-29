@@ -29,7 +29,6 @@ void cerrarArchivo(char* nombreArchivo){
 
 	}
 
-	free(fcb);
 }
 
 void abrirArchivo(char* nombreArchivo){
@@ -140,6 +139,10 @@ int posicionFCB (char* nombre){
 		fcb2 = list_get(fcbs, j);
 
 		if(strcmp(fcb2->nombreDeArchivo, nombre) == 0){
+
+			log_info(loggerFS, "ARCHIVO ENCONTRADO EN LA POS %i", j);
+			log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb2 -> nombreDeArchivo);
+			log_info(loggerFS, "	|-> Tamanio: %d", fcb2 -> nombreDeArchivo);
 			return j;
 		}
 
@@ -152,7 +155,6 @@ int posicionFCB (char* nombre){
 	string_append(&path, pathFCB());
 	string_append(&path, "/");
 	string_append(&path, nombre);
-	log_info(loggerFS, "PATH GUARDADO: %s", path);
 
 	lector = config_create(path);
 
@@ -180,6 +182,10 @@ int posicionFCB (char* nombre){
 		fcb -> abierto = 0;
 		list_add(fcbs, fcb);
 
+		log_info(loggerFS, "ARCHIVO ENCONTRADO EN LA POS %i", list_size(fcbs) - 1);
+		log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb -> nombreDeArchivo);
+		log_info(loggerFS, "	|-> Tamanio: %d", fcb -> nombreDeArchivo);
+
 		free(fcb);
 		config_destroy(lector);
 
@@ -199,8 +205,6 @@ void almacenarFcb (t_fcb* fcb){
 	string_append(&path, pathFCB());
 	string_append(&path, "/");
 	string_append(&path, fcb -> nombreDeArchivo);
-	log_info(loggerFS, "PATH GUARDADO: %s", path);
-
 	FILE* salvador = fopen(path, "wb+");
 
 	if (salvador != NULL){

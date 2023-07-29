@@ -36,7 +36,7 @@ int main(/*int argc, char** argv*/) {
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
 	// REALIZAR LAS CONEXIONES CON EL CLIENTE  -----------------------------------------
-	iniciarMemoria ();
+	//iniciarMemoria ();
 	// INICIALIZAR ESTRUCTURAS DESPUES DE SER CLIENTE DE MEMORIA  ----------------------------------------------------------------------
 	iniciarEstructuras();
 	peticiones = list_create();
@@ -47,7 +47,7 @@ int main(/*int argc, char** argv*/) {
 		nuevaInstruc -> nombre = F_CREATE;
 		nuevaInstruc -> pid = 1;
 		nuevaInstruc -> param1 = "DATYYYYYYYYYYYY.config";
-		list_add(peticiones, nuevaInstruc);
+
 
 	t_instruccion* nuevaInstruc2 = malloc(sizeof(t_instruccion));
 	nuevaInstruc2 -> nombre = F_OPEN;
@@ -55,15 +55,17 @@ int main(/*int argc, char** argv*/) {
 	nuevaInstruc2 -> param1 = "NATYYYYYYYYYYYY.config";
 
 	t_instruccion* nuevaInstruc3 = malloc(sizeof(t_instruccion));
-		nuevaInstruc3 -> nombre = F_OPEN;
+		nuevaInstruc3 -> nombre = F_CLOSE;
 		nuevaInstruc3 -> pid = 1;
 		nuevaInstruc3 -> param1 = "DATYYYYYYYYYYYY.config";
 
+	list_add(peticiones, nuevaInstruc2);
+	list_add(peticiones, nuevaInstruc);
 	list_add(peticiones, nuevaInstruc3);
 	list_add(peticiones, nuevaInstruc3);
 
-	iniciarServKernel ();
-	for (int j = 0; j<3 ; j++){
+	//iniciarServKernel ();
+	for (int j = 0; j<4 ; j++){
 		ejecutarPeticiones();
 	}
 
