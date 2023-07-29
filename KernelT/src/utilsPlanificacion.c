@@ -347,20 +347,23 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
 	 }
 
  void cerrarArchivoEnTGAA(t_archivo* archivo){
-	 t_colaDeArchivo* cola = buscarColaDeArchivo(archivo->nombreArchivo);
-	 queue_destroy(cola->colaBlock);
+	 //t_colaDeArchivo* cola = buscarColaDeArchivo(archivo->nombreArchivo);
+	// queue_destroy(cola->colaBlock);
+	 int posColaDeBlock = posColaDeArchivo(archivo->nombreArchivo);
+	 list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
 	 archivo->contador=0;
 	 archivo->nombreArchivo=NULL;
 	 free(archivo);
  }
 
- /*int buscarTAxP(uint32_t pid){
-	 int tamanio = list_size(listaDeTablasAxP);
-	 for(int i = 0; i<tamanio; i++){
-		 t_tablaDeAxP* tabla = list_get(listaDeTablasAxP, i);
-		 if(tabla->PID == pid){
-			 return i;
-		 }
-	 }
-	 return -1;
- }*/
+void posicionarPuntero (char* nombreArchivo, t_pcb* proceso, char* posicionPtro){
+	int posPuntero = atoi(posicionPtro);
+	int pos = buscarArchivoEnProceso(nombreArchivo, proceso);
+	t_archivoPorProceso* archivo = list_get(proceso->archAbiertos, pos);
+	archivo->puntero = posPuntero;
+}
+
+void cerrarArchivoDeProceso(t_archivoPorProceso* archivo){
+	free(archivo);
+}
+
