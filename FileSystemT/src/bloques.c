@@ -51,8 +51,8 @@ void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
 int proxBloqueVacio(){
 	for (int i = 0; i<10; i++){
 		bool bit = bitarray_test_bit(bitMap, i);
-		if (bit == 0) return i;
 		log_info(loggerFS, "Accediendo al bit %i:         %s", i,string_itoa(bit));
+		if (bit == 0) return i;
 	}
 	log_warning(loggerFS, "NO HAY BLOQUES DISPONIBLES");
 	return -1;
