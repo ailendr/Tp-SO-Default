@@ -63,7 +63,7 @@ void iniciarSuperBloque(){
 	log_info(loggerFS, "El tamaño de bloque es: %d",tamBloque);
 	log_info(loggerFS, "La cantidad de bloques es: %d", cantBloques);
 	superBloque -> blockSize = tamBloque;
-	superBloque->blockCount = cantBloques;
+	superBloque -> blockCount = cantBloques;
 	config_destroy(rutaSuperBloque);
 	log_info(loggerFS, "Ok -> Creacion Superbloque");
 }
@@ -80,16 +80,22 @@ void iniciarBitMap(){
 
 		log_info(loggerFS, "Recuperando los datos");
 		fread(bitMap->bitarray, 1, bytes, preGuardado);
+		fclose(preGuardado);
 
 	} else {
-
-		preGuardado = fopen(pathBitmap(), "wb+");
 		log_info(loggerFS, "Creando el archivo");
-		strcpy(bitMap->bitarray, string_repeat('0', superBloque->blockCount));
-		fwrite(bitMap->bitarray, 1, bytes, preGuardado);
-
+		guardarBitMap(string_repeat('0', superBloque->blockCount));
+		log_info(loggerFS, "%s", bitMap->bitarray);
 	}
 	log_info(loggerFS, "Ok -> Creacion BitMap");
+
+}
+
+void guardarBitMap(char* bitArray){
+	FILE* preGuardado = fopen(pathBitmap(), "wb+");
+	int bytes = superBloque->blockCount/8;
+	strcpy(bitMap->bitarray, bitArray);
+	fwrite(bitMap->bitarray, 1, bytes, preGuardado);
 	fclose(preGuardado);
 }
 

@@ -85,26 +85,31 @@ void posicionarPuntero (char* nombreArchivo, char* posicion){
 	free(fcb);
 }
 
-void truncarArchivo (char* nombreArchivo, uint32_t tamanio){
+int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
 	t_fcb* fcb;
 	int posicion = posicionFCB(nombreArchivo);
 	fcb = list_get(fcbs, posicion);
+
+	log_info(loggerFS, "	|-> Tamanio Nuevo: %d", tamanio);
+	log_info(loggerFS, "	|-> ...: %d", superBloque->blockSize);
 
 	int diferencia = cantBloques(tamanio)-cantBloques(fcb -> tamanioArchivo);
 
 	if(cantBloques(tamanio) > cantBloques(fcb -> tamanioArchivo)){
 		agregarBloques(diferencia, fcb);
-	    fcb -> tamanioArchivo = tamanio;
 	}
 
 	if(cantBloques(tamanio) < cantBloques(fcb -> tamanioArchivo)){
 		eliminarBloques((-1)*diferencia, fcb);
-	    fcb -> tamanioArchivo = tamanio;
 	}
 
-	int offset = tamanio % superBloque->blockSize;
+	log_info(loggerFS, "Operacion: TRUNCAR (TRUNCATE) -> Archivo: %s", fcb -> nombreDeArchivo);
+	log_info(loggerFS, "	|-> Tamanio Viejo: %d", fcb -> tamanioArchivo);
+	log_info(loggerFS, "	|-> Tamanio Nuevo: %d", tamanio);
+    fcb -> tamanioArchivo = tamanio;
 
-	//TODO
+    return 0;
+
 }
 
 void leerArchivo (t_instruccion* instruccion){
@@ -142,7 +147,7 @@ int posicionFCB (char* nombre){
 
 			log_info(loggerFS, "ARCHIVO ENCONTRADO EN LA POS %i", j);
 			log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb2 -> nombreDeArchivo);
-			log_info(loggerFS, "	|-> Tamanio: %d", fcb2 -> nombreDeArchivo);
+			log_info(loggerFS, "	|-> Tamanio: %d", fcb2 -> tamanioArchivo);
 			return j;
 		}
 
@@ -160,9 +165,7 @@ int posicionFCB (char* nombre){
 
 	if(lector != NULL ) {
 		fcb -> nombreDeArchivo = config_get_string_value(lector, "NOMBRE_ARCHIVO");
-		log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb -> nombreDeArchivo);
 		fcb -> tamanioArchivo = config_get_int_value(lector, "TAMANIO");
-		log_info(loggerFS, "	|-> Tamanio: %i", fcb -> nombreDeArchivo);
 
 		if (config_has_property(lector, "PUNTERO_DIRECTO")){
 			fcb -> punteroDirecto = config_get_int_value(lector, "PUNTERO_DIRECTO");
@@ -184,7 +187,7 @@ int posicionFCB (char* nombre){
 
 		log_info(loggerFS, "ARCHIVO ENCONTRADO EN LA POS %i", list_size(fcbs) - 1);
 		log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb -> nombreDeArchivo);
-		log_info(loggerFS, "	|-> Tamanio: %d", fcb -> nombreDeArchivo);
+		log_info(loggerFS, "	|-> Tamanio: %i", fcb -> tamanioArchivo);
 
 		free(fcb);
 		config_destroy(lector);
@@ -237,40 +240,5 @@ void almacenarFcb (t_fcb* fcb){
 	}
 
 	fclose(salvador);
-}
-
-int cantBloques (uint32_t tamanio){
-	int cantidadDeBloques = 0;
-	cantidadDeBloques = ceil(tamanio/superBloque->blockSize) + 1;
-	//El + 1 es por el bloque que tiene todos los punteros
-	return cantidadDeBloques;
-}
-
-void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
-
-}
-
-void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
-
-}
-
-// ___________________ FINALIZACION ___________________
-void finalizarListaFcb(){
-
-	t_fcb* fcb;
-	int tamanioLista = list_size(fcbs);
-	int j = 0;
-
-	for(j; j < tamanioLista; j++){
-		fcb = list_get(fcbs, j);
-
-		if(fcb -> abierto == 1){
-			cerrarArchivo(fcb -> nombreDeArchivo);
-		}
-
-	}
-
-	list_clean(fcbs);
-	list_destroy(fcbs);
 }
 

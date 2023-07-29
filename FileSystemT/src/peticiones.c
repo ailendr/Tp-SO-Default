@@ -76,8 +76,7 @@ void ejecutarPeticiones(){
 	t_instruccion* instruccion = malloc (sizeof(t_instruccion));
 	int nombre;
 	char* nombreArchivo;
-
-	t_paquete* paqueteI;
+	int valorOp = 0;
 
 	instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
@@ -99,17 +98,19 @@ void ejecutarPeticiones(){
 		case F_OPEN:
 			if (posicionFCB (nombreArchivo) != -1){
 				abrirArchivo(nombreArchivo);
+				valorOp = OK;
 			} else {
 				instruccion->param1 = "-1";
-				log_info(loggerFS, "ERROR: EL ARCHIVO NO EXISTENTE   Operacion: ABRIR (OPEN) -> Archivo: %s", nombreArchivo);
+				log_info(loggerFS, "ERROR: ARCHIVO NO EXISTENTE   Operacion: ABRIR (OPEN) -> Archivo: %s", nombreArchivo);
+				valorOp = ERROR;
 			}
 			break;
 		case F_CREATE:
-			//TODO Crear el f_create
 			crearArchivo(nombreArchivo);
 			break;
 		case F_TRUNCATE:
-			//TODO truncarArchivo (nombreArchivo, instruccion -> param2);
+			log_info(loggerFS, "CANTIDAD DE BLOQUES: %s", instruccion -> param2);
+			 truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
 			break;
 		case F_CLOSE:
 			cerrarArchivo(nombreArchivo);
@@ -118,10 +119,9 @@ void ejecutarPeticiones(){
 			posicionarPuntero (nombreArchivo, instruccion->param2);
 			break;
 	}
+
 	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
 
-
-	//paqueteI = serializarInstruccion(instruccion);
-	//validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
+	if (nombre != F_CREATE) send(cliente, &valorOp, sizeof(int), 0);
 
 }

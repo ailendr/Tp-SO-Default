@@ -50,22 +50,24 @@ int main(/*int argc, char** argv*/) {
 
 
 	t_instruccion* nuevaInstruc2 = malloc(sizeof(t_instruccion));
-	nuevaInstruc2 -> nombre = F_OPEN;
+	nuevaInstruc2 -> nombre = F_TRUNCATE;
 	nuevaInstruc2 -> pid = 1;
-	nuevaInstruc2 -> param1 = "NATYYYYYYYYYYYY.config";
+	nuevaInstruc2 -> param1 = "DATYYYYYYYYYYYY.config";
+	nuevaInstruc2 -> param2 = string_itoa(superBloque -> blockSize);
+	log_info(loggerFS, "CANTIDAD DE BLOQUES: %s", nuevaInstruc2 -> param2);
 
 	t_instruccion* nuevaInstruc3 = malloc(sizeof(t_instruccion));
-		nuevaInstruc3 -> nombre = F_CLOSE;
+		nuevaInstruc3 -> nombre = F_TRUNCATE;
 		nuevaInstruc3 -> pid = 1;
 		nuevaInstruc3 -> param1 = "DATYYYYYYYYYYYY.config";
+		nuevaInstruc3 -> param2 = "0";
 
-	list_add(peticiones, nuevaInstruc2);
 	list_add(peticiones, nuevaInstruc);
-	list_add(peticiones, nuevaInstruc3);
+	list_add(peticiones, nuevaInstruc2);
 	list_add(peticiones, nuevaInstruc3);
 
 	//iniciarServKernel ();
-	for (int j = 0; j<4 ; j++){
+	for (int j = 0; j<3 ; j++){
 		ejecutarPeticiones();
 	}
 
@@ -75,10 +77,11 @@ int main(/*int argc, char** argv*/) {
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
 
+	free (superBloque);
+	free (bitMap);
 	list_destroy(peticiones);
-	if (fcbs != NULL){
-		finalizarListaFcb();
-	}
+	list_destroy(fcbs);
+
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
 	close (cliente);

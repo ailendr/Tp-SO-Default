@@ -12,6 +12,11 @@
 
 #include "FSEstructuras.h"
 
+int cantBloques (uint32_t tamanio);
+void eliminarBloques (int cantidadDeBloques, t_fcb* fcb);
+void agregarBloques (int cantidadDeBloques, t_fcb* fcb);
+int proxBloqueVacio();
+
 void escribirBloque (void* contenido, uint32_t sizeContenido, uint32_t numeroBloque);
 void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t offset , uint32_t numeroBloque);
 void liberarBloque(uint32_t numeroBloque);

@@ -23,6 +23,4 @@ void escribirArchivo (t_instruccion* instruccion);
 int posicionFCB (char* nombre);
 void almacenarFcb (t_fcb* fcb);
 
-void finalizarListaFcb();
-
 #endif /* SRC_OPERACIONES_H_ */
