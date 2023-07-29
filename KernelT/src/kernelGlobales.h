@@ -25,5 +25,8 @@ extern t_list* listaDeBloqueo;
 extern t_list* listaDeInstancias;
 extern t_list* listaDeColasPorArchivo;
 
+extern t_list* archivos;
+extern int operacionFS;
+
 #endif /* SRC_KERNELGLOBALES_H_ */
 

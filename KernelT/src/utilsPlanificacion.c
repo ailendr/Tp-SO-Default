@@ -271,4 +271,40 @@ float tiempoActualEnMiliseg(){
 	 return tiempo;
 }
 
+void crearColaBlockDeArchivo(char* archivo){ //Crea la cola de bloqueo del archivo y agrega a la lista de cola por Archivo
+	t_colaDeArchivo* cola = malloc(sizeof(t_colaDeArchivo));
+	cola->nombreArchivo = archivo;
+	cola->colaBlock = queue_create();
+	list_add(listaDeColasPorArchivo, cola);
+
+}
+void bloquearProcesoPorArchivo (char* archivo, t_pcb* proceso){
+	t_colaDeArchivo* cola = buscarColaDeArchivo(archivo);
+	if(cola != NULL){
+		queue_push(cola->colaBlock,proceso);
+	}
+}
+
+t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
+ int posicion = posColaDeArchivo(archivo);
+ t_colaDeArchivo* cola = NULL;
+ 	 if(posicion != -1){
+	 	 cola = list_get(listaDeColasPorArchivo, posicion);
+ 	 }
+	 return cola;
+}
+
+
+
+ int posColaDeArchivo(char* archivo){
+ int tamanio = list_size(listaDeColasPorArchivo);
+ for(int i = 0; i<tamanio; i++){
+	  t_colaDeArchivo* cola = list_get(listaDeColasPorArchivo, i);
+	  if( strcmp(cola->nombreArchivo, archivo) == 0 ){
+		  return i;
+	  }
+  }
+  return -1;
+
+}
 

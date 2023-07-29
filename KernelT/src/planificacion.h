@@ -9,13 +9,6 @@
 #define SRC_PLANIFICACION_H_
 #include "utilsPlanificacion.h"
 
-typedef struct{
-	uint32_t PID;
-	char* nombreArchivo;
-}t_archivos;
-
-extern t_list* archivos;
-extern int operacionFS;
 
 extern struct timespec begin, end;
 

@@ -16,6 +16,11 @@ typedef struct{
 } t_parametroIO;
 
 typedef struct{
+	uint32_t PID;
+	char* nombreArchivo;
+}t_archivo;
+
+typedef struct{
 	char* nombreArchivo;
 	t_queue* colaBlock;
 } t_colaDeArchivo;
@@ -56,6 +61,12 @@ void loggearListaDeIntrucciones(t_list* instrucciones);
 int posProcesoAEliminar(t_list* listaDeProcesos, int pid);
 
 float tiempoActualEnMiliseg();
+ //Funciones para Archivos//
+void crearColaBlockDeArchivo(char* archivo);
+void bloquearProcesoPorArchivo (char* archivo, t_pcb* proceso);
+t_colaDeArchivo* buscarColaDeArchivo(char* archivo);
+int posColaDeArchivo(char* archivo);
+
 
 
 #endif /* SRC_UTILSPLANIFICACION_H_ */
