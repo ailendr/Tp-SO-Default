@@ -55,15 +55,6 @@ int iniciarServKernel (){
 
 	recibirHandshake(cliente, HANDSHAKE_Kernel, loggerFS);
 	log_info(loggerFS, "Ok -> Servidor de Peticiones");
-	// INICIALIZAR HILO  ----------------------------------------------------------------------------
-    pthread_t hiloEjecutor;
-    pthread_t hiloAtencion;
-
-	pthread_create(&hiloAtencion,NULL,(void*)atenderPeticiones,NULL);
-	pthread_create(&hiloEjecutor,NULL,(void*)ejecutarPeticiones,NULL);
-
-	pthread_detach(hiloAtencion);
-	pthread_detach(hiloEjecutor);
 	}
 	return 0;
 }

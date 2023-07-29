@@ -33,7 +33,7 @@ void cerrarArchivo(char* nombreArchivo){
 }
 
 void abrirArchivo(char* nombreArchivo){
-	t_fcb* fcb = malloc(sizeof(t_fcb));
+	t_fcb* fcb;
 	int posicion = posicionFCB(nombreArchivo);
 	fcb = list_get(fcbs, posicion);
 	if (fcb -> abierto == 0){
@@ -132,32 +132,32 @@ void escribirArchivo (t_instruccion* instruccion){
 
 // ___________________ UTILS ___________________
 int posicionFCB (char* nombre){
-	t_config* lector;
-	int posicion = -1;
-	t_fcb* fcb = malloc (sizeof(t_fcb));
-	char* path = pathFCB();
+	t_fcb* fcb2;
 
 	int tamanioLista = list_size(fcbs);
 
 	for(int j = 0; j < tamanioLista; j++){
-		fcb = list_get(fcbs, j);
+		fcb2 = list_get(fcbs, j);
 
-		if(strcmp(fcb->nombreDeArchivo, nombre) == 0){
+		if(strcmp(fcb2->nombreDeArchivo, nombre) == 0){
 			return j;
 		}
 
 	}
 
+	t_fcb* fcb = malloc (sizeof(t_fcb));
+
+	t_config* lector;
+	char* path = string_new();
+	string_append(&path, pathFCB());
+	string_append(&path, "/");
+	string_append(&path, nombre);
 	log_info(loggerFS, "PATH GUARDADO: %s", path);
 
-	char* path2 = strcat (path, "/");
-	path2 = strcat (path2, nombre);
-	log_info(loggerFS, "PATH GUARDADO: %s", path2);
-
-	lector = config_create(path2);
+	lector = config_create(path);
 
 	if(lector != NULL ) {
-		strcpy(fcb -> nombreDeArchivo, config_get_string_value(lector, "NOMBRE_ARCHIVO"));
+		fcb -> nombreDeArchivo = config_get_string_value(lector, "NOMBRE_ARCHIVO");
 		log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb -> nombreDeArchivo);
 		fcb -> tamanioArchivo = config_get_int_value(lector, "TAMANIO");
 		log_info(loggerFS, "	|-> Tamanio: %i", fcb -> nombreDeArchivo);
@@ -184,7 +184,6 @@ int posicionFCB (char* nombre){
 		config_destroy(lector);
 
 		return list_size(fcbs) - 1;
-		config_destroy(lector);
 
 	}
 
@@ -196,32 +195,33 @@ int posicionFCB (char* nombre){
 
 void almacenarFcb (t_fcb* fcb){
 
-	char* path = pathFCB();
-	path = strcat (path, "/");
-	path = strcat (path, fcb -> nombreDeArchivo);
+	char* path = string_new();
+	string_append(&path, pathFCB());
+	string_append(&path, "/");
+	string_append(&path, fcb -> nombreDeArchivo);
 	log_info(loggerFS, "PATH GUARDADO: %s", path);
 
 	FILE* salvador = fopen(path, "wb+");
 
 	if (salvador != NULL){
 
-		char* infoFCB = "NOMBRE_ARCHIVO:";
+		char* infoFCB = "NOMBRE_ARCHIVO=";
 		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 		fwrite(fcb -> nombreDeArchivo, 1, strlen(fcb -> nombreDeArchivo), salvador);
 
-		infoFCB = "\nTAMANIO:";
+		infoFCB = "\nTAMANIO=";
 		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 		infoFCB = string_itoa(fcb -> tamanioArchivo);
 		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 
 		if (fcb -> punteroDirecto != -1){
-			infoFCB = "\nPUNTERO_DIRECTO:";
+			infoFCB = "\nPUNTERO_DIRECTO=";
 			fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 			infoFCB = string_itoa(fcb -> punteroDirecto);
 			fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 
 			if (fcb -> punteroDirecto != -1){
-				infoFCB = "\nPUNTERO_INDIRECTO:";
+				infoFCB = "\nPUNTERO_INDIRECTO=";
 				fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 				infoFCB = string_itoa(fcb -> punteroIndirecto);
 				fwrite(infoFCB, 1, strlen(infoFCB), salvador);

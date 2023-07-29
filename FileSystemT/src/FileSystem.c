@@ -35,33 +35,40 @@ int main(/*int argc, char** argv*/) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
-
-
-
-	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
-	sem_init(&nuevoPedido,0,0);
-
-
 	// REALIZAR LAS CONEXIONES CON EL CLIENTE  -----------------------------------------
-	//iniciarMemoria ();
+	iniciarMemoria ();
 	// INICIALIZAR ESTRUCTURAS DESPUES DE SER CLIENTE DE MEMORIA  ----------------------------------------------------------------------
 	iniciarEstructuras();
 	peticiones = list_create();
 	fcbs = list_create();
 	// REALIZAR LAS CONEXIONES COMO SERVIDOR  -----------------------------------------
 
+	t_instruccion* nuevaInstruc = malloc(sizeof(t_instruccion));
+		nuevaInstruc -> nombre = F_CREATE;
+		nuevaInstruc -> pid = 1;
+		nuevaInstruc -> param1 = "DATYYYYYYYYYYYY.config";
+		list_add(peticiones, nuevaInstruc);
+
 	t_instruccion* nuevaInstruc2 = malloc(sizeof(t_instruccion));
 	nuevaInstruc2 -> nombre = F_OPEN;
 	nuevaInstruc2 -> pid = 1;
 	nuevaInstruc2 -> param1 = "NATYYYYYYYYYYYY.config";
-	sem_post(&nuevoPedido);
 
-	list_add(peticiones, nuevaInstruc2);
+	t_instruccion* nuevaInstruc3 = malloc(sizeof(t_instruccion));
+		nuevaInstruc3 -> nombre = F_OPEN;
+		nuevaInstruc3 -> pid = 1;
+		nuevaInstruc3 -> param1 = "DATYYYYYYYYYYYY.config";
 
-	ejecutarPeticiones();
+	list_add(peticiones, nuevaInstruc3);
+	list_add(peticiones, nuevaInstruc3);
 
 	iniciarServKernel ();
+	for (int j = 0; j<3 ; j++){
+		ejecutarPeticiones();
+	}
 
+
+	atenderPeticiones();
 
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
@@ -70,7 +77,6 @@ int main(/*int argc, char** argv*/) {
 	if (fcbs != NULL){
 		finalizarListaFcb();
 	}
-	sem_destroy(&nuevoPedido);
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
 	close (cliente);

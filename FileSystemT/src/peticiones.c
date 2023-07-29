@@ -7,8 +7,6 @@
 
 #include "peticiones.h"
 
-sem_t nuevoPedido;
-
 void atenderPeticiones(){
    log_info(loggerFS, "Ejecuta Hilo Atender Peticiones numero : <%ld> ", pthread_self());
 	//void* buffer = NULL;
@@ -27,7 +25,6 @@ void atenderPeticiones(){
 			newInstr->pid = -1;
 			list_clean(peticiones);
 			list_add(peticiones, newInstr);
-		    sem_post(&nuevoPedido);
 			break;
 		}
 
@@ -66,8 +63,10 @@ void atenderPeticiones(){
 			//deserializarInstruccionEstructura(buffer, cantParam, &desplazamiento);
 			list_add(peticiones, nuevaInstruc);
 			//free(buffer);
-		    sem_post(&nuevoPedido);
 		}
+
+		ejecutarPeticiones();
+
 	}
 }
 
@@ -80,54 +79,48 @@ void ejecutarPeticiones(){
 
 	t_paquete* paqueteI;
 
-	while(1){
+	instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
-		sem_wait(&nuevoPedido);
+	nombre = instruccion->nombre;
 
-		instruccion = list_get(list_take_and_remove(peticiones,1), 0);
-
-		nombre = instruccion->nombre;
-
-		if (nombre == EXIT){
-			log_info(loggerFS, "Finalice todas las peticiones pendientes. Finalizamos modulo");
-			break;
-		}
-
-		nombreArchivo = instruccion -> param1;
-
-		switch(nombre){
-			case F_READ:
-				//TODO leerArchivo(instruccion);
-				break;
-			case F_WRITE:
-				//TODO escribirArchivo (instruccion);
-				break;
-			case F_OPEN:
-				if (posicionFCB (nombreArchivo) != -1){
-					abrirArchivo(nombreArchivo);
-				} else {
-					instruccion->param1 = "-1";
-				}
-				break;
-			case F_CREATE:
-				//TODO Crear el f_create
-				crearArchivo(nombreArchivo);
-				break;
-			case F_TRUNCATE:
-				//TODO truncarArchivo (nombreArchivo, instruccion -> param2);
-				break;
-			case F_CLOSE:
-				cerrarArchivo(nombreArchivo);
-				break;
-			case F_SEEK:
-				posicionarPuntero (nombreArchivo, instruccion->param2);
-				break;
-		}
-		log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
-
-		//paqueteI = serializarInstruccion(instruccion);
-		//validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
-		//TODO Ver que kernel lo reciba y empezar a trabajar desde ahi
+	if (nombre == EXIT){
+		log_info(loggerFS, "Finalice todas las peticiones pendientes. Finalizamos modulo");
 	}
+
+	nombreArchivo = instruccion -> param1;
+	log_info(loggerFS, "PATH GUARDADO: %s", pathFCB());
+	switch(nombre){
+		case F_READ:
+			//TODO leerArchivo(instruccion);
+			break;
+		case F_WRITE:
+			//TODO escribirArchivo (instruccion);
+			break;
+		case F_OPEN:
+			if (posicionFCB (nombreArchivo) != -1){
+				abrirArchivo(nombreArchivo);
+			} else {
+				instruccion->param1 = "-1";
+			}
+			break;
+		case F_CREATE:
+			//TODO Crear el f_create
+			crearArchivo(nombreArchivo);
+			break;
+		case F_TRUNCATE:
+			//TODO truncarArchivo (nombreArchivo, instruccion -> param2);
+			break;
+		case F_CLOSE:
+			cerrarArchivo(nombreArchivo);
+			break;
+		case F_SEEK:
+			posicionarPuntero (nombreArchivo, instruccion->param2);
+			break;
+	}
+	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
+	log_info(loggerFS, "PATH GUARDADO: %s", pathFCB());
+
+	paqueteI = serializarInstruccion(instruccion);
+	validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
 
 }
