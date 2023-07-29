@@ -18,6 +18,7 @@ extern t_segmento* segmentoCero;
 extern t_list * listaDeTablas;
 extern t_segmento* segmentoLibre;
 extern pthread_mutex_t mutexEspacioUser;
+extern pthread_mutex_t mutexOperacionFS;
 //ESTRUCTURAS Y UTILS DE MEMORIA
 void iniciarEstructuras();
 void crearSegmentoCero();

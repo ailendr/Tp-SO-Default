@@ -8,7 +8,6 @@
 #ifndef SRC_KERNELCONEXIONES_H_
 #define SRC_KERNELCONEXIONES_H_
 
-#include <pthread.h>
 #include "planificacion.h"
 
 

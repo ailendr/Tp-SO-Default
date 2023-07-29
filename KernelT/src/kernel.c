@@ -37,7 +37,7 @@ int main(){
 
 
     crearEstados();
-    crearEstructurasDeRecursos();
+    crearEstructurasDeRecursosyArchivos();
 	inicializarSemaforos();
 
 

@@ -13,6 +13,7 @@ t_list* listaDeInstancias;
 t_queue *colaNew;
 t_list *colaReady;
 t_list* listaDeProcesos;//procesos admitidos en el sistema
+t_list* listaDeColasPorArchivo;
 uint32_t pid = 0;
 
 void crearEstados() {
@@ -198,9 +199,10 @@ t_list* crearListaDeInstancias(){
 	return listaDeInstancias;
 }
 
-void crearEstructurasDeRecursos(){ //Son globales
+void crearEstructurasDeRecursosyArchivos(){ //Son globales
 	listaDeBloqueo = crearListaDeBloqueo();
 	listaDeInstancias = crearListaDeInstancias();
+	listaDeColasPorArchivo = list_create(); //A medida que vamos creando un archivo -> creamos una colaDeArchivo , llenando el nombre e inicializando la cola y la agregamos
 }
 
 int recursoDisponible(char* nombre){
@@ -268,4 +270,5 @@ float tiempoActualEnMiliseg(){
 	float tiempo = (tiempoReal.tv_sec*1000) + (tiempoReal.tv_nsec*1e-6); //tiempo en milisegundos
 	 return tiempo;
 }
+
 
