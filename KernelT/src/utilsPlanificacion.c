@@ -327,6 +327,17 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
 	 return -1;
  }
 
+ int buscarArchivoEnProceso(char* nombreArchivo, t_pcb* proceso){
+	 int tamanio = list_size(proceso->archAbiertos);
+	 for (int i = 0; i<tamanio; i++){
+		 t_archivo* archivo = list_get(proceso->archAbiertos, i);
+		 if(strcmp(archivo->nombreArchivo,nombreArchivo) == 0){
+			 return i;
+		 }
+	 }
+	 return -1;
+ }
+
 
  void agregarEntradaATablaxProceso(char* nombreArchivo, t_pcb* proceso, int posPuntero){
 		 t_archivoPorProceso* archivo = malloc(sizeof(t_archivoPorProceso));
@@ -335,7 +346,13 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
 		 list_add(proceso->archAbiertos, archivo);
 	 }
 
-
+ void cerrarArchivoEnTGAA(t_archivo* archivo){
+	 t_colaDeArchivo* cola = buscarColaDeArchivo(archivo->nombreArchivo);
+	 queue_destroy(cola->colaBlock);
+	 archivo->contador=0;
+	 archivo->nombreArchivo=NULL;
+	 free(archivo);
+ }
 
  /*int buscarTAxP(uint32_t pid){
 	 int tamanio = list_size(listaDeTablasAxP);

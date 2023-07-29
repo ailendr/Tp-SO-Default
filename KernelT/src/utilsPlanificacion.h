@@ -74,7 +74,8 @@ int recursoDisponible(char* nombre);
 void mostrarListaDeProcesos();
 void loggearListaDeIntrucciones(t_list* instrucciones);
 int posProcesoAEliminar(t_list* listaDeProcesos, int pid);
-
+int buscarArchivoEnProceso(char* nombreArchivo, t_pcb* proceso);
+void cerrarArchivoEnTGAA(t_archivo* archivo);
 float tiempoActualEnMiliseg();
  //Funciones para Archivos//
 void crearColaBlockDeArchivo(char* archivo);

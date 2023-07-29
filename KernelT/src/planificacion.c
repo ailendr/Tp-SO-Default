@@ -216,7 +216,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
 						t_archivo* archivo = malloc (sizeof(t_archivo*));
 						archivo->nombreArchivo = instruccion->param1;
-						archivo->contador = 1;
+						archivo->contador +=1; //Le agregue el más porque no vi que se incremente en ningún lado y sino siempre va a valer 1
 						list_add(tablaGlobalDeArchivos, archivo);
 						//Agrego entrada a la Tabla de Archivos para este proceso//
 						agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0);
@@ -230,6 +230,32 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case F_CLOSE:
+				instruccion=deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
+				log_info(loggerKernel, "Instruccion F CLOSE");
+				int pos=buscarArchivoEnTGAA(instruccion->param1);
+				//Modifico el contador en la TGAA
+				t_archivo* archivo = list_get(tablaGlobalDeArchivos, pos);
+				int instancias = archivo->contador; //Ya se que esto parece  re para nada, pero sino creo que me tira cualquier numero
+				archivo->contador = instancias -1;
+				//Cierro el arch en la tabla del proceso
+				int posArchProceso =buscarArchivoEnProceso(archivo->nombreArchivo, ultimoEjecutado);
+				t_list* listaDeArchs = ultimoEjecutado->archAbiertos;
+				t_archivoPorProceso archivoProceso= list_remove(listaDeArchs, posArchProceso);
+				t_pcb* proceso;
+				//Si el archivo tiene procesos bloquedos
+				if(archivo->contador>0){
+					t_colaDeArchivo* colaArchivo = buscarColaDeArchivo(archivo->nombreArchivo);
+					proceso=queue_pop(colaArchivo->colaBlock);
+					agregarAEstadoReady(proceso);
+				}else{
+					list_remove_and_destroy_element(tablaGlobalDeArchivos, pos, (void*)cerrarArchivoEnTGAA);
+					archivoProceso->nombreArchivo=NULL;
+					archivoProceso->puntero=0;
+					free(archivoProceso);
+				}
+				free(instruccion);
+				procesoAEjecutar(ultimoEjecutado->contexto);
+				instruccionAEjecutar(ultimoEjecutado);
 				break;
 			case F_SEEK:
 				break;
