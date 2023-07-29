@@ -15,7 +15,7 @@ t_list *colaReady;
 t_list* listaDeProcesos;//procesos admitidos en el sistema
 t_list* listaDeColasPorArchivo;
 t_list* tablaGlobalDeArchivos;
-t_list* listaDeTablasAxP;
+//t_list* listaDeTablasAxP;
 uint32_t pid = 0;
 
 void crearEstados() {
@@ -209,7 +209,6 @@ void crearEstructurasDeRecursos(){ //Son globales
 void crearEstructurasDeArchivos(){
 	listaDeColasPorArchivo = list_create(); //A medida que vamos creando un archivo -> creamos una colaDeArchivo , llenando el nombre e inicializando la cola y la agregamos
     tablaGlobalDeArchivos = list_create();
-    listaDeTablasAxP= list_create();
 }
 
 
@@ -290,6 +289,7 @@ void bloquearProcesoPorArchivo (char* archivo, t_pcb* proceso){
 	t_colaDeArchivo* cola = buscarColaDeArchivo(archivo);
 	if(cola != NULL){
 		queue_push(cola->colaBlock,proceso);
+		logCambioDeEstado(proceso, "EXEC", "BLOCK");
 	}
 }
 
@@ -316,3 +316,34 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
 
 }
 
+ int buscarArchivoEnTGAA(char* nombreArchivo){
+	 int tamanio = list_size(tablaGlobalDeArchivos);
+	 for (int i = 0; i<tamanio; i++){
+		 t_archivo* archivo = list_get(tablaGlobalDeArchivos, i);
+		 if(strcmp(archivo->nombreArchivo,nombreArchivo) == 0){
+			 return i;
+		 }
+	 }
+	 return -1;
+ }
+
+
+ void agregarEntradaATablaxProceso(char* nombreArchivo, t_pcb* proceso, int posPuntero){
+		 t_archivoPorProceso* archivo = malloc(sizeof(t_archivoPorProceso));
+		 archivo->nombreArchivo = nombreArchivo;
+		 archivo->puntero= posPuntero;
+		 list_add(proceso->archAbiertos, archivo);
+	 }
+
+
+
+ /*int buscarTAxP(uint32_t pid){
+	 int tamanio = list_size(listaDeTablasAxP);
+	 for(int i = 0; i<tamanio; i++){
+		 t_tablaDeAxP* tabla = list_get(listaDeTablasAxP, i);
+		 if(tabla->PID == pid){
+			 return i;
+		 }
+	 }
+	 return -1;
+ }*/

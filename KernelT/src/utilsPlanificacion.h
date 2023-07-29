@@ -25,11 +25,11 @@ typedef struct{
 	int puntero;
 }t_archivoPorProceso;
 
-typedef struct{
+/*typedef struct{
 	uint32_t PID;
 	t_list* archivos; //Aca almacenamos un archivo por proceso
 }t_tablaDeAxP; //Tabla de archivos por proceso
-
+*/
 typedef struct{
 	char* nombreArchivo;
 	t_queue* colaBlock;
@@ -81,6 +81,10 @@ void crearColaBlockDeArchivo(char* archivo);
 void bloquearProcesoPorArchivo (char* archivo, t_pcb* proceso);
 t_colaDeArchivo* buscarColaDeArchivo(char* archivo);
 int posColaDeArchivo(char* archivo);
+int buscarArchivoEnTGAA(char* nombreArchivo);
+void agregarEntradaATablaxProceso(char* nombreArchivo, t_pcb* proceso, int posPuntero);
+//int buscarTAxP(uint32_t pid);
+
 
 
 

@@ -179,17 +179,55 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case F_OPEN:
-				log_info(loggerKernel, "Instruccion Open File");
+				log_info(loggerKernel, "Instruccion F Open ");
 				instruccion = deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
-				/*
-				if (archivoAbierto(instruccion->param1, instruccion->pid) != -1){
-					log_info(loggerKernel, "Archivo: %s ya creado para <ID %i>", instruccion->param1, instruccion->pid);
-				} else {
-					t_paquete* paqueteDS = serializarInstruccion(instruccion);
-					validarEnvioDePaquete(paqueteDS, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
+				log_info(loggerKernel,"PID: <%d> - Abrir Archivo: <%s>", instruccion->pid, instruccion->param1);
+                int posArchivo = buscarArchivoEnTGAA(instruccion->param1);
+                t_paquete* paquete;
+                int recepcion;
+				if (posArchivo != -1){
+					log_info(loggerKernel, "Archivo: %s ya existente", instruccion->param1);
+					t_archivo* archivo = list_get(tablaGlobalDeArchivos, posArchivo);
+					archivo->contador += 1; //incremento el contador para ese archivo en la Tabla Global de Archivos Abiertos
+					agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0); //Agrega la entrada y posiciona el puntero en cero
+					bloquearProcesoPorArchivo(instruccion->param1, ultimoEjecutado);
+					paquete = serializarInstruccion(instruccion);
+					validarEnvioDePaquete(paquete, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
+					free(instruccion);
+				     recepcion = recibir_operacion(socketFs);
+					}
+				else { //si no existe en la TGAA
+					//1) Consulta si existe ese archivo
+					paquete = serializarInstruccion(instruccion);
+					validarEnvioDePaquete(paquete, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
+					recepcion = recibir_operacion(socketFs);
+						if(recepcion == ERROR ){ // Solo si no existe envia un F Create
+							t_instruccion* instrucFCreate = malloc(sizeof(t_instruccion));
+							instrucFCreate->nombre = F_CREATE;
+							instrucFCreate->param1 = instruccion->param1;
+							t_paquete* paq = serializarInstruccion(instrucFCreate);
+							validarEnvioDePaquete(paq, socketFs, loggerKernel, configKernel, "Instruccion F CREATE");
+							//Si es la primera vez que crea un archivo-> Debe iniciar una cola de block para ese archivo
+							crearColaBlockDeArchivo(instruccion->param1);
+
+							free(instrucFCreate);
+						}
+						//Exista o no exista debe hacer esto//
+						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
+						t_archivo* archivo = malloc (sizeof(t_archivo*));
+						archivo->nombreArchivo = instruccion->param1;
+						archivo->contador = 1;
+						list_add(tablaGlobalDeArchivos, archivo);
+						//Agrego entrada a la Tabla de Archivos para este proceso//
+						agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0);
+
+						free(instruccion); //ver si luego no genera inconsistencias
+						procesoAEjecutar(ultimoEjecutado->contexto);
+						instruccionAEjecutar(ultimoEjecutado);
+
+
 				}
-				*/
-				free(instruccion);
+
 				break;
 			case F_CLOSE:
 				break;
@@ -404,16 +442,16 @@ void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecu
 			log_info(loggerKernel, "Respuesta de Create Segment: COMPACTAR");
 			//TODO Validariamos que no haya operaciones esntre Fs y Memoria
 			if(operacionFS==1){
-			log_info(loggerKernel, "Esperando Finalizacion de Operaciones entre FS y Memoria");
+			log_info(loggerKernel, "Compactacion: Esperando Fin de Operaciones de FS");
 					}
 			pthread_mutex_lock(&mutexOperacionFS);
-			log_info(loggerKernel, "Solicitando COMPACTACION a Memoria");
+			log_info(loggerKernel, "Compactacion: Se solicito compactacion ");
 			int habilitado = COMPACTAR;//solicitariamos a la memoria que compacte enviandole un send de O
 			send(socketMemoria, &habilitado, sizeof(int),0);
 			t_list* listaDeTablas = deserializarListaDeTablas(socketMemoria);//recibe lista de tablas actualizada y deserializa
 			actualizarTablaEnProcesos(listaDeTablas);//funcion que tome cada pcb y setee la nueva tabla correspondiente con su posicion
 			pthread_mutex_unlock(&mutexOperacionFS);
-			log_info(loggerKernel, "Finalizo la COMPACTACION");
+			log_info(loggerKernel, "Se Finalizo el proceso de COMPACTACION");
 			t_paquete* paqueteCS = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paqueteCS, socketMemoria, loggerKernel, configKernel, "Instruccion Create Segment");
 			validarCS(socketMemoria,instruccion,ultimoEjecutado);
