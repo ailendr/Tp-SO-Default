@@ -74,28 +74,19 @@ void iniciarArchivoDeBloques(){
 
     	archivo_bloques = fopen(pathBloques(), "wb+");
         if (archivo_bloques == NULL) {
-            log_trace(fileSystem_logger, "No se pudo crear Archivo de Bloques");
+        	log_info(loggerFS, "No se pudo crear Archivo de Bloques");
             return;
         }
         fseek(archivo_bloques, tamanio_archivo - 1, SEEK_SET);
         fputc('\0', archivo_bloques);
 
-        log_trace(fileSystem_logger, "Archivo de Bloques creado");
-        log_trace(fileSystem_logger, "Tamaño: %d", tamanio_archivo);
-        //fclose(archivo_bloques);
+        log_info(loggerFS, "Archivo de Bloques Creado");
+        log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
     } else {
 
-    	log_trace(fileSystem_logger, "Archivo de Bloques leido");
-    	log_trace(fileSystem_logger, "Tamaño: %d", tamanio_archivo);
-        /*// El archivo existe, se verifica el tamaño actual
-        fseek(archivo_bloques, tamanio_archivo - 1, SEEK_END);
-        if (ftell(archivo_bloques) == tamanio_archivo) {
-   	log_trace(fileSystem_logger, "Archivo de Bloques leido");
-        	log_trace(fileSystem_logger, "Tamaño: %d", tamanio_archivo);
-        } else {
-        	log_error(fileSystem_logger, "Archivo de Bloques no tiene el tamaño deseado.");
-        	return;
-        }*/
+    	log_info(loggerFS, "Archivo de Bloques leido");
+    	log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
+
     }
     fclose(archivo_bloques);
 }

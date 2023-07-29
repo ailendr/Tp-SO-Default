@@ -86,15 +86,15 @@ void liberarBloque(uint32_t numeroBloque){
 }
 
 void leerArchivoBloques(void* aLeer, int posicion, int cantidad){
-	FILE* archivo_bloques = fopen(path_bloques, "r+b");
+	FILE* archivo_bloques = fopen(pathBloques(), "r+b");
 	fseek(archivo_bloques, posicion, SEEK_SET);
 	fread(aLeer, cantidad,1, archivo_bloques);
 	fclose(archivo_bloques);
 }
 
 void escribirArchivoBloques(void* aEscribir, int posicion, int cantidad){
-	log_trace(fileSystem_logger, "escribiendo archivo pos: %d , cant: %d", posicion, cantidad);
-	FILE* archivo_bloques = fopen(path_bloques, "r+b");
+	log_trace(loggerFS, "escribiendo archivo pos: %d , cant: %d", posicion, cantidad);
+	FILE* archivo_bloques = fopen(pathBloques(), "r+b");
 	fseek(archivo_bloques, posicion, SEEK_SET);
 	fwrite(aEscribir, cantidad,1, archivo_bloques);
 	fclose(archivo_bloques);
