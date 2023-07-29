@@ -8,7 +8,7 @@
 #include "peticiones.h"
 
 void atenderPeticiones(){
-   log_info(loggerFS, "Ejecuta Hilo Atender Peticiones numero : <%ld> ", pthread_self());
+   log_info(loggerFS, "Recibiendo Peticiones de Kernel ");
 	//void* buffer = NULL;
 	//int tamanio = 0;
 	int cantParam = 0;
@@ -71,7 +71,7 @@ void atenderPeticiones(){
 }
 
 void ejecutarPeticiones(){
- log_info(loggerFS, "Ejecuta Hilo Ejecutar Peticiones numero : <%ld> ", pthread_self());
+ log_info(loggerFS, "Ejecutando Peticiones");
 
 	t_instruccion* instruccion = malloc (sizeof(t_instruccion));
 	int nombre;
@@ -91,9 +91,15 @@ void ejecutarPeticiones(){
 	switch(nombre){
 		case F_READ:
 			//TODO leerArchivo(instruccion);
+			valorOp=OK;
+			send(cliente, &valorOp, sizeof(int), 0);
+
 			break;
 		case F_WRITE:
 			//TODO escribirArchivo (instruccion);
+			valorOp=OK;
+			send(cliente, &valorOp, sizeof(int), 0);
+
 			break;
 		case F_OPEN:
 			if (posicionFCB (nombreArchivo) != -1){
@@ -104,6 +110,8 @@ void ejecutarPeticiones(){
 				log_info(loggerFS, "ERROR: ARCHIVO NO EXISTENTE   Operacion: ABRIR (OPEN) -> Archivo: %s", nombreArchivo);
 				valorOp = ERROR;
 			}
+			send(cliente,&valorOp,sizeof(int),0 );
+
 			break;
 		case F_CREATE:
 			crearArchivo(nombreArchivo);
@@ -111,7 +119,9 @@ void ejecutarPeticiones(){
 		case F_TRUNCATE:
 			 int res = truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
 			 if (res == 0){ valorOp = OK; }
-			 else { valorOp = ERROR; }
+			// else { valorOp = ERROR; }
+			 send(cliente, &valorOp, sizeof(int), 0);
+
 			break;
 		case F_CLOSE:
 			cerrarArchivo(nombreArchivo);

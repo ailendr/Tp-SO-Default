@@ -3,7 +3,12 @@
 #include "memoria.h"
 
 
-int main(void) {
+int main(int argc, char** argv) {
+	if(argc < 2){
+			return EXIT_FAILURE;
+		}
+
+	char* pathConfig = argv[1];
 
 	printf("Hola soy Memoria y soy servidor de Kernel,Cpu y Fs \n ");
 
@@ -14,7 +19,7 @@ int main(void) {
 
 	int servidorMemoria = 0;
 
-	configMemoria = config_create("../MemoriaT/memoria.config");
+	configMemoria = config_create(pathConfig);
 	if(verificarConfig (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 
 	char* puerto = puertoEscucha();

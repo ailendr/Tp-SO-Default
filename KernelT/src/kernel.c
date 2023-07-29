@@ -3,12 +3,11 @@
 #include "kernel.h"
 
 
-/*int main(int argc, char** argv) {
+int main(int argc, char** argv) {
 	if(argc < 2){
 			return EXIT_FAILURE;
 		}
-	char* pathConfig = argv[1];*/
-int main(){
+	char* pathConfig = argv[1];
 
 	printf ("Hola soy kernel y estoy queriendo recibir mensajes\n ");
 
@@ -20,7 +19,7 @@ int main(){
 
 	int server_fd = 0;
 
-	configKernel = config_create("/home/utnso/tp-2023-1c-Default-2.0/KernelT/kernel.config");
+	configKernel = config_create(pathConfig);
 
 	if(verificarConfig (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
