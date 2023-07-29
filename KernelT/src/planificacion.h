@@ -15,6 +15,7 @@ typedef struct{
 }t_archivos;
 
 extern t_list* archivos;
+extern int operacionFS;
 
 extern struct timespec begin, end;
 
