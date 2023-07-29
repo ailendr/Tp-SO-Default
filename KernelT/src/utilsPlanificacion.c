@@ -14,6 +14,8 @@ t_queue *colaNew;
 t_list *colaReady;
 t_list* listaDeProcesos;//procesos admitidos en el sistema
 t_list* listaDeColasPorArchivo;
+t_list* tablaGlobalDeArchivos;
+t_list* listaDeTablasAxP;
 uint32_t pid = 0;
 
 void crearEstados() {
@@ -199,11 +201,17 @@ t_list* crearListaDeInstancias(){
 	return listaDeInstancias;
 }
 
-void crearEstructurasDeRecursosyArchivos(){ //Son globales
+void crearEstructurasDeRecursos(){ //Son globales
 	listaDeBloqueo = crearListaDeBloqueo();
 	listaDeInstancias = crearListaDeInstancias();
-	listaDeColasPorArchivo = list_create(); //A medida que vamos creando un archivo -> creamos una colaDeArchivo , llenando el nombre e inicializando la cola y la agregamos
 }
+
+void crearEstructurasDeArchivos(){
+	listaDeColasPorArchivo = list_create(); //A medida que vamos creando un archivo -> creamos una colaDeArchivo , llenando el nombre e inicializando la cola y la agregamos
+    tablaGlobalDeArchivos = list_create();
+    listaDeTablasAxP= list_create();
+}
+
 
 int recursoDisponible(char* nombre){
 	char** recursos = Recursos();

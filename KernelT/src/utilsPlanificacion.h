@@ -16,9 +16,19 @@ typedef struct{
 } t_parametroIO;
 
 typedef struct{
-	uint32_t PID;
 	char* nombreArchivo;
+	int contador;
 }t_archivo;
+
+typedef struct{
+	char* nombreArchivo;
+	int puntero;
+}t_archivoPorProceso;
+
+typedef struct{
+	uint32_t PID;
+	t_list* archivos; //Aca almacenamos un archivo por proceso
+}t_tablaDeAxP; //Tabla de archivos por proceso
 
 typedef struct{
 	char* nombreArchivo;
@@ -56,7 +66,8 @@ void actualizarTablaEnProcesos(t_list* listaDeTablas);
 
 t_list* crearListaDeBloqueo();
 t_list* crearListaDeInstancias();
-void crearEstructurasDeRecursosyArchivos();
+void crearEstructurasDeRecursos();
+void crearEstructurasDeArchivos();
 int recursoDisponible(char* nombre);
 
 //Logueo de las instrucciones para verificar que esta todo ok//

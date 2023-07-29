@@ -9,7 +9,6 @@
 
 struct timespec begin, end;
 int operacionFS = 0;
-t_list* archivos;
 
 
 void largoPlazo() {
