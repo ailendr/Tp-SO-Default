@@ -10,7 +10,6 @@
 int cantBloques (uint32_t tamanio){
 	int cantidadDeBloques = 0;
 	cantidadDeBloques = ceil(tamanio/superBloque->blockSize);
-	log_info(loggerFS, "CANTIDAD DE BLOQUES: %s",string_itoa(cantidadDeBloques));
 	if (cantidadDeBloques > 1) cantidadDeBloques++;
 	//El + 1 es por el bloque que tiene todos los punteros
 	return cantidadDeBloques;
@@ -24,14 +23,14 @@ void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
 
 	int proxCargar;
 
-	if (fcb->punteroDirecto == -1){
+	if (fcb->punteroDirecto == -1 && cantidadDeBloques > 0){
 		cantidadDeBloques --;
 		proxCargar = proxBloqueVacio();
 		bitarray_set_bit(bitMap, proxCargar);
 		fcb->punteroDirecto = proxCargar;
 	}
 
-	if (fcb->punteroIndirecto == -1){
+	if (fcb->punteroIndirecto == -1 && cantidadDeBloques > 0){
 		cantidadDeBloques --;
 		proxCargar = proxBloqueVacio();
 		bitarray_set_bit(bitMap, proxCargar);
@@ -51,7 +50,9 @@ void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
 
 int proxBloqueVacio(){
 	for (int i = 0; i<10; i++){
-		if (bitarray_test_bit(bitMap, 0) == 0) return i;
+		bool bit = bitarray_test_bit(bitMap, i);
+		if (bit == 0) return i;
+		log_info(loggerFS, "Accediendo al bit %i:         %s", i,string_itoa(bit));
 	}
 	log_warning(loggerFS, "NO HAY BLOQUES DISPONIBLES");
 	return -1;

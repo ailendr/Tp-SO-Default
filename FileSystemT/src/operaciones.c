@@ -90,9 +90,6 @@ int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
 	int posicion = posicionFCB(nombreArchivo);
 	fcb = list_get(fcbs, posicion);
 
-	log_info(loggerFS, "	|-> Tamanio Nuevo: %d", tamanio);
-	log_info(loggerFS, "	|-> ...: %d", superBloque->blockSize);
-
 	int diferencia = cantBloques(tamanio)-cantBloques(fcb -> tamanioArchivo);
 
 	if(cantBloques(tamanio) > cantBloques(fcb -> tamanioArchivo)){
@@ -100,7 +97,7 @@ int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
 	}
 
 	if(cantBloques(tamanio) < cantBloques(fcb -> tamanioArchivo)){
-		eliminarBloques((-1)*diferencia, fcb);
+		eliminarBloques(diferencia, fcb);
 	}
 
 	log_info(loggerFS, "Operacion: TRUNCAR (TRUNCATE) -> Archivo: %s", fcb -> nombreDeArchivo);

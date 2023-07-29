@@ -109,8 +109,9 @@ void ejecutarPeticiones(){
 			crearArchivo(nombreArchivo);
 			break;
 		case F_TRUNCATE:
-			log_info(loggerFS, "CANTIDAD DE BLOQUES: %s", instruccion -> param2);
-			 truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
+			 int res = truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
+			 if (res == 0){ valorOp = OK; }
+			 else { valorOp = ERROR; }
 			break;
 		case F_CLOSE:
 			cerrarArchivo(nombreArchivo);

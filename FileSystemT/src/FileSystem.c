@@ -54,7 +54,6 @@ int main(/*int argc, char** argv*/) {
 	nuevaInstruc2 -> pid = 1;
 	nuevaInstruc2 -> param1 = "DATYYYYYYYYYYYY.config";
 	nuevaInstruc2 -> param2 = string_itoa(superBloque -> blockSize);
-	log_info(loggerFS, "CANTIDAD DE BLOQUES: %s", nuevaInstruc2 -> param2);
 
 	t_instruccion* nuevaInstruc3 = malloc(sizeof(t_instruccion));
 		nuevaInstruc3 -> nombre = F_TRUNCATE;
