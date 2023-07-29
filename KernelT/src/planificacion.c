@@ -216,7 +216,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
 						t_archivo* archivo = malloc (sizeof(t_archivo*));
 						archivo->nombreArchivo = instruccion->param1;
-						archivo->contador = 1;
+						archivo->contador +=1; //Le agregue el más porque no vi que se incremente en ningún lado y sino siempre va a valer 1
 						list_add(tablaGlobalDeArchivos, archivo);
 						//Agrego entrada a la Tabla de Archivos para este proceso//
 						agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0);
@@ -230,8 +230,46 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 				break;
 			case F_CLOSE:
+				log_info(loggerKernel, "Instruccion F CLOSE");
+				instruccion=deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
+                t_paquete* paqueteFC=serializarInstruccion(instruccion);
+                validarEnvioDePaquete(paqueteFC, socketFs, loggerKernel, configKernel, "Instruccion F Close");
+				//Cierro el arch en la tabla del proceso
+				int posArchProceso =buscarArchivoEnProceso(instruccion->param1, ultimoEjecutado);
+				t_list* listaDeArchs = ultimoEjecutado->archAbiertos;
+				list_remove_and_destroy_element(listaDeArchs, posArchProceso, (void*) cerrarArchivoDeProceso);
+				t_pcb* proceso;
+
+				//Modifico el contador en la TGAA
+				int pos = buscarArchivoEnTGAA(instruccion->param1);
+				t_archivo* archivo = list_get(tablaGlobalDeArchivos, pos);
+				int instancias = archivo->contador; //Ya se que esto parece  re para nada, pero sino creo que me tira cualquier numero
+				archivo->contador = instancias - 1;
+				//Si el archivo tiene procesos bloquedos
+				if(archivo->contador>0){
+					t_colaDeArchivo* colaArchivo = buscarColaDeArchivo(archivo->nombreArchivo);
+					proceso = queue_pop(colaArchivo->colaBlock);
+					agregarAEstadoReady(proceso);
+				}else{
+					list_remove_and_destroy_element(tablaGlobalDeArchivos, pos, (void*)cerrarArchivoEnTGAA);
+					/*archivoProceso->nombreArchivo=NULL;
+					archivoProceso->puntero=0;
+					free(archivoProceso);*/
+				}
+				free(instruccion);
+				procesoAEjecutar(ultimoEjecutado->contexto);
+				instruccionAEjecutar(ultimoEjecutado);
 				break;
 			case F_SEEK:
+				log_info(loggerKernel, "Instruccion F SEEK");
+				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
+				posicionarPuntero(instruccion->param1,ultimoEjecutado, instruccion->param2);
+				t_paquete* paqueteFS = serializarInstruccion(instruccion);
+				validarEnvioDePaquete(paqueteFS, socketFs, loggerKernel, configKernel, "Instruccion F SEEK");
+				free(instruccion);
+				procesoAEjecutar(ultimoEjecutado->contexto);
+				instruccionAEjecutar(ultimoEjecutado);
+
 				break;
 			case F_READ:
 				log_info(loggerKernel, "Instruccion F READ");

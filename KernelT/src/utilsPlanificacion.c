@@ -327,6 +327,17 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
 	 return -1;
  }
 
+ int buscarArchivoEnProceso(char* nombreArchivo, t_pcb* proceso){
+	 int tamanio = list_size(proceso->archAbiertos);
+	 for (int i = 0; i<tamanio; i++){
+		 t_archivo* archivo = list_get(proceso->archAbiertos, i);
+		 if(strcmp(archivo->nombreArchivo,nombreArchivo) == 0){
+			 return i;
+		 }
+	 }
+	 return -1;
+ }
+
 
  void agregarEntradaATablaxProceso(char* nombreArchivo, t_pcb* proceso, int posPuntero){
 		 t_archivoPorProceso* archivo = malloc(sizeof(t_archivoPorProceso));
@@ -335,15 +346,24 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
 		 list_add(proceso->archAbiertos, archivo);
 	 }
 
+ void cerrarArchivoEnTGAA(t_archivo* archivo){
+	 //t_colaDeArchivo* cola = buscarColaDeArchivo(archivo->nombreArchivo);
+	// queue_destroy(cola->colaBlock);
+	 int posColaDeBlock = posColaDeArchivo(archivo->nombreArchivo);
+	 list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
+	 archivo->contador=0;
+	 archivo->nombreArchivo=NULL;
+	 free(archivo);
+ }
 
+void posicionarPuntero (char* nombreArchivo, t_pcb* proceso, char* posicionPtro){
+	int posPuntero = atoi(posicionPtro);
+	int pos = buscarArchivoEnProceso(nombreArchivo, proceso);
+	t_archivoPorProceso* archivo = list_get(proceso->archAbiertos, pos);
+	archivo->puntero = posPuntero;
+}
 
- /*int buscarTAxP(uint32_t pid){
-	 int tamanio = list_size(listaDeTablasAxP);
-	 for(int i = 0; i<tamanio; i++){
-		 t_tablaDeAxP* tabla = list_get(listaDeTablasAxP, i);
-		 if(tabla->PID == pid){
-			 return i;
-		 }
-	 }
-	 return -1;
- }*/
+void cerrarArchivoDeProceso(t_archivoPorProceso* archivo){
+	free(archivo);
+}
+

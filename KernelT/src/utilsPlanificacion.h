@@ -74,7 +74,6 @@ int recursoDisponible(char* nombre);
 void mostrarListaDeProcesos();
 void loggearListaDeIntrucciones(t_list* instrucciones);
 int posProcesoAEliminar(t_list* listaDeProcesos, int pid);
-
 float tiempoActualEnMiliseg();
  //Funciones para Archivos//
 void crearColaBlockDeArchivo(char* archivo);
@@ -83,6 +82,12 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo);
 int posColaDeArchivo(char* archivo);
 int buscarArchivoEnTGAA(char* nombreArchivo);
 void agregarEntradaATablaxProceso(char* nombreArchivo, t_pcb* proceso, int posPuntero);
+void posicionarPuntero (char* nombreArchivo, t_pcb* proceso, char* posicionPtro);
+int buscarArchivoEnProceso(char* nombreArchivo, t_pcb* proceso);
+void cerrarArchivoEnTGAA(t_archivo* archivo);
+void cerrarArchivoDeProceso(t_archivoPorProceso* archivo);
+
+
 //int buscarTAxP(uint32_t pid);
 
 
