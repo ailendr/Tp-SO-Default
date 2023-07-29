@@ -7,7 +7,6 @@
 
 #ifndef SRC_UTILSPLANIFICACION_H_
 #define SRC_UTILSPLANIFICACION_H_
-#include "kernelGlobales.h"
 #include "semaforos.h"
 
 typedef struct{
@@ -15,6 +14,11 @@ typedef struct{
 	t_pcb* procesoABloquear;
 
 } t_parametroIO;
+
+typedef struct{
+	char* nombreArchivo;
+	t_queue* colaBlock;
+} t_colaDeArchivo;
 
 void crearEstados();
 void eliminarEstados();
@@ -43,7 +47,7 @@ void actualizarTablaEnProcesos(t_list* listaDeTablas);
 
 t_list* crearListaDeBloqueo();
 t_list* crearListaDeInstancias();
-void crearEstructurasDeRecursos();
+void crearEstructurasDeRecursosyArchivos();
 int recursoDisponible(char* nombre);
 
 //Logueo de las instrucciones para verificar que esta todo ok//

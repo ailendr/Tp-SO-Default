@@ -65,7 +65,9 @@ void atenderPeticionesFs(int* socketFs){
 	switch(codInstruccion){
 	case(F_READ):
 			instruccion = obtenerInstruccion(socket, 3);
+		pthread_mutex_lock(mutexOperacionFS);
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_READ,0);
+		pthread_mutex_unlock(mutexOperacionFS);
 		free(instruccion);
 
 
@@ -73,8 +75,11 @@ void atenderPeticionesFs(int* socketFs){
 
 	case (F_WRITE):
 			instruccion = obtenerInstruccion(socket, 3);
-	        int bytes = atoi(instruccion->param3);
+	     pthread_mutex_lock(mutexOperacionFS);
+	       int bytes = atoi(instruccion->param3);
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_WRITE, bytes);
+		pthread_mutex_unlock(mutexOperacionFS);
+
 		free(instruccion);
 
 		break;
@@ -173,9 +178,11 @@ void atenderPeticionesKernel(int* socketKernel){
 				break;
 
 			case COMPACTAR:
+				pthread_mutex_lock(mutexOperacionFS);
+				compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
+				pthread_mutex_unlock(mutexOperacionFS);
 
-					compactar(); //->Supongo que deberia devolver un paquete o al menos la lista de tablas actualizada              // si la lista de tablas es global no hace falta porque se ve reflejado el cambio que se hace en compactar()
-					enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
+				enviarListaDeTablas(listaDeTablas, socket); //Serializa y envia
 				break;
 			case EXIT:
 				instruccion = obtenerInstruccion(socket,0);
