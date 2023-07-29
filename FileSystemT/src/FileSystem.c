@@ -35,31 +35,52 @@ int main(/*int argc, char** argv*/) {
 
 	printf ("El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 
-
-
-
-	// INICIALIZAR SEMAFOROS ------------------------------------------------------------------------
-	sem_init(&nuevoPedido,0, 0);
-
-
 	// REALIZAR LAS CONEXIONES CON EL CLIENTE  -----------------------------------------
-	iniciarMemoria ();
+	//iniciarMemoria ();
 	// INICIALIZAR ESTRUCTURAS DESPUES DE SER CLIENTE DE MEMORIA  ----------------------------------------------------------------------
 	iniciarEstructuras();
-	peticiones = queue_create();
+	peticiones = list_create();
+	fcbs = list_create();
 	// REALIZAR LAS CONEXIONES COMO SERVIDOR  -----------------------------------------
 
-	iniciarServKernel ();
+	t_instruccion* nuevaInstruc = malloc(sizeof(t_instruccion));
+		nuevaInstruc -> nombre = F_CREATE;
+		nuevaInstruc -> pid = 1;
+		nuevaInstruc -> param1 = "DATYYYYYYYYYYYY.config";
 
+
+	t_instruccion* nuevaInstruc2 = malloc(sizeof(t_instruccion));
+	nuevaInstruc2 -> nombre = F_TRUNCATE;
+	nuevaInstruc2 -> pid = 1;
+	nuevaInstruc2 -> param1 = "DATYYYYYYYYYYYY.config";
+	nuevaInstruc2 -> param2 = string_itoa(superBloque -> blockSize);
+
+	t_instruccion* nuevaInstruc3 = malloc(sizeof(t_instruccion));
+		nuevaInstruc3 -> nombre = F_TRUNCATE;
+		nuevaInstruc3 -> pid = 1;
+		nuevaInstruc3 -> param1 = "DATYYYYYYYYYYYY.config";
+		nuevaInstruc3 -> param2 = "0";
+
+	list_add(peticiones, nuevaInstruc);
+	list_add(peticiones, nuevaInstruc2);
+	list_add(peticiones, nuevaInstruc3);
+
+	//iniciarServKernel ();
+	for (int j = 0; j<3 ; j++){
+		ejecutarPeticiones();
+	}
+
+
+	atenderPeticiones();
 
 	// FINALIZAR MODULO -----------------------------------------------------------------------------
 	log_info(loggerFS, "Finalizando File System...\n");
 
-	queue_destroy(peticiones);
-	if (fcbs != NULL){
-		finalizarListaFcb();
-	}
-	sem_destroy(&nuevoPedido);
+	free (superBloque);
+	free (bitMap);
+	list_destroy(peticiones);
+	list_destroy(fcbs);
+
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
 	close (cliente);

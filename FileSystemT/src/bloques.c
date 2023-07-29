@@ -7,6 +7,57 @@
 
 #include "bloques.h"
 
+int cantBloques (uint32_t tamanio){
+	int cantidadDeBloques = 0;
+	cantidadDeBloques = ceil(tamanio/superBloque->blockSize);
+	if (cantidadDeBloques > 1) cantidadDeBloques++;
+	//El + 1 es por el bloque que tiene todos los punteros
+	return cantidadDeBloques;
+}
+
+void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
+
+}
+
+void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
+
+	int proxCargar;
+
+	if (fcb->punteroDirecto == -1 && cantidadDeBloques > 0){
+		cantidadDeBloques --;
+		proxCargar = proxBloqueVacio();
+		bitarray_set_bit(bitMap, proxCargar);
+		fcb->punteroDirecto = proxCargar;
+	}
+
+	if (fcb->punteroIndirecto == -1 && cantidadDeBloques > 0){
+		cantidadDeBloques --;
+		proxCargar = proxBloqueVacio();
+		bitarray_set_bit(bitMap, proxCargar);
+		fcb->punteroIndirecto = proxCargar;
+	}
+
+	for (int i = 0; i < cantidadDeBloques; i++){
+		proxCargar = proxBloqueVacio();
+		bitarray_set_bit(bitMap, proxCargar);
+		//Guardar en el archivo de bloques
+	}
+
+	guardarBitMap(bitMap->bitarray);
+	log_info(loggerFS, "%s", bitMap->bitarray);
+
+}
+
+int proxBloqueVacio(){
+	for (int i = 0; i<10; i++){
+		bool bit = bitarray_test_bit(bitMap, i);
+		if (bit == 0) return i;
+		log_info(loggerFS, "Accediendo al bit %i:         %s", i,string_itoa(bit));
+	}
+	log_warning(loggerFS, "NO HAY BLOQUES DISPONIBLES");
+	return -1;
+}
+
 void escribirBloque (void* contenido, uint32_t sizeContenido, uint32_t numeroBloque){
     int offset = 0;
     if (sizeContenido > superBloque -> blockSize){

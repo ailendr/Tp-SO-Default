@@ -16,13 +16,11 @@ void cerrarArchivo(char* nombreArchivo);
 void abrirArchivo(char* nombreArchivo);
 void crearArchivo(char* nombreArchivo);
 void posicionarPuntero (char* nombreArchivo, char* posicion);
-void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
+int truncarArchivo (char* nombreArchivo, uint32_t tamanio);
 void leerArchivo(t_instruccion* instruccion);
 void escribirArchivo (t_instruccion* instruccion);
 
 int posicionFCB (char* nombre);
 void almacenarFcb (t_fcb* fcb);
-
-void finalizarListaFcb();
 
 #endif /* SRC_OPERACIONES_H_ */
