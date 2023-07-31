@@ -15,41 +15,7 @@ t_list* peticiones;
 void iniciarEstructuras(){
 	iniciarSuperBloque();
 	iniciarBitMap();
-	//validarArchivo(archBloques, ARCHBLOQUES);
-}
-
-void validarArchivo(char* pathArch, int estructura){
-	FILE* archivo = fopen(pathArch, "r"); // "a" para escribir al final si exite
-	if(archivo==NULL){
-		log_info(loggerFS, "El archivo no se pudo abrir");
-		exit(1);
-	}
-	// se mueve al final del archivo
-	fseek(archivo, 0, SEEK_END);
-	int posicion = ftell(archivo);
-	//char palabra=fgetc(archivo);
-	 if(posicion == 0){
-		 log_info(loggerFS, "El archivo esta vacio");
-		 switch(estructura){
-		 case BITMAP:
-			 iniciarBitMap();
-			 break;
-
-		 case ARCHBLOQUES:
-			 iniciarArchivoDeBloques();
-			 break;
-		 default:
-			 break;
-		 }
-	 }
-	 else{
-
-		 log_info(loggerFS,"El archivo no esta vacio");
-		 //recuperar el contenido del archivo
-		 return;
-	 }
-	 fclose(archivo);
-
+	iniciarArchivoDeBloques();
 }
 
 //////////////////////////////INICIALIZACION ESTRUCTURAS////////////////////////////////////////
@@ -99,24 +65,29 @@ void guardarBitMap(char* bitArray){
 	fclose(preGuardado);
 }
 
-void iniciarArchivoDeBloques(char* pathArch){
+void iniciarArchivoDeBloques(){
+	FILE* archivo_bloques = fopen(pathBloques(), "r+");
+   	int tamanio_archivo = superBloque -> blockCount * superBloque -> blockSize;
 
-	/*int cantidadBloques = superBloque -> blockCount;
-	int i = 0;
+    if (archivo_bloques == NULL) {
+        // El archivo no existe, se crea y se trunca al tamaño deseado
 
-	for(i; i<cantidadBloques; i++){
+    	archivo_bloques = fopen(pathBloques(), "wb+");
+        if (archivo_bloques == NULL) {
+        	log_info(loggerFS, "No se pudo crear Archivo de Bloques");
+            return;
+        }
+        fseek(archivo_bloques, tamanio_archivo - 1, SEEK_SET);
+        fputc('\0', archivo_bloques);
 
-	}*/
-	//--------------------------------------------------------------------------------------------------------
-	//t_bloque* arrayBloques[cantidadBloques];
+        log_info(loggerFS, "Archivo de Bloques Creado");
+        log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
+    } else {
 
-	//t_bloque* arrayBloques[cantidadBloques];
-	//log_info(loggerFS, "");
-	//t_bloque* bloque;
-	//arrayBloques[cantidadBloques] -> tamBloque = superBloque->blockSize * superBloque->blockCount;
-	//tamanioDelArchivo = superBloque->blockSize * superBloque->blockCount;
-	//t_bloque* arrayBloques[superBloque->blockCount];
+    	log_info(loggerFS, "Archivo de Bloques leido");
+    	log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
 
-
+    }
+    fclose(archivo_bloques);
 }
 

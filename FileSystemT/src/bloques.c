@@ -51,8 +51,8 @@ void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
 int proxBloqueVacio(){
 	for (int i = 0; i<10; i++){
 		bool bit = bitarray_test_bit(bitMap, i);
-		if (bit == 0) return i;
 		log_info(loggerFS, "Accediendo al bit %i:         %s", i,string_itoa(bit));
+		if (bit == 0) return i;
 	}
 	log_warning(loggerFS, "NO HAY BLOQUES DISPONIBLES");
 	return -1;
@@ -75,7 +75,7 @@ void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t 
         log_warning(loggerFS, "Se quiso agregar %d bytes al bloque %d en el offset %d", sizeContenido,numeroBloque, offset);
     }
 
-    memcpy(superBloque -> blockSize + offset,contenido, sizeContenido);
+   // memcpy(superBloque -> blockSize + offset,contenido, sizeContenido); //para copiar tiene que ser un void* como es superBloque rompe
 
 
 }
@@ -85,4 +85,17 @@ void liberarBloque(uint32_t numeroBloque){
    bitarray_clean_bit(bitMap, numeroBloque);
 }
 
+void leerArchivoBloques(void* aLeer, int posicion, int cantidad){
+	FILE* archivo_bloques = fopen(pathBloques(), "r+b");
+	fseek(archivo_bloques, posicion, SEEK_SET);
+	fread(aLeer, cantidad,1, archivo_bloques);
+	fclose(archivo_bloques);
+}
 
+void escribirArchivoBloques(void* aEscribir, int posicion, int cantidad){
+	log_trace(loggerFS, "escribiendo archivo pos: %d , cant: %d", posicion, cantidad);
+	FILE* archivo_bloques = fopen(pathBloques(), "r+b");
+	fseek(archivo_bloques, posicion, SEEK_SET);
+	fwrite(aEscribir, cantidad,1, archivo_bloques);
+	fclose(archivo_bloques);
+}

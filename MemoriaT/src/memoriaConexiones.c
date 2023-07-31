@@ -62,12 +62,16 @@ void atenderPeticionesFs(int* socketFs){
 		int codInstruccion;
 	    codInstruccion = recibir_operacion(socket);
 	    t_instruccion* instruccion;
+	    int valorOp = 0;
 	switch(codInstruccion){
 	case(F_READ):
 		instruccion = obtenerInstruccion(socket, 3);
 		pthread_mutex_lock(&mutexOperacionFS);
 		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - TAMAÑO_ <%ld> -Origen: <FS>", instruccion->pid, instruccion->param1, strlen(instruccion->param2));
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_READ,0);
+		valorOp =OK;
+		send(socketFs, &valorOp, sizeof(int), 0);
+
 		pthread_mutex_unlock(&mutexOperacionFS);
 		free(instruccion);
 

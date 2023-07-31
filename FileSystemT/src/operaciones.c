@@ -109,7 +109,7 @@ int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
 
 }
 
-void leerArchivo (t_instruccion* instruccion){
+void leerArchivo (t_instruccion* instruccion, void* bufferLectura, int bytesALeer){
 	t_fcb* fcb;
 	int posicion = posicionFCB(instruccion->param1);
 
@@ -117,6 +117,29 @@ void leerArchivo (t_instruccion* instruccion){
 		log_info(loggerFS, "ERROR: NO EXISTE ARCHIVO   Operacion: LEER (READ) -> Archivo: %s", instruccion->param1);
 	} else {
 		fcb = list_get(fcbs, posicion);
+		uint32_t posPtro = fcb->punteroPosicion;
+		//FILE* archivo_bloques = fopen(pathBloques(), "r+");
+		//fseek(archivo_bloques, posPtro,SEEK_SET);
+		//fread(archivo_bloques, si)
+		int tam_leido = 0;
+			//log_trace(fileSystem_logger, "leyendo archivo: %s", archivo);
+			while(tam_leido < bytesALeer){
+				int tam_a_leer_max = (superBloque->blockSize ) - (posPtro % superBloque->blockSize);
+				int tam_a_leer = min((bytesALeer-tam_leido), tam_a_leer_max);
+				//t_fcb* fcb = fcb_segun_nombre();
+				int bloque_logico = bloqueSegunPuntero(posPtro);
+				int bloque_fisico = bloqueLogicoAFisico(fcb, bloque_logico);
+				int offset = offsetSegunPuntero(posPtro);
+				int posicion = posicionArchivoBloques(bloque_fisico, offset);
+				leerArchivoBloques(bufferLectura + tam_leido, posicion, tam_a_leer);
+
+				usleep(retardoNumerico()*1000);
+				log_info(loggerFS, "Acceso Bloque - Archivo:%s - Bloque Archivo:%d - Bloque File System: %d",fcb->nombreDeArchivo , bloque_logico, bloque_fisico);
+
+				tam_leido += tam_a_leer;
+				posPtro += tam_a_leer;
+			}
+
 	}
 }
 
@@ -238,4 +261,43 @@ void almacenarFcb (t_fcb* fcb){
 
 	fclose(salvador);
 }
+
+///----------UTILS OPERACIONES-------------///
+//FUNCIONES PA LEER//
+
+int min(int num1, int num2){
+ return num1<num2? num1 : num2;
+}
+
+int posicionArchivoBloques(int num_bloque, int offset){
+	return num_bloque*superBloque->blockSize + offset;
+}
+int bloqueSegunPuntero(int puntero){
+	return puntero/superBloque->blockSize;
+}
+
+int offsetSegunPuntero(int puntero){
+	return puntero % superBloque->blockSize;
+}
+int bloqueLogicoAFisico(t_fcb* fcb, int num_bloque){
+	int bloque_fisico;
+	if(num_bloque == 0){
+		return fcb->punteroDirecto;
+	}else{
+		int posicion = fcb->punteroIndirecto * (superBloque->blockSize) + (num_bloque - 1)*sizeof(uint32_t);
+		leerArchivoBloques((void*)&bloque_fisico, posicion, sizeof(uint32_t));
+		return bloque_fisico;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 

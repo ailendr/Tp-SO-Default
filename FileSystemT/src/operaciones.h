@@ -17,7 +17,12 @@ void abrirArchivo(char* nombreArchivo);
 void crearArchivo(char* nombreArchivo);
 void posicionarPuntero (char* nombreArchivo, char* posicion);
 int truncarArchivo (char* nombreArchivo, uint32_t tamanio);
-void leerArchivo(t_instruccion* instruccion);
+void leerArchivo (t_instruccion* instruccion, void* bufferLectura, int bytesALeer);
+int offsetSegunPuntero(int puntero);
+int bloqueSegunPuntero(int puntero);
+int posicionArchivoBloques(int num_bloque, int offset);
+int bloqueLogicoAFisico(t_fcb* fcb, int num_bloque);
+int min(int num1, int num2);
 void escribirArchivo (t_instruccion* instruccion);
 
 int posicionFCB (char* nombre);
