@@ -237,7 +237,8 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				//Cierro el arch en la tabla del proceso
 				int posArchProceso =buscarArchivoEnProceso(instruccion->param1, ultimoEjecutado);
 				t_list* listaDeArchs = ultimoEjecutado->archAbiertos;
-				list_remove_and_destroy_element(listaDeArchs, posArchProceso, (void*) cerrarArchivoDeProceso);
+				//No es el mismo archivo para todos? Se lo va a dejar con basura a otros procesos si lo destruimos.
+				list_remove_and_destroy_element(listaDeArchs, posArchProceso, (void*) cerrarArchivoDeProceso);//VEEEEEEEEER
 				t_pcb* proceso;
 
 				//Modifico el contador en la TGAA
