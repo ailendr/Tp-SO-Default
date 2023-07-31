@@ -75,7 +75,7 @@ void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t 
         log_warning(loggerFS, "Se quiso agregar %d bytes al bloque %d en el offset %d", sizeContenido,numeroBloque, offset);
     }
 
-    memcpy(superBloque -> blockSize + offset,contenido, sizeContenido);
+   // memcpy(superBloque -> blockSize + offset,contenido, sizeContenido); //para copiar tiene que ser un void* como es superBloque rompe
 
 
 }

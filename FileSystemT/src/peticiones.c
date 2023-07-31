@@ -77,6 +77,7 @@ void ejecutarPeticiones(){
 	int nombre;
 	char* nombreArchivo;
 	int valorOp = 0;
+	t_paquete* paquete;
 
 	instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
@@ -90,10 +91,22 @@ void ejecutarPeticiones(){
 
 	switch(nombre){
 		case F_READ:
-			//TODO leerArchivo(instruccion);
-			valorOp=OK;
+			int bytesRead = atoi(instruccion->param3);
+			char* bufferLectura = malloc(bytesRead);
+			//char mensaje_read[100]= "";
+		    char* mensaje = NULL;
+			leerArchivo(instruccion,(void*) bufferLectura, bytesRead);
+			//sprintf(mensaje, "MOV_OUT %s %s %d", direccion_fisica_read, aLeer, tamanio_read);
+		    memcpy(&mensaje, bufferLectura+0, bytesRead);
+			//Armado de instruccion FRead y envio a Memoria//
+		    instruccion->param1 = mensaje;
+		    paquete = serializarInstruccion(instruccion);
+		    validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Read a Memoria");
+		    recv(socketMemoria,&valorOp, sizeof(int), MSG_WAITALL); //espera confirmacion a memoria
+		    if(valorOp==OK){
+		    valorOp=OK;
 			send(cliente, &valorOp, sizeof(int), 0);
-
+		    }
 			break;
 		case F_WRITE:
 			//TODO escribirArchivo (instruccion);
