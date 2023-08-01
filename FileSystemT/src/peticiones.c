@@ -103,31 +103,23 @@ void ejecutarPeticiones(){
 		    paquete = serializarInstruccion(instruccion);
 		    validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Read a Memoria");
 		    recv(socketMemoria,&valorOp, sizeof(int), MSG_WAITALL); //espera confirmacion a memoria
-		    if(valorOp==OK){
-		    valorOp=OK;
+		    if(valorOp == OK){
 			send(cliente, &valorOp, sizeof(int), 0);
 		    }
 		    free(bufferLectura);
 			break;
 		case F_WRITE:
 			int bytesWrite = atoi(instruccion->param3);
-			//REVISAR, me maree un poco haciendo esto
-			char* mensajeW = NULL;
-			instruccion->param1 = mensajeW;
+			char* bufferEscritura = NULL;
 			paquete = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Write a Memoria");
 			int codigo = recibir_operacion(socketMemoria);
 			if(codigo != (-1) && codigo == MENSAJE){
-				char* bufferEscritura = recibir_mensaje(socketMemoria);
+				 bufferEscritura = recibir_mensaje(socketMemoria);
 				escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
-
-				if(valorOp==OK){
-					valorOp=OK;
-					send(cliente, &valorOp, sizeof(int), 0);
-			}
-			free(bufferEscritura);
 			}
 			break;
+
 		case F_OPEN:
 			if (posicionFCB (nombreArchivo) != -1){
 				abrirArchivo(nombreArchivo);
