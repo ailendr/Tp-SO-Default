@@ -129,7 +129,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	}
 	else if (valor == OK){
 	log_info(loggerCPU, "Fin de la traduccion de direccion logica a fisica");
-	retorno= dirFisica;
+	retorno = dirFisica;
 	}
 	return retorno;
 
