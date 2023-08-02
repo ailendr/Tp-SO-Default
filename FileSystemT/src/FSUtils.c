@@ -44,26 +44,14 @@ int iniciarServKernel (){
 
 	log_info(loggerFS, "Esperando que se conecte Kernel");
 
-	while(1){
-
 	cliente = esperar_cliente(servidorFS, loggerFS);
 	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
 	    close(servidorFS);
 	    close(cliente);
 	    return EXIT_FAILURE;
 	}
-
 	recibirHandshake(cliente, HANDSHAKE_Kernel, loggerFS);
 	log_info(loggerFS, "Ok -> Servidor de Peticiones");
-	// INICIALIZAR HILO  ----------------------------------------------------------------------------
-    pthread_t hiloEjecutor;
-    pthread_t hiloAtencion;
+	return EXIT_SUCCESS;
 
-	pthread_create(&hiloAtencion,NULL,(void*)atenderPeticiones,NULL);
-	pthread_create(&hiloEjecutor,NULL,(void*)ejecutarPeticiones,NULL);
-
-	pthread_detach(hiloAtencion);
-	pthread_detach(hiloEjecutor);
 	}
-	return 0;
-}

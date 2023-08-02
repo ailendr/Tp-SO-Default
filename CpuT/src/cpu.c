@@ -1,19 +1,12 @@
 #include "./cpu.h"
 
 
-int main(/*int argc, char** argv*/) {
-
-	/*
+int main(int argc, char** argv) {
 	if(argc < 2){
-		printf ("Faltan argumentos para poder ejecutar CPU. Revisar el llamado");
-		return EXIT_FAILURE;
-	}
+			return EXIT_FAILURE;
+		}
 
-	if(argc > 2){
-		printf ("Se invoca a CPU con demasiados argumentos. Revisar el llamado");
-		return EXIT_FAILURE;
-	}
-	*/
+	char* pathConfig = argv[1];
 
 	char* instr;
 	t_instruccion* nuevaInstr = NULL;
@@ -27,14 +20,14 @@ int main(/*int argc, char** argv*/) {
 	int verificador = 0;
 
 
-	if (iniciarCpu ("../CpuT/cpu.config") == 1) return EXIT_FAILURE;
+	if (iniciarCpu (pathConfig) == 1) return EXIT_FAILURE;
 
 	while (1){
 
 		int codigo = recibir_operacion(cliente);
 
 		if(codigo == -1) {
-			log_info(loggerCPU, "Se cayo kernel");
+			log_info(loggerCPU, "Se Desconecto kernel");
 			break;
 		}
     
@@ -85,6 +78,7 @@ int main(/*int argc, char** argv*/) {
 	return EXIT_SUCCESS;
 
 }
+
 
 
 

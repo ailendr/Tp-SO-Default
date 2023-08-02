@@ -12,10 +12,6 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-
-
-extern sem_t nuevoPedido;
-
 void atenderPeticiones();
 void ejecutarPeticiones();
 

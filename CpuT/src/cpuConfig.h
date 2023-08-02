@@ -1,10 +1,3 @@
-/*
- * cpuConfig.h
- *
- *  Created on: Apr 16, 2023
- *      Author: utnso
- */
-
 #ifndef SRC_CPUCONFIG_H_
 #define SRC_CPUCONFIG_H_
 
@@ -27,3 +20,4 @@ int retardo();
 int tamSegmento();
 
 #endif /* SRC_CPUCONFIG_H_ */
+

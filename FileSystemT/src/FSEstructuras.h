@@ -49,29 +49,14 @@ typedef struct{
 
 extern t_superbloque* superBloque;
 extern t_bitarray* bitMap;
-extern t_queue* peticiones;
+extern t_list* peticiones;
 
 
 void iniciarEstructuras();
-void validarArchivo(char* pathArch, int estructura);
 void iniciarSuperBloque();
 void iniciarArchivoDeBloques();
 void iniciarBitMap();
+void guardarBitMap();
 
-/*
- *
-  #incluye <sys/mman.h>
-
-void *mmap(void * addr , size_t length , int prot , int flags , int fd , off_t offset );
-
-int munmap(void * addr , size_t length );
-
-mmap () crea una nueva asignación en el espacio de direcciones virtuales del
-       proceso de llamada. La dirección inicial de la nueva asignación es
-       especificado en la dirección . El argumento de longitud especifica la longitud de
-       el mapeo (que debe ser mayor que 0).
-
-
- */
 
 #endif /* SRC_FSESTRUCTURAS_H_ */

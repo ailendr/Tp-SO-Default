@@ -16,13 +16,16 @@ void cerrarArchivo(char* nombreArchivo);
 void abrirArchivo(char* nombreArchivo);
 void crearArchivo(char* nombreArchivo);
 void posicionarPuntero (char* nombreArchivo, char* posicion);
-void truncarArchivo (char* nombreArchivo, uint32_t tamanio);
-void leerArchivo(t_instruccion* instruccion);
-void escribirArchivo (t_instruccion* instruccion);
-
+int truncarArchivo (char* nombreArchivo, uint32_t tamanio);
+void leerArchivo (t_instruccion* instruccion, void* bufferLectura, int bytesALeer);
+int offsetSegunPuntero(int puntero);
+int bloqueSegunPuntero(int puntero);
+int posicionArchivoBloques(int num_bloque, int offset);
+int bloqueLogicoAFisico(t_fcb* fcb, int num_bloque);
+int min(int num1, int num2);
+void escribirArchivo (t_instruccion* instruccion, void* bufferEscritura, int bytesAEscribir);
+void escribirYLeerArchivo(void* buffer, int bytes, t_fcb* fcb, op_code operacion);
 int posicionFCB (char* nombre);
 void almacenarFcb (t_fcb* fcb);
-
-void finalizarListaFcb();
 
 #endif /* SRC_OPERACIONES_H_ */

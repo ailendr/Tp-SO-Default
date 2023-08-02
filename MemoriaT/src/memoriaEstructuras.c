@@ -147,7 +147,7 @@ void logearListaDeSegmentos(char* mensaje){
 	log_info(loggerMemoria, "Lista de segmentos %s: ", mensaje);
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
-		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d- En Memoria: %d, Tam Info: %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio, segmento->estaEnMemoria, segmento->tamanioInfo);
+		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio);
 		log_info(loggerMemoria, "Pos en la lista: %d", i);
 	}
 }
@@ -234,7 +234,7 @@ t_tabla* deleteSegment(uint32_t id, uint32_t pid) { //Me sirve que retorne la ta
 void compactar() {
 	log_info(loggerMemoria,"Solicitud de Compactación");
     usleep(retardoCompactacion()*1000);
-	logearListaDeSegmentos("Antes de compactar");
+	//logearListaDeSegmentos("Antes de compactar");
 	t_list* listaAux=list_filter(listaDeSegmentos, (void*)segmentoOcupado);//creo una lista aux solo con los segmentos ocupados
 	list_clean(listaDeSegmentos);//Es mejor destruir los elementos tambien por si queda algo
 	list_add(listaDeSegmentos, segmentoCero);
@@ -293,11 +293,7 @@ void validarSegmento(uint32_t pid, char* direcF,int bytes, int socket){
 		valorOp = ERROR;
 		send(socket, &valorOp, sizeof(int), 0);
 	}
-/*
-	if()) {
-		valorOp = -1;
-		send(socket, &valorOp, sizeof(int), 0);
-	}*/
+
 	else if ( numSegmento < cantSegmentos() && bytes < segmento->limite ){
 		valorOp = OK;
 	    send(socket, &valorOp, sizeof(int), 0);
@@ -316,11 +312,13 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	if(numSegmento != 0){ //Solo q busque para el segmento q sea distinto de cero porq si es cero no va a poder encontrarlo por el pid random q tiene
 		posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
 	}
+	if(numSegmento == 0 && offset == 0) { //Para que no nos de negativo en el memcpy
+		offset = 1;
+	}
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
 	usleep(retardoMemoria()*1000);
 
 		if(operacion == MOV_IN || operacion == F_WRITE){
-           // char* infoAEnviar = malloc(bytes); //probablemente haya q hacer eso para copiarle info de un cierto tamaño
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
@@ -344,11 +342,5 @@ void escribirMemoria(t_segmento* segmento, int tamInfo){
 	segmento->tamanioInfo = tamInfo;
 }
 
-//// Func para probar compactacion//
 
-void escribir(t_segmento* segmento){
-	char* info = "Aprobamos SO";
-	memcpy(memoriaContigua+segmento->base, &info, strlen(info));
-
-}
 

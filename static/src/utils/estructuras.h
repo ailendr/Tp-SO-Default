@@ -135,3 +135,4 @@ bool pidEnTabla(t_list* lista, uint32_t pid);
 void loggearTablaDeSegmentos(t_tabla* tabla, t_log* logger);
 
 #endif /* SRC_UTILS_ESTRUCTURAS_H_ */
+
