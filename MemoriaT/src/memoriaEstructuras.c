@@ -293,11 +293,7 @@ void validarSegmento(uint32_t pid, char* direcF,int bytes, int socket){
 		valorOp = ERROR;
 		send(socket, &valorOp, sizeof(int), 0);
 	}
-/*
-	if()) {
-		valorOp = -1;
-		send(socket, &valorOp, sizeof(int), 0);
-	}*/
+
 	else if ( numSegmento < cantSegmentos() && bytes < segmento->limite ){
 		valorOp = OK;
 	    send(socket, &valorOp, sizeof(int), 0);
@@ -320,7 +316,6 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	usleep(retardoMemoria()*1000);
 
 		if(operacion == MOV_IN || operacion == F_WRITE){
-           // char* infoAEnviar = malloc(bytes); //probablemente haya q hacer eso para copiarle info de un cierto tamaño
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
@@ -344,11 +339,5 @@ void escribirMemoria(t_segmento* segmento, int tamInfo){
 	segmento->tamanioInfo = tamInfo;
 }
 
-//// Func para probar compactacion//
 
-void escribir(t_segmento* segmento){
-	char* info = "Aprobamos SO";
-	memcpy(memoriaContigua+segmento->base, &info, strlen(info));
-
-}
 

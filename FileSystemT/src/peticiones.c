@@ -103,17 +103,23 @@ void ejecutarPeticiones(){
 		    paquete = serializarInstruccion(instruccion);
 		    validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Read a Memoria");
 		    recv(socketMemoria,&valorOp, sizeof(int), MSG_WAITALL); //espera confirmacion a memoria
-		    if(valorOp==OK){
-		    valorOp=OK;
+		    if(valorOp == OK){
 			send(cliente, &valorOp, sizeof(int), 0);
 		    }
+		    free(bufferLectura);
 			break;
 		case F_WRITE:
-			//TODO escribirArchivo (instruccion);
-			valorOp=OK;
-			send(cliente, &valorOp, sizeof(int), 0);
-
+			int bytesWrite = atoi(instruccion->param3);
+			char* bufferEscritura = NULL;
+			paquete = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Write a Memoria");
+			int codigo = recibir_operacion(socketMemoria);
+			if(codigo != (-1) && codigo == MENSAJE){
+				 bufferEscritura = recibir_mensaje(socketMemoria);
+				escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
+			}
 			break;
+
 		case F_OPEN:
 			if (posicionFCB (nombreArchivo) != -1){
 				abrirArchivo(nombreArchivo);
@@ -148,4 +154,5 @@ void ejecutarPeticiones(){
 
 	if (nombre != F_CREATE) send(cliente, &valorOp, sizeof(int), 0);
 
+////NO FALTAN LOS FREE DE LAS INTRUCCIONES?????
 }

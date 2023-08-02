@@ -63,7 +63,7 @@ void crearArchivo(char* nombreArchivo){
 }
 
 void posicionarPuntero (char* nombreArchivo, char* posicion){
-	//TODO Transformacion de char a entero
+	//Transformacion de char a entero
 	int posCursor = atoi(posicion);
 	t_fcb* fcb;
 	int pos = posicionFCB(nombreArchivo);
@@ -117,33 +117,11 @@ void leerArchivo (t_instruccion* instruccion, void* bufferLectura, int bytesALee
 		log_info(loggerFS, "ERROR: NO EXISTE ARCHIVO   Operacion: LEER (READ) -> Archivo: %s", instruccion->param1);
 	} else {
 		fcb = list_get(fcbs, posicion);
-		uint32_t posPtro = fcb->punteroPosicion;
-		//FILE* archivo_bloques = fopen(pathBloques(), "r+");
-		//fseek(archivo_bloques, posPtro,SEEK_SET);
-		//fread(archivo_bloques, si)
-		int tam_leido = 0;
-			//log_trace(fileSystem_logger, "leyendo archivo: %s", archivo);
-			while(tam_leido < bytesALeer){
-				int tam_a_leer_max = (superBloque->blockSize ) - (posPtro % superBloque->blockSize);
-				int tam_a_leer = min((bytesALeer-tam_leido), tam_a_leer_max);
-				//t_fcb* fcb = fcb_segun_nombre();
-				int bloque_logico = bloqueSegunPuntero(posPtro);
-				int bloque_fisico = bloqueLogicoAFisico(fcb, bloque_logico);
-				int offset = offsetSegunPuntero(posPtro);
-				int posicion = posicionArchivoBloques(bloque_fisico, offset);
-				leerArchivoBloques(bufferLectura + tam_leido, posicion, tam_a_leer);
-
-				usleep(retardoNumerico()*1000);
-				log_info(loggerFS, "Acceso Bloque - Archivo:%s - Bloque Archivo:%d - Bloque File System: %d",fcb->nombreDeArchivo , bloque_logico, bloque_fisico);
-
-				tam_leido += tam_a_leer;
-				posPtro += tam_a_leer;
-			}
-
+		escribirYLeerArchivo(bufferLectura, bytesALeer, fcb, F_READ);
 	}
 }
 
-void escribirArchivo (t_instruccion* instruccion){
+void escribirArchivo (t_instruccion* instruccion, void* bufferEscritura, int bytesAEscribir){
 	t_fcb* fcb;
 	int posicion = posicionFCB(instruccion->param1);
 
@@ -151,6 +129,37 @@ void escribirArchivo (t_instruccion* instruccion){
 		log_info(loggerFS, "ERROR: NO EXISTE ARCHIVO   Operacion: ESCRIBIR (WRITE) -> Archivo: %s", instruccion->param1);
 	} else {
 		fcb = list_get(fcbs, posicion);
+		escribirYLeerArchivo(bufferEscritura, bytesAEscribir, fcb, F_WRITE);
+		int valorOp=OK;
+		send(cliente, &valorOp, sizeof(int), 0);
+		free(bufferEscritura);
+
+	}
+}
+
+void escribirYLeerArchivo(void* buffer, int bytes, t_fcb* fcb, op_code operacion){
+	int tamanioRecorrido=0;
+	uint32_t posPtro = fcb->punteroPosicion;
+
+	while(tamanioRecorrido < bytes){
+		int tamMax = (superBloque->blockSize)- (posPtro % superBloque->blockSize);
+		int tamAEscribir_Leer = min(bytes - tamanioRecorrido, tamMax);
+		int bloque_logico = bloqueSegunPuntero(posPtro);
+		int bloque_fisico = bloqueLogicoAFisico(fcb, bloque_logico);
+		int offset = offsetSegunPuntero(posPtro);
+		int posicion = posicionArchivoBloques(bloque_fisico, offset);
+		if(operacion == F_WRITE){
+			escribirArchivoBloques(buffer + tamanioRecorrido, posicion, tamAEscribir_Leer);
+		}
+		else if (operacion == F_READ){
+			leerArchivoBloques(buffer + tamanioRecorrido, posicion, tamAEscribir_Leer);
+		}
+
+		usleep(retardoNumerico() * 1000);
+		log_info(loggerFS, "Acceso Bloque - Archivo:%s - Bloque Archivo:%d - Bloque File System: %d",fcb->nombreDeArchivo, bloque_logico, bloque_fisico);
+
+		tamanioRecorrido += tamAEscribir_Leer;
+		posPtro += tamAEscribir_Leer;
 	}
 }
 

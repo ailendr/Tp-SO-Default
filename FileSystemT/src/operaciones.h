@@ -23,8 +23,8 @@ int bloqueSegunPuntero(int puntero);
 int posicionArchivoBloques(int num_bloque, int offset);
 int bloqueLogicoAFisico(t_fcb* fcb, int num_bloque);
 int min(int num1, int num2);
-void escribirArchivo (t_instruccion* instruccion);
-
+void escribirArchivo (t_instruccion* instruccion, void* bufferEscritura, int bytesAEscribir);
+void escribirYLeerArchivo(void* buffer, int bytes, t_fcb* fcb, op_code operacion);
 int posicionFCB (char* nombre);
 void almacenarFcb (t_fcb* fcb);
 
