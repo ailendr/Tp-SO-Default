@@ -312,7 +312,7 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	if(numSegmento != 0){ //Solo q busque para el segmento q sea distinto de cero porq si es cero no va a poder encontrarlo por el pid random q tiene
 		posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
 	}
-	if(offset == 0) { //Para que no nos de negativo en el memcpy
+	if(numSegmento == 0 && offset == 0) { //Para que no nos de negativo en el memcpy
 		offset = 1;
 	}
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
