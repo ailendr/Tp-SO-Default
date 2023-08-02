@@ -44,17 +44,14 @@ int iniciarServKernel (){
 
 	log_info(loggerFS, "Esperando que se conecte Kernel");
 
-	while(1){
-
 	cliente = esperar_cliente(servidorFS, loggerFS);
 	if( verificarSocket (cliente, loggerFS, configFS) == 1 ){
 	    close(servidorFS);
 	    close(cliente);
 	    return EXIT_FAILURE;
 	}
-
 	recibirHandshake(cliente, HANDSHAKE_Kernel, loggerFS);
 	log_info(loggerFS, "Ok -> Servidor de Peticiones");
+	return EXIT_SUCCESS;
+
 	}
-	return 0;
-}

@@ -216,7 +216,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
 						t_archivo* archivo = malloc (sizeof(t_archivo*));
 						archivo->nombreArchivo = instruccion->param1;
-						archivo->contador +=1; //Le agregue el más porque no vi que se incremente en ningún lado y sino siempre va a valer 1
+						archivo->contador = 1; //Le agregue el más porque no vi que se incremente en ningún lado y sino siempre va a valer 1
 						list_add(tablaGlobalDeArchivos, archivo);
 						//Agrego entrada a la Tabla de Archivos para este proceso//
 						agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0);
@@ -237,8 +237,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				//Cierro el arch en la tabla del proceso
 				int posArchProceso =buscarArchivoEnProceso(instruccion->param1, ultimoEjecutado);
 				t_list* listaDeArchs = ultimoEjecutado->archAbiertos;
-				//No es el mismo archivo para todos? Se lo va a dejar con basura a otros procesos si lo destruimos.
-				list_remove_and_destroy_element(listaDeArchs, posArchProceso, (void*) cerrarArchivoDeProceso);//VEEEEEEEEER
+				list_remove_and_destroy_element(listaDeArchs, posArchProceso, (void*) cerrarArchivoDeProceso); //Se borra el archivoPorProceso q es distinto al archivo del TGA
 				t_pcb* proceso;
 
 				//Modifico el contador en la TGAA
