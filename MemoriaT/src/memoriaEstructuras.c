@@ -319,16 +319,37 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	usleep(retardoMemoria()*1000);
 
 		if(operacion == MOV_IN || operacion == F_WRITE){
-			char* valorAEnviar = malloc(bytes); //Esto es nuevo solo para probar, antes estaba &Registro
-			//int base = segmento->base;
+			//Prueba 1: --Stack smashing pero le llega a Fs playstation1--//
+			/*char* valorAEnviar = malloc(bytes);
+			valorAEnviar = NULL;//Esto es nuevo solo para probar, antes estaba &Registro
 			pthread_mutex_lock(&mutexEspacioUser);
-			memcpy(&valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			memcpy(&valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes);
 			pthread_mutex_unlock(&mutexEspacioUser);
 			log_info(loggerMemoria, "El contenido a enviar es : %s", valorAEnviar);
 			if(enviarMensaje(valorAEnviar, socket) == -1){
 				log_info(loggerMemoria, "Error al enviar mensaje");
-			}
+			*/
 
+			//--Prueba 2: Sin stack smashing pero Fs queda bloqueado esperando el mensaje--//
+			/*pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			pthread_mutex_unlock(&mutexEspacioUser);
+			log_info(loggerMemoria, "El contenido a enviar es : %s", registro);
+			if(enviarMensaje(registro, socket) == -1){
+				log_info(loggerMemoria, "Error al enviar mensaje");
+			}*/
+            //--Prueba 3: sin stack smashing y fs recibe algo--//
+			void* valorAEnviar = malloc(bytes);
+			//valorAEnviar = NULL;//Esto es nuevo solo para probar, antes estaba &Registro
+			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			pthread_mutex_unlock(&mutexEspacioUser);
+			//char* valor = (char*)valorAEnviar; Esto no sirve para visualizar
+			//log_info(loggerMemoria, "El contenido a enviar es : %s", valor);
+			//Habria q usar HEXDUMP PARA VER Q ONDA ESE VOID* VALOR A ENVIAR
+			if(enviarMensaje((char*)valorAEnviar, socket) == -1){ //Esto no va a servir porq es un void*
+				log_info(loggerMemoria, "Error al enviar mensaje");
+					}
 		}
 
 	 if(operacion == MOV_OUT ||operacion == F_READ){
@@ -344,7 +365,7 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 
 void escribirMemoria(t_segmento* segmento, int tamInfo){
 	segmento->tieneInfo = 1;
-	segmento->tamanioInfo = tamInfo;
+	segmento->tamanioInfo += tamInfo;
 }
 
 

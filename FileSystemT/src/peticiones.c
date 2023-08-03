@@ -114,7 +114,6 @@ void ejecutarPeticiones(){
 			send(cliente, &valorOp, sizeof(int), 0);
 		    }
 		    free(bufferLectura);
-		    free(instruccion);
 			break;
 		case F_WRITE:
 			int bytesWrite = atoi(instruccion->param3);
@@ -123,10 +122,10 @@ void ejecutarPeticiones(){
 			validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Write a Memoria");
 			int codigo = recibir_operacion(socketMemoria);
 			if(codigo != (-1) && codigo == MENSAJE){
+				log_info(loggerFS, "Se recibió la palabra a Escribir desde Memoria");
 				 bufferEscritura = recibir_mensaje(socketMemoria);
 				escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
 			}
-			free(instruccion);
 			break;
 
 		case F_OPEN:
@@ -139,13 +138,11 @@ void ejecutarPeticiones(){
 				valorOp = ERROR;
 			}
 			send(cliente,&valorOp,sizeof(int),0 );
-			free(instruccion);
 
 
 			break;
 		case F_CREATE:
 			crearArchivo(nombreArchivo);
-			free(instruccion);
 
 			break;
 		case F_TRUNCATE:
@@ -153,25 +150,22 @@ void ejecutarPeticiones(){
 			 if (res == 0){ valorOp = OK; }
 			// else { valorOp = ERROR; }
 			 send(cliente, &valorOp, sizeof(int), 0);
-			free(instruccion);
 
 
 			break;
 		case F_CLOSE:
 			cerrarArchivo(nombreArchivo);
-			free(instruccion);
 
 			break;
 		case F_SEEK:
 			posicionarPuntero (nombreArchivo, instruccion->param2);
-			free(instruccion);
 
 			break;
 	}
 
 	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
+	free(instruccion);
 
-	if (nombre != F_CREATE) send(cliente, &valorOp, sizeof(int), 0);
+	//if (nombre != F_CREATE) send(cliente, &valorOp, sizeof(int), 0); //NO VA PORQ PARA FSEEK,FCLOSE NO SE ESPERA UNA RESPUESTA
 
-////NO FALTAN LOS FREE DE LAS INTRUCCIONES?????
 }
