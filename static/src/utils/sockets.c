@@ -74,6 +74,27 @@ void enviar_mensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en u
 	eliminar_paquete(paquete);//libera los punteros q componen la estructura paquete y luego la estructura en si
 }
 
+int enviarMensaje(char* mensaje, int socket_cliente) //1)poner el mensaje en un paquee
+{
+	t_paquete* paquete = malloc(sizeof(t_paquete));
+
+	paquete->codigo_operacion = MENSAJE;
+	paquete->buffer = malloc(sizeof(t_buffer));
+	paquete->buffer->size = strlen(mensaje) + 1;
+	paquete->buffer->stream = malloc(paquete->buffer->size);
+	memcpy(paquete->buffer->stream, mensaje, paquete->buffer->size);
+
+	int bytes = paquete->buffer->size + 2*sizeof(int);
+
+	void* a_enviar = serializar_paquete(paquete, bytes);//2)serializar el paquete
+
+	int returnSend = send(socket_cliente, a_enviar, bytes, 0);//3) se envia lo serializado
+
+	free(a_enviar); //libera puntero
+	eliminar_paquete(paquete);//libera los punteros q componen la estructura paquete y luego la estructura en si
+  return returnSend;
+}
+
 void* serializar_paquete(t_paquete* paquete, int bytes) // pone lo del paquete posta en ptra estructura magic para copiarlo basicamente
 {
 	void * magic = malloc(bytes);

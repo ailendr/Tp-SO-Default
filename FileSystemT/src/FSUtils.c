@@ -6,15 +6,12 @@
  */
 
 #include "FSUtils.h"
-//Agrego los sockets : Los extern estan en config.c
-int servidorFS;
-int socketMemoria;
-int cliente;
+
 
 int iniciarMemoria (){
 	log_info(loggerFS, "Realizando Conexion con Memoria");
 
-	int socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerFS);
+	socketMemoria = iniciarCliente(IP_Memoria(), puertoMemoria(), loggerFS);
 	if( verificarSocket (socketMemoria, loggerFS, configFS) == 1 ) {
 		close (servidorFS);
 		return EXIT_FAILURE;

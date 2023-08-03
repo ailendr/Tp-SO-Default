@@ -322,7 +322,9 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
-			enviar_mensaje(registro, socket);
+			if(enviarMensaje(registro, socket) == -1){
+				log_info(loggerMemoria, "Error al enviar mensaje");
+			}
 
 		}
 

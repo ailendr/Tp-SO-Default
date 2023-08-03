@@ -6,6 +6,10 @@
  */
 
 #include "peticiones.h"
+//Agrego los sockets : Los extern estan en config.c
+int servidorFS;
+int socketMemoria;
+int cliente;
 
 void atenderPeticiones(){
    log_info(loggerFS, "Recibiendo Peticiones de Kernel ");
@@ -110,6 +114,7 @@ void ejecutarPeticiones(){
 			send(cliente, &valorOp, sizeof(int), 0);
 		    }
 		    free(bufferLectura);
+		    free(instruccion);
 			break;
 		case F_WRITE:
 			int bytesWrite = atoi(instruccion->param3);
@@ -121,6 +126,7 @@ void ejecutarPeticiones(){
 				 bufferEscritura = recibir_mensaje(socketMemoria);
 				escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
 			}
+			free(instruccion);
 			break;
 
 		case F_OPEN:
@@ -133,23 +139,33 @@ void ejecutarPeticiones(){
 				valorOp = ERROR;
 			}
 			send(cliente,&valorOp,sizeof(int),0 );
+			free(instruccion);
+
 
 			break;
 		case F_CREATE:
 			crearArchivo(nombreArchivo);
+			free(instruccion);
+
 			break;
 		case F_TRUNCATE:
 			 int res = truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
 			 if (res == 0){ valorOp = OK; }
 			// else { valorOp = ERROR; }
 			 send(cliente, &valorOp, sizeof(int), 0);
+			free(instruccion);
+
 
 			break;
 		case F_CLOSE:
 			cerrarArchivo(nombreArchivo);
+			free(instruccion);
+
 			break;
 		case F_SEEK:
 			posicionarPuntero (nombreArchivo, instruccion->param2);
+			free(instruccion);
+
 			break;
 	}
 
