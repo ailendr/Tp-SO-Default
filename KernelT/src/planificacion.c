@@ -204,6 +204,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						if(recepcion == ERROR ){ // Solo si no existe envia un F Create
 							t_instruccion* instrucFCreate = malloc(sizeof(t_instruccion));
 							instrucFCreate->nombre = F_CREATE;
+							instrucFCreate->pid = contextoActualizado->pid;
 							instrucFCreate->param1 = instruccion->param1;
 							t_paquete* paq = serializarInstruccion(instrucFCreate);
 							validarEnvioDePaquete(paq, socketFs, loggerKernel, configKernel, "Instruccion F CREATE");

@@ -41,6 +41,9 @@ void atenderPeticiones(){
 			case F_OPEN:
 				cantParam = 1;
 				break;
+			case F_CREATE:
+				cantParam = 1;
+				break;
 			case F_TRUNCATE:
 				cantParam = 2;
 				break;
