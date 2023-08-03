@@ -72,7 +72,7 @@ void atenderPeticionesFs(int* socketFs){
 		valorOp =OK;
 		send(socket, &valorOp, sizeof(int), 0);
 
-		///pthread_mutex_unlock(&mutexOperacionFS);
+		//pthread_mutex_unlock(&mutexOperacionFS);
 		free(instruccion);
 
 

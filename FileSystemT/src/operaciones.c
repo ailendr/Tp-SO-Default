@@ -82,7 +82,7 @@ void posicionarPuntero (char* nombreArchivo, char* posicion){
 
 	}
 
-	free(fcb);
+	//free(fcb);
 }
 
 int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
