@@ -319,10 +319,13 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	usleep(retardoMemoria()*1000);
 
 		if(operacion == MOV_IN || operacion == F_WRITE){
+			char* valorAEnviar = malloc(bytes); //Esto es nuevo solo para probar, antes estaba &Registro
+			//int base = segmento->base;
 			pthread_mutex_lock(&mutexEspacioUser);
-			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			memcpy(&valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
-			if(enviarMensaje(registro, socket) == -1){
+			log_info(loggerMemoria, "El contenido a enviar es : %s", valorAEnviar);
+			if(enviarMensaje(valorAEnviar, socket) == -1){
 				log_info(loggerMemoria, "Error al enviar mensaje");
 			}
 
