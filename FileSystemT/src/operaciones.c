@@ -11,14 +11,11 @@
 t_list* fcbs;
 
 void cerrarArchivo(char* nombreArchivo){
-	t_fcb* fcb;
-	int posicion = posicionFCB(nombreArchivo);
+	t_fcb* fcb = cargarFCB(nombreArchivo);
 
-	if (posicion == -1 ){
+	if ( fcb == NULL ){
 		log_info(loggerFS, "ERROR: NO EXISTE ARCHIVO   Operacion: CERRAR (CLOSE) -> Archivo: %s", nombreArchivo);
 	} else {
-		fcb = list_get(fcbs, posicion);
-
 		if (fcb -> abierto == 1){
 			fcb -> abierto = 0;
 			almacenarFcb (fcb);
@@ -31,17 +28,13 @@ void cerrarArchivo(char* nombreArchivo){
 
 }
 
-void abrirArchivo(char* nombreArchivo){
-	t_fcb* fcb;
-	int posicion = posicionFCB(nombreArchivo);
-	fcb = list_get(fcbs, posicion);
+void abrirArchivo(t_fcb* fcb ){
 	if (fcb -> abierto == 0){
 		fcb -> abierto = 1;
 		log_info(loggerFS, "Operacion: ABRIR (OPEN) -> Archivo: %s", fcb -> nombreDeArchivo);
 	} else {
-		log_info(loggerFS, "ERROR: EL ARCHIVO YA ESTA ABIERTO   Operacion: ABRIR (OPEN) -> Archivo: %s", nombreArchivo);
+		log_info(loggerFS, "ERROR: EL ARCHIVO YA ESTA ABIERTO   Operacion: ABRIR (OPEN) -> Archivo: %s", fcb->nombreDeArchivo);
 	}
-	free(fcb);
 }
 
 void crearArchivo(char* nombreArchivo){
@@ -58,20 +51,17 @@ void crearArchivo(char* nombreArchivo){
     almacenarFcb (fcb1);
 
 	log_info(loggerFS, "Operacion: CREAR -> Archivo: %s", nombreArchivo);
-	//free(fcb1);
 
 }
 
 void posicionarPuntero (char* nombreArchivo, char* posicion){
 	//Transformacion de char a entero
 	int posCursor = atoi(posicion);
-	t_fcb* fcb;
-	int pos = posicionFCB(nombreArchivo);
+	t_fcb* fcb = cargarFCB(nombreArchivo);
 
-	if (pos == -1 ){
+	if ( fcb == NULL ){
 		log_info(loggerFS, "ERROR: NO EXISTE ARCHIVO   Operacion: POSICIONAR (SEEK) -> Archivo: %s", nombreArchivo);
 	} else {
-		fcb = list_get(fcbs, pos);
 
 		if (fcb -> abierto == 1){
 			fcb -> punteroPosicion = posCursor;
@@ -85,9 +75,7 @@ void posicionarPuntero (char* nombreArchivo, char* posicion){
 }
 
 int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
-	t_fcb* fcb;
-	int posicion = posicionFCB(nombreArchivo);
-	fcb = list_get(fcbs, posicion);
+	t_fcb* fcb = cargarFCB(nombreArchivo);
 
 	int diferencia = cantBloques(tamanio)-cantBloques(fcb -> tamanioArchivo);
 
@@ -104,30 +92,29 @@ int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
 	log_info(loggerFS, "	|-> Tamanio Nuevo: %d", tamanio);
     fcb -> tamanioArchivo = tamanio;
 
+    almacenarFcb (fcb);
+
     return 0;
 
 }
 
 void leerArchivo (t_instruccion* instruccion, void* bufferLectura, int bytesALeer){
-	t_fcb* fcb;
-	int posicion = posicionFCB(instruccion->param1);
+	t_fcb* fcb = cargarFCB(instruccion->param1);
 
-	if (posicion == -1 ){
+	if (fcb == NULL){
 		log_info(loggerFS, "ERROR: NO EXISTE ARCHIVO   Operacion: LEER (READ) -> Archivo: %s", instruccion->param1);
 	} else {
-		fcb = list_get(fcbs, posicion);
 		escribirYLeerArchivo(bufferLectura, bytesALeer, fcb, F_READ);
 	}
 }
 
 void escribirArchivo (t_instruccion* instruccion, void* bufferEscritura, int bytesAEscribir){
-	t_fcb* fcb;
-	int posicion = posicionFCB(instruccion->param1);
+	t_fcb* fcb = cargarFCB(instruccion->param1);
 
-	if (posicion == -1 ){
+	if (fcb == NULL){
 		log_info(loggerFS, "ERROR: NO EXISTE ARCHIVO   Operacion: ESCRIBIR (WRITE) -> Archivo: %s", instruccion->param1);
 	} else {
-		fcb = list_get(fcbs, posicion);
+
 		escribirYLeerArchivo(bufferEscritura, bytesAEscribir, fcb, F_WRITE);
 		int valorOp=OK;
 		send(cliente, &valorOp, sizeof(int), 0);
@@ -163,25 +150,10 @@ void escribirYLeerArchivo(void* buffer, int bytes, t_fcb* fcb, op_code operacion
 }
 
 // ___________________ UTILS ___________________
-int posicionFCB (char* nombre){
-	t_fcb* fcb2;
+t_fcb* cargarFCB (char* nombre){
+	t_fcb* fcb = buscarFCB(nombre);
 
-	int tamanioLista = list_size(fcbs);
-
-	for(int j = 0; j < tamanioLista; j++){
-		fcb2 = list_get(fcbs, j);
-
-		if(strcmp(fcb2->nombreDeArchivo, nombre) == 0){
-
-			log_info(loggerFS, "ARCHIVO ENCONTRADO EN LA POS %i", j);
-			log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb2 -> nombreDeArchivo);
-			log_info(loggerFS, "	|-> Tamanio: %d", fcb2 -> tamanioArchivo);
-			return j;
-		}
-
-	}
-
-	t_fcb* fcb = malloc (sizeof(t_fcb));
+	if (fcb != NULL) return fcb;
 
 	t_config* lector;
 	char* path = string_new();
@@ -192,23 +164,12 @@ int posicionFCB (char* nombre){
 	lector = config_create(path);
 
 	if(lector != NULL ) {
+
+		fcb = malloc (sizeof(t_fcb));
 		fcb -> nombreDeArchivo = config_get_string_value(lector, "NOMBRE_ARCHIVO");
 		fcb -> tamanioArchivo = config_get_int_value(lector, "TAMANIO");
-
-		if (config_has_property(lector, "PUNTERO_DIRECTO")){
-			fcb -> punteroDirecto = config_get_int_value(lector, "PUNTERO_DIRECTO");
-
-			if (config_has_property(lector, "PUNTERO_INDIRECTO")){
-				fcb -> punteroIndirecto = config_get_int_value(lector, "PUNTERO_INDIRECTO");
-			} else {
-				fcb -> punteroIndirecto = -1;
-			}
-
-		} else {
-			fcb -> punteroDirecto = -1;
-			fcb -> punteroIndirecto = -1;
-		}
-
+		fcb -> punteroDirecto = config_get_int_value(lector, "PUNTERO_DIRECTO");
+		fcb -> punteroIndirecto = config_get_int_value(lector, "PUNTERO_INDIRECTO");
 		fcb -> punteroPosicion = 0;
 		fcb -> abierto = 0;
 		list_add(fcbs, fcb);
@@ -217,17 +178,22 @@ int posicionFCB (char* nombre){
 		log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb -> nombreDeArchivo);
 		log_info(loggerFS, "	|-> Tamanio: %i", fcb -> tamanioArchivo);
 
-		free(fcb);
 		config_destroy(lector);
-
-		return list_size(fcbs) - 1;
 
 	}
 
-	free(fcb);
+	return fcb;
 
-	return -1;
+}
 
+t_fcb* buscarFCB(char* archivo){
+	for(int i=0;i<list_size(fcbs);i++){
+		t_fcb* fcb = list_get(fcbs, i);
+		if(string_equals_ignore_case(fcb->nombreDeArchivo, archivo)){
+			return fcb;
+		}
+	}
+	return NULL;
 }
 
 void almacenarFcb (t_fcb* fcb){
@@ -249,19 +215,16 @@ void almacenarFcb (t_fcb* fcb){
 		infoFCB = string_itoa(fcb -> tamanioArchivo);
 		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 
-		if (fcb -> punteroDirecto != -1){
-			infoFCB = "\nPUNTERO_DIRECTO=";
-			fwrite(infoFCB, 1, strlen(infoFCB), salvador);
-			infoFCB = string_itoa(fcb -> punteroDirecto);
-			fwrite(infoFCB, 1, strlen(infoFCB), salvador);
+		infoFCB = "\nPUNTERO_DIRECTO=";
+		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
+		infoFCB = string_itoa(fcb -> punteroDirecto);
+		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
 
-			if (fcb -> punteroDirecto != -1){
-				infoFCB = "\nPUNTERO_INDIRECTO=";
-				fwrite(infoFCB, 1, strlen(infoFCB), salvador);
-				infoFCB = string_itoa(fcb -> punteroIndirecto);
-				fwrite(infoFCB, 1, strlen(infoFCB), salvador);
-			}
-		}
+		infoFCB = "\nPUNTERO_INDIRECTO=";
+		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
+		infoFCB = string_itoa(fcb -> punteroIndirecto);
+		fwrite(infoFCB, 1, strlen(infoFCB), salvador);
+
 
 	} else {
 		log_info(loggerFS, "PATH GUARDADO: %s -> ERROR AL ABRIR ARCHIVO", path);

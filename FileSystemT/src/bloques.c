@@ -22,7 +22,7 @@ void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
 void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
 
 	int proxCargar;
-	t_bitarray* bitMap = bitmapRecuperado ();
+	bitmapRecuperado();
 
 	if (fcb->punteroDirecto == -1 && cantidadDeBloques > 0){
 		cantidadDeBloques --;
@@ -64,7 +64,7 @@ void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
 }
 
 int proxBloqueVacio(){
-	t_bitarray* bitMap = bitmapRecuperado ();
+	bitmapRecuperado ();
 	for (int i = 0; i < bitMap->size; i++){
 		bool bit = bitarray_test_bit(bitMap, i);
 		log_info(loggerFS, "Accediendo al bit %i:         %s", i,string_itoa(bit));
@@ -97,7 +97,7 @@ void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t 
 }
 
 void liberarBloque(uint32_t numeroBloque){
-	t_bitarray* bitMap = bitmapRecuperado ();
+	bitmapRecuperado ();
 	bitarray_clean_bit(bitMap, numeroBloque);
 	guardarBitMap(bitMap->bitarray);
 	log_info(loggerFS, "Se libero el bloque numero %i", numeroBloque);
