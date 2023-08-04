@@ -320,12 +320,13 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 
 		if(operacion == MOV_IN || operacion == F_WRITE){
 			//Prueba 1: --Stack smashing pero le llega a Fs playstation1--//
-			/*void* valorAEnviar ;
+			/*char* valorAEnviar = malloc(bytes);
+
 		//valorAEnviar = NULL;//Esto es nuevo solo para probar, antes estaba &Registro
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes);
 			pthread_mutex_unlock(&mutexEspacioUser);
-			//valorAEnviar[bytes] = '\0';
+			//valorAEnviar[bytes] = '\0'; -> esto va si hacemos malloc (bytes + 1)
 			log_info(loggerMemoria, "El contenido a enviar es : %s", valorAEnviar);
 			if(enviarMensaje(valorAEnviar, socket) == -1){
 				log_info(loggerMemoria, "Error al enviar mensaje");
