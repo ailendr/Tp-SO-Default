@@ -8,7 +8,7 @@
 #include "FSEstructuras.h"
 
 t_superbloque* superBloque;
-t_bitarray* bitMap;
+//t_bitarray* bitMap;
 t_list* peticiones;
 
 
@@ -36,33 +36,53 @@ void iniciarSuperBloque(){
 
 void iniciarBitMap(){
 	log_info(loggerFS, "Bajando Bitmap ....");
-	int bytes = superBloque->blockCount/8;
-	char* bitArray = malloc(bytes);
-	bitMap = bitarray_create_with_mode(bitArray, bytes, LSB_FIRST);
-
 	FILE* preGuardado = fopen(pathBitmap(), "rb+");
 
-	if (preGuardado != NULL){
+	if (preGuardado == NULL){
 
-		log_info(loggerFS, "Recuperando los datos");
-		fread(bitMap->bitarray, 1, bytes, preGuardado);
-		fclose(preGuardado);
+		int bytes = superBloque->blockCount/8;
+		char* bitArray = malloc(bytes);
+		t_bitarray* bitMap = bitarray_create_with_mode(bitArray, bytes, LSB_FIRST);
+		log_info(loggerFS, "Creando el Bitmap ...");
+		guardarBitMap(string_repeat('0', superBloque->blockCount));
+		bitarray_destroy(bitMap);
+		log_info(loggerFS, "Se creo correctamente");
 
 	} else {
-		log_info(loggerFS, "Creando el archivo");
-		guardarBitMap(string_repeat('0', superBloque->blockCount));
-		log_info(loggerFS, "%s", bitMap->bitarray);
+
+		log_info(loggerFS, "Recuperando los datos...");
+		t_bitarray* bitMap = bitmapRecuperado (); //Para saber que no tira error aca
+		log_info(loggerFS, "Se recupero correctamente");
+		fclose(preGuardado); //Va aca porque si es nulo no tengo q cerrarlo
+		bitarray_destroy(bitMap);
+
 	}
-	log_info(loggerFS, "Ok -> Creacion BitMap");
+
+	log_info(loggerFS, "BitMap -> OK");
 
 }
 
 void guardarBitMap(char* bitArray){
-	FILE* preGuardado = fopen(pathBitmap(), "wb+");
 	int bytes = superBloque->blockCount/8;
-	strcpy(bitMap->bitarray, bitArray);
+	t_bitarray* bitMap = bitarray_create_with_mode(bitArray, bytes, LSB_FIRST);
+	FILE* preGuardado = fopen(pathBitmap(), "wb+");
+	//strcpy(bitMap->bitarray, bitArray);
 	fwrite(bitMap->bitarray, 1, bytes, preGuardado);
 	fclose(preGuardado);
+	bitarray_destroy(bitMap);
+}
+
+t_bitarray* bitmapRecuperado (){
+	int bytes = superBloque->blockCount/8;
+	char* bitArray = malloc(bytes);
+	t_bitarray* bitMap = bitarray_create_with_mode(bitArray, bytes, LSB_FIRST);
+
+	FILE* preGuardado = fopen(pathBitmap(), "rb+");
+
+	fread(bitMap->bitarray, 1, bytes, preGuardado);
+	fclose(preGuardado);
+
+	return bitMap;
 }
 
 void iniciarArchivoDeBloques(){
@@ -73,21 +93,25 @@ void iniciarArchivoDeBloques(){
         // El archivo no existe, se crea y se trunca al tamaño deseado
 
     	archivo_bloques = fopen(pathBloques(), "wb+");
+
         if (archivo_bloques == NULL) {
         	log_info(loggerFS, "No se pudo crear Archivo de Bloques");
             return;
         }
+
         fseek(archivo_bloques, tamanio_archivo - 1, SEEK_SET);
         fputc('\0', archivo_bloques);
 
         log_info(loggerFS, "Archivo de Bloques Creado");
         log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
+
     } else {
 
     	log_info(loggerFS, "Archivo de Bloques leido");
     	log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
 
     }
+
     fclose(archivo_bloques);
 }
 

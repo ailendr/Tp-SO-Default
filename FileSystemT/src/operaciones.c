@@ -48,8 +48,8 @@ void crearArchivo(char* nombreArchivo){
 
     t_fcb* fcb1 = malloc(sizeof(t_fcb));
     fcb1 -> nombreDeArchivo = nombreArchivo;
-    fcb1 -> tamanioArchivo = 256;
-    fcb1 -> punteroDirecto = 0;
+    fcb1 -> tamanioArchivo = 0;
+    fcb1 -> punteroDirecto = -1;
     fcb1 -> punteroIndirecto = -1;
     fcb1 -> punteroPosicion = 0;
     fcb1 -> abierto = 1;
@@ -82,7 +82,6 @@ void posicionarPuntero (char* nombreArchivo, char* posicion){
 
 	}
 
-	//free(fcb);
 }
 
 int truncarArchivo (char* nombreArchivo, uint32_t tamanio){

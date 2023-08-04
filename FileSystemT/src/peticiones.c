@@ -11,6 +11,10 @@ int servidorFS;
 int socketMemoria;
 int cliente;
 
+int servidorFS;
+int socketMemoria;
+int cliente;
+
 void atenderPeticiones(){
    log_info(loggerFS, "Recibiendo Peticiones de Kernel ");
 	//void* buffer = NULL;
@@ -56,6 +60,9 @@ void atenderPeticiones(){
 				break;
 			case F_SEEK:
 				cantParam = 2; 
+				break;
+			case F_CREATE:
+				cantParam = 1;
 				break;
 			default:
 				cantParam = -1;
@@ -164,7 +171,5 @@ void ejecutarPeticiones(){
 
 	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
 	free(instruccion);
-
-	//if (nombre != F_CREATE) send(cliente, &valorOp, sizeof(int), 0); //NO VA PORQ PARA FSEEK,FCLOSE NO SE ESPERA UNA RESPUESTA
 
 }

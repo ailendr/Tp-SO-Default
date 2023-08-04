@@ -22,34 +22,50 @@ void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
 void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
 
 	int proxCargar;
+	t_bitarray* bitMap = bitmapRecuperado ();
 
 	if (fcb->punteroDirecto == -1 && cantidadDeBloques > 0){
 		cantidadDeBloques --;
 		proxCargar = proxBloqueVacio();
+		if (proxCargar == -1){
+			log_info(loggerFS, "	-> No se puede cargar bloques para el archivo %s", fcb -> nombreDeArchivo);
+			return;
+		}
 		bitarray_set_bit(bitMap, proxCargar);
 		fcb->punteroDirecto = proxCargar;
+		log_info(loggerFS, "	-> Se cargo un nuevo bloque con puntero directo para el archivo %s", fcb -> nombreDeArchivo);
+
 	}
 
 	if (fcb->punteroIndirecto == -1 && cantidadDeBloques > 0){
 		cantidadDeBloques --;
 		proxCargar = proxBloqueVacio();
+		if (proxCargar == -1){
+			log_info(loggerFS, "	-> No se puede cargar bloques para el archivo %s", fcb -> nombreDeArchivo);
+			return;
+		}
 		bitarray_set_bit(bitMap, proxCargar);
 		fcb->punteroIndirecto = proxCargar;
+		log_info(loggerFS, "	-> Se cargo un nuevo bloque de punteros para el archivo %s", fcb -> nombreDeArchivo);
+
 	}
 
 	for (int i = 0; i < cantidadDeBloques; i++){
 		proxCargar = proxBloqueVacio();
 		bitarray_set_bit(bitMap, proxCargar);
+		log_info(loggerFS, "	-> Se cargo un nuevo bloque de punteros para el archivo %s", fcb -> nombreDeArchivo);
 		//Guardar en el archivo de bloques
 	}
 
 	guardarBitMap(bitMap->bitarray);
-	log_info(loggerFS, "%s", bitMap->bitarray);
+
+	bitarray_destroy(bitMap);
 
 }
 
 int proxBloqueVacio(){
-	for (int i = 0; i<10; i++){
+	t_bitarray* bitMap = bitmapRecuperado ();
+	for (int i = 0; i < bitMap->size; i++){
 		bool bit = bitarray_test_bit(bitMap, i);
 		log_info(loggerFS, "Accediendo al bit %i:         %s", i,string_itoa(bit));
 		if (bit == 0) return i;
@@ -81,8 +97,11 @@ void agregarContenidoABloque (void* contenido, uint32_t sizeContenido, uint32_t 
 }
 
 void liberarBloque(uint32_t numeroBloque){
-   //aca vaciar bloque
-   bitarray_clean_bit(bitMap, numeroBloque);
+	t_bitarray* bitMap = bitmapRecuperado ();
+	bitarray_clean_bit(bitMap, numeroBloque);
+	guardarBitMap(bitMap->bitarray);
+	log_info(loggerFS, "Se libero el bloque numero %i", numeroBloque);
+	bitarray_destroy(bitMap);
 }
 
 void leerArchivoBloques(void* aLeer, int posicion, int cantidad){
