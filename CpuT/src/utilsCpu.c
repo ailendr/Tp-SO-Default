@@ -101,7 +101,7 @@ char* mmu (char* direccionLogica, uint32_t id, int tam){
 	log_info(loggerCPU, "DIRECCION FISICA: %s", dirFisica);
 
 	int cantBytes = 0;
-	cantBytes = (offset - 1) + tam; //le resto un -1 porq tiene q escribir contando desde el byte del offset
+	cantBytes = offset + tam; //le resto un -1 porq tiene q escribir contando desde el byte del offset
 	log_info(loggerCPU, "CANT BYTES A LEER: %i", cantBytes);
 
 	if (cantBytes > (valorGuardar - 1)){
