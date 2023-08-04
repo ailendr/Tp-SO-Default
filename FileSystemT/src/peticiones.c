@@ -120,12 +120,13 @@ void ejecutarPeticiones(){
 			char* bufferEscritura = NULL;
 			paquete = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Write a Memoria");
-			int codigo = recibir_operacion(socketMemoria);
-			if(codigo != (-1) && codigo == MENSAJE){
-				log_info(loggerFS, "Se recibió la palabra a Escribir desde Memoria");
-				 bufferEscritura = recibir_mensaje(socketMemoria);
-				escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
-			}
+			/*int codigo = recibir_operacion(socketMemoria);
+			if(codigo != (-1) && codigo == MENSAJE){*/
+			bufferEscritura = recibir_mensaje(socketMemoria);
+			log_info(loggerFS, "Se recibió la informacion a Escribir desde Memoria; %s", bufferEscritura);
+
+			escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
+
 			break;
 
 		case F_OPEN:

@@ -320,16 +320,17 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 
 		if(operacion == MOV_IN || operacion == F_WRITE){
 			//Prueba 1: --Stack smashing pero le llega a Fs playstation1--//
-			/*char* valorAEnviar = malloc(bytes);
-			valorAEnviar = NULL;//Esto es nuevo solo para probar, antes estaba &Registro
+			/*void* valorAEnviar ;
+		//valorAEnviar = NULL;//Esto es nuevo solo para probar, antes estaba &Registro
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes);
 			pthread_mutex_unlock(&mutexEspacioUser);
+			//valorAEnviar[bytes] = '\0';
 			log_info(loggerMemoria, "El contenido a enviar es : %s", valorAEnviar);
 			if(enviarMensaje(valorAEnviar, socket) == -1){
 				log_info(loggerMemoria, "Error al enviar mensaje");
-			*/
-
+			}
+*/
 			//--Prueba 2: Sin stack smashing pero Fs queda bloqueado esperando el mensaje--//
 			/*pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
@@ -338,8 +339,8 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 			if(enviarMensaje(registro, socket) == -1){
 				log_info(loggerMemoria, "Error al enviar mensaje");
 			}*/
-            //--Prueba 3: sin stack smashing y fs recibe algo--//
-			void* valorAEnviar = malloc(bytes);
+		  //--Prueba 3: sin stack smashing y fs recibe algo--//
+			/*void* valorAEnviar = malloc(bytes);
 			//valorAEnviar = NULL;//Esto es nuevo solo para probar, antes estaba &Registro
 			pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
@@ -349,7 +350,16 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 			//Habria q usar HEXDUMP PARA VER Q ONDA ESE VOID* VALOR A ENVIAR
 			if(enviarMensaje((char*)valorAEnviar, socket) == -1){ //Esto no va a servir porq es un void*
 				log_info(loggerMemoria, "Error al enviar mensaje");
-					}
+					}*/
+            //--Prueba 4: sin stack smashing y fs recibe algo que nada q ver--//
+			t_buffer* valorAEnviar = malloc(sizeof(t_buffer));
+			valorAEnviar->stream = malloc(bytes);
+			valorAEnviar->size = 0;
+			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(valorAEnviar->stream, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			valorAEnviar->size += bytes;
+			pthread_mutex_unlock(&mutexEspacioUser);
+			validarEnvioBuffer(valorAEnviar, socket, "Informacion Recuperada De Memoria", loggerMemoria, configMemoria);
 		}
 
 	 if(operacion == MOV_OUT ||operacion == F_READ){
