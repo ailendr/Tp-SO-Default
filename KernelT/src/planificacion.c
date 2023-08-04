@@ -186,15 +186,15 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
                 t_paquete* paquete;
                 int recepcion;
 				if (posArchivo != -1){
-					log_info(loggerKernel, "Archivo: %s ya existente", instruccion->param1);
+					log_info(loggerKernel, "Archivo: <%s> ya existente", instruccion->param1);
 					t_archivo* archivo = list_get(tablaGlobalDeArchivos, posArchivo);
-					archivo->contador += 1; //incremento el contador para ese archivo en la Tabla Global de Archivos Abiertos
+					archivo->contador += 1; //incremento el contador, es la cantidad de procesos esperando
 					agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0); //Agrega la entrada y posiciona el puntero en cero
 					bloquearProcesoPorArchivo(instruccion->param1, ultimoEjecutado);
-					paquete = serializarInstruccion(instruccion);
+					/*paquete = serializarInstruccion(instruccion);
 					validarEnvioDePaquete(paquete, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
 					free(instruccion);
-				     recepcion = recibir_operacion(socketFs);
+				     recepcion = recibir_operacion(socketFs);*/
 					}
 				else { //si no existe en la TGAA
 					//1) Consulta si existe ese archivo
@@ -204,6 +204,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						if(recepcion == ERROR ){ // Solo si no existe envia un F Create
 							t_instruccion* instrucFCreate = malloc(sizeof(t_instruccion));
 							instrucFCreate->nombre = F_CREATE;
+							instrucFCreate->pid = contextoActualizado->pid;
 							instrucFCreate->param1 = instruccion->param1;
 							t_paquete* paq = serializarInstruccion(instrucFCreate);
 							validarEnvioDePaquete(paq, socketFs, loggerKernel, configKernel, "Instruccion F CREATE");
@@ -216,7 +217,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
 						t_archivo* archivo = malloc (sizeof(t_archivo*));
 						archivo->nombreArchivo = instruccion->param1;
-						archivo->contador = 1; //Le agregue el más porque no vi que se incremente en ningún lado y sino siempre va a valer 1
+						archivo->contador = 0; //Es el contador de cuantos procesos esperan al archivo
 						list_add(tablaGlobalDeArchivos, archivo);
 						//Agrego entrada a la Tabla de Archivos para este proceso//
 						agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0);
@@ -224,7 +225,6 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						free(instruccion); //ver si luego no genera inconsistencias
 						procesoAEjecutar(ultimoEjecutado->contexto);
 						instruccionAEjecutar(ultimoEjecutado);
-
 
 				}
 
@@ -239,17 +239,19 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				t_list* listaDeArchs = ultimoEjecutado->archAbiertos;
 				list_remove_and_destroy_element(listaDeArchs, posArchProceso, (void*) cerrarArchivoDeProceso); //Se borra el archivoPorProceso q es distinto al archivo del TGA
 				t_pcb* proceso;
-
 				//Modifico el contador en la TGAA
 				int pos = buscarArchivoEnTGAA(instruccion->param1);
 				t_archivo* archivo = list_get(tablaGlobalDeArchivos, pos);
-				int instancias = archivo->contador; //Ya se que esto parece  re para nada, pero sino creo que me tira cualquier numero
-				archivo->contador = instancias - 1;
-				//Si el archivo tiene procesos bloquedos
-				if(archivo->contador>0){
+				//int instancias = archivo->contador; //Ya se que esto parece  re para nada, pero sino creo que me tira cualquier numero
+
+				if(archivo->contador > 0){
 					t_colaDeArchivo* colaArchivo = buscarColaDeArchivo(archivo->nombreArchivo);
 					proceso = queue_pop(colaArchivo->colaBlock);
+					archivo->contador -= 1;
 					agregarAEstadoReady(proceso);
+					sem_post(&planiCortoPlazo);
+
+
 				}else{
 					list_remove_and_destroy_element(tablaGlobalDeArchivos, pos, (void*)cerrarArchivoEnTGAA);
 					/*archivoProceso->nombreArchivo=NULL;
@@ -257,8 +259,8 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 					free(archivoProceso);*/
 				}
 				free(instruccion);
-				procesoAEjecutar(ultimoEjecutado->contexto);
-				instruccionAEjecutar(ultimoEjecutado);
+				//procesoAEjecutar(ultimoEjecutado->contexto); NO ACLARA QUE TENGA QUE ENVIAR A CPU DE NUEVO->Kernel debe elegir otro proceso
+				//instruccionAEjecutar(ultimoEjecutado);
 				break;
 			case F_SEEK:
 				log_info(loggerKernel, "Instruccion F SEEK");
@@ -521,22 +523,28 @@ void implementacionF(t_parametroFS* parametro){
 	t_paquete* paqueteF = serializarInstruccion(instruccion);
 	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion a File System");
 	proceso->estadoPcb= BLOCK;
-	log_info(loggerKernel, "PID: %d - Bloqueado por operar sobre el archivo: %s", proceso->contexto->pid, instruccion->param1);
+	log_info(loggerKernel, "PID: <%d> - Bloqueado por operar sobre el archivo: <%s>", proceso->contexto->pid, instruccion->param1);
 	logCambioDeEstado(proceso, "EXEC", "BLOCK");
 	finTiempoEnCPU(proceso);
 
 	int finOperacion = recibir_operacion(socketFs);
-	if(finOperacion == OK){
-		log_info(loggerKernel, "Finalizo la operacion en File System");
-	    logCambioDeEstado(proceso, "BLOCK", "READY");
+	if(finOperacion == -1){
+		log_info(loggerKernel, "Error al recibir de FS el resultado de la operacion");
 	}
-	pthread_mutex_unlock(&mutexOperacionFS);
-	agregarAEstadoReady(proceso);
-	operacionFS = 0;
+	else if( finOperacion == OK){
+		log_info(loggerKernel, "Finalizo la Operacion en File System");
+		logCambioDeEstado(proceso, "BLOCK", "READY");
 
-	free(parametro->instruccion);
-	free(parametro->proceso);
-	free(parametro);
+		pthread_mutex_unlock(&mutexOperacionFS);
+		agregarAEstadoReady(proceso);
+		sem_post(&planiCortoPlazo);
+
+		operacionFS = 0;
+
+		free(parametro->instruccion);
+		free(parametro->proceso);
+		free(parametro);
+	}
 }
 
 // UTILS FILE SYSTEM

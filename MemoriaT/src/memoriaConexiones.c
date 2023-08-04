@@ -20,7 +20,7 @@ while(1){
 		instruccion = obtenerInstruccion(socket, 2);
 		char* cantBytes = instruccion->param1;
 		int bytes = atoi(cantBytes); //Los bytes llegan el param 1 que es el Registro
-		log_info(loggerMemoria, "PID: <%d> - Acción: <LEER - Dirección física: <%s> - TAMAÑO_ <%d> - Origen: <CPU>", instruccion->pid, instruccion->param2, bytes);
+		log_info(loggerMemoria, "PID: <%d> - Acción: <LEER - Dirección física: <%s> - TAMAÑO: <%d> - Origen: <CPU>", instruccion->pid, instruccion->param2, bytes);
 		implementarInstruccion(instruccion->param2,instruccion->pid, instruccion->param1,socket, MOV_IN, bytes);
 		free(instruccion);
 
@@ -28,7 +28,7 @@ while(1){
 
 	case(MOV_OUT):
 		instruccion = obtenerInstruccion(socket, 2);
-		log_info(loggerMemoria, "“PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - TAMAÑO_ <%ld> - Origen: <CPU>", instruccion->pid, instruccion->param1, strlen(instruccion->param2));
+		log_info(loggerMemoria, "“PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - TAMAÑO: <%ld> - Origen: <CPU>", instruccion->pid, instruccion->param1, strlen(instruccion->param2));
 		implementarInstruccion(instruccion->param1, instruccion->pid, instruccion->param2,socket, MOV_OUT,0);
 		free(instruccion);
 
@@ -66,13 +66,13 @@ void atenderPeticionesFs(int* socketFs){
 	switch(codInstruccion){
 	case(F_READ):
 		instruccion = obtenerInstruccion(socket, 3);
-		pthread_mutex_lock(&mutexOperacionFS);
-		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - TAMAÑO_ <%ld> -Origen: <FS>", instruccion->pid, instruccion->param1, strlen(instruccion->param2));
+		//pthread_mutex_lock(&mutexOperacionFS);
+		log_info(loggerMemoria, "“PID: <%d> - Acción: <LEER> - Dirección física: <%s> - TAMAÑO: <%ld> -Origen: <FS>", instruccion->pid, instruccion->param1, strlen(instruccion->param2));
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_READ,0);
 		valorOp =OK;
 		send(socket, &valorOp, sizeof(int), 0);
 
-		pthread_mutex_unlock(&mutexOperacionFS);
+		//pthread_mutex_unlock(&mutexOperacionFS);
 		free(instruccion);
 
 
@@ -80,11 +80,11 @@ void atenderPeticionesFs(int* socketFs){
 
 	case (F_WRITE):
 		instruccion = obtenerInstruccion(socket, 3);
-	    pthread_mutex_lock(&mutexOperacionFS);
+	    //pthread_mutex_lock(&mutexOperacionFS);
 	    int bytes = atoi(instruccion->param3);
-	    log_info(loggerMemoria, "PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - TAMAÑO_ <%d> - Origen: <FS>", instruccion->pid, instruccion->param2, bytes);
+	    log_info(loggerMemoria, "PID: <%d> - Acción: <ESCRIBIR> - Dirección física: <%s> - TAMAÑO <%d> - Origen: <FS>", instruccion->pid, instruccion->param2, bytes);
 		implementarInstruccion(instruccion->param2, instruccion->pid, instruccion->param1, socket, F_WRITE, bytes);
-		pthread_mutex_unlock(&mutexOperacionFS);
+		//pthread_mutex_unlock(&mutexOperacionFS);
 
 		free(instruccion);
 

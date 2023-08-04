@@ -6,7 +6,6 @@
  */
 
 #include "FSUtils.h"
-//Agrego los sockets : Los extern estan en config.c
 
 int iniciarMemoria (){
 	log_info(loggerFS, "Realizando Conexion con Memoria");

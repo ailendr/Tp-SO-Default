@@ -6,6 +6,10 @@
  */
 
 #include "peticiones.h"
+//Agrego los sockets : Los extern estan en config.c
+int servidorFS;
+int socketMemoria;
+int cliente;
 
 int servidorFS;
 int socketMemoria;
@@ -43,6 +47,9 @@ void atenderPeticiones(){
 				cantParam = 3;
 				break;
 			case F_OPEN:
+				cantParam = 1;
+				break;
+			case F_CREATE:
 				cantParam = 1;
 				break;
 			case F_TRUNCATE:
@@ -117,13 +124,13 @@ void ejecutarPeticiones(){
 			break;
 		case F_WRITE:
 			int bytesWrite = atoi(instruccion->param3);
-			char* bufferEscritura = NULL;
 			paquete = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Write a Memoria");
 			int codigo = recibir_operacion(socketMemoria);
 			if(codigo != (-1) && codigo == MENSAJE){
-				 bufferEscritura = recibir_mensaje(socketMemoria);
-				escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
+			char* bufferEscritura = recibir_mensaje(socketMemoria);
+			log_info(loggerFS, "Se recibió la informacion a Escribir desde Memoria; %s", bufferEscritura);
+			escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
 			}
 			break;
 
@@ -138,9 +145,11 @@ void ejecutarPeticiones(){
 			}
 			send(cliente,&valorOp,sizeof(int),0 );
 
+
 			break;
 		case F_CREATE:
 			crearArchivo(nombreArchivo);
+
 			break;
 		case F_TRUNCATE:
 			 int res = truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
@@ -148,17 +157,19 @@ void ejecutarPeticiones(){
 			// else { valorOp = ERROR; }
 			 send(cliente, &valorOp, sizeof(int), 0);
 
+
 			break;
 		case F_CLOSE:
 			cerrarArchivo(nombreArchivo);
+
 			break;
 		case F_SEEK:
 			posicionarPuntero (nombreArchivo, instruccion->param2);
+
 			break;
 	}
 
 	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
-
-	free (instruccion);
+	free(instruccion);
 
 }

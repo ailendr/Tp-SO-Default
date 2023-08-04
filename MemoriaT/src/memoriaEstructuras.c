@@ -247,8 +247,8 @@ void compactar() {
 		if(segmento->tieneInfo){
 			char* info;
 			pthread_mutex_lock(&mutexEspacioUser);
-			memcpy(&info, memoriaContigua + ((segmento->base) - 1),segmento->tamanioInfo);
-			memcpy(memoriaContigua + ((segAnterior->limite) - 1), &info, segmento->tamanioInfo);
+			memcpy(&info, memoriaContigua + segmento->base, segmento->tamanioInfo);
+			memcpy(memoriaContigua + segAnterior->limite, &info, segmento->tamanioInfo);
 			pthread_mutex_unlock(&mutexEspacioUser);
 			}
 
@@ -312,23 +312,84 @@ void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket
 	if(numSegmento != 0){ //Solo q busque para el segmento q sea distinto de cero porq si es cero no va a poder encontrarlo por el pid random q tiene
 		posSeg = buscarPosSegmento(numSegmento, pid, tabla->segmentos);
 	}
-	if(numSegmento == 0 && offset == 0) { //Para que no nos de negativo en el memcpy
+	/*if(numSegmento == 0 && offset == 0) { //Para que no nos de negativo en el memcpy
 		offset = 1;
-	}
+	}*/
 	t_segmento* segmento = list_get(tabla->segmentos, posSeg);
 	usleep(retardoMemoria()*1000);
 
-		if(operacion == MOV_IN || operacion == F_WRITE){
+		if(operacion == MOV_IN ){
+			//--Alternativa que Funciona con MOV_IN--//
+			char* valorAEnviar = malloc(bytes);
 			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(&valorAEnviar, memoriaContigua + segmento->base + offset, bytes); //Consultar porqué sin & no funciona si se supone q es una direccion de memoria un char*
+			pthread_mutex_unlock(&mutexEspacioUser);
+			log_info(loggerMemoria, "El contenido a enviar es : %s", valorAEnviar);
+			if(enviarMensaje(valorAEnviar, socket) == -1){
+				log_info(loggerMemoria, "Error al enviar mensaje");
+			}
+			//free(valorAEnviar);
+		}
+
+
+
+		if( operacion == F_WRITE){
+			//Prueba 1: --Stack smashing pero le llega a Fs playstation1--//
+			/*char* valorAEnviar = malloc(bytes +1 );
+			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(&valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes);
+			pthread_mutex_unlock(&mutexEspacioUser);
+			valorAEnviar[bytes] = '\0';
+			log_info(loggerMemoria, "El contenido a enviar es : %s", valorAEnviar);
+			if(enviarMensaje(valorAEnviar, socket) == -1){
+				log_info(loggerMemoria, "Error al enviar mensaje");
+			} */
+
+			//--Prueba 2: Con stack smashing y Fs queda bloqueado esperando el mensaje--//
+			/*pthread_mutex_lock(&mutexEspacioUser);
 			memcpy(&registro, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
 			pthread_mutex_unlock(&mutexEspacioUser);
-			enviar_mensaje(registro, socket);
+			log_info(loggerMemoria, "El contenido a enviar es : %s", registro);
+			if(enviarMensaje(registro, socket) == -1){
+				log_info(loggerMemoria, "Error al enviar mensaje");
+			}*/
+		  //--Prueba 3: sin stack smashing y fs recibe algo--//
+			/*void* valorAEnviar = malloc(bytes);
+			//valorAEnviar = NULL;//Esto es nuevo solo para probar, antes estaba &Registro
+			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(valorAEnviar, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			pthread_mutex_unlock(&mutexEspacioUser);
+			//char* valor = (char*)valorAEnviar; Esto no sirve para visualizar
+			//log_info(loggerMemoria, "El contenido a enviar es : %s", valor);
+			//Habria q usar HEXDUMP PARA VER Q ONDA ESE VOID* VALOR A ENVIAR
+			if(enviarMensaje((char*)valorAEnviar, socket) == -1){ //Esto no va a servir porq es un void*
+				log_info(loggerMemoria, "Error al enviar mensaje");
+					}*/
+            //--Prueba 4: sin stack smashing y fs recibe algo que nada q ver--//
+			/*t_buffer* valorAEnviar = malloc(sizeof(t_buffer));
+			valorAEnviar->stream = malloc(bytes);
+			valorAEnviar->size = 0;
+			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(valorAEnviar->stream + 0, memoriaContigua + (segmento->base + (offset-1)), bytes); //Comprobado que si pisa lo que habia antiguamente en registro :))
+			valorAEnviar->size += bytes;
+			pthread_mutex_unlock(&mutexEspacioUser);
+			validarEnvioBuffer(valorAEnviar, socket, "Informacion Recuperada De Memoria", loggerMemoria, configMemoria);*/
 
+			//--Prueba 5 : Hay stack smashing.Memoria solo logra enviar Playstation1 , FS recibe Playstation1--//
+		  char* valorAEnviar = malloc(bytes);
+			pthread_mutex_lock(&mutexEspacioUser);
+			memcpy(&valorAEnviar, memoriaContigua + segmento->base + offset, bytes); //Consultar porqué sin & no funciona ya que no almacena nada y  se supone q es una direccion de memoria un char*
+			pthread_mutex_unlock(&mutexEspacioUser);
+			log_info(loggerMemoria, "El contenido a enviar es : %s", valorAEnviar);
+			if(enviarMensaje(valorAEnviar, socket) == -1){
+				log_info(loggerMemoria, "Error al enviar mensaje");
+			}
+			free(valorAEnviar);
 		}
 
 	 if(operacion == MOV_OUT ||operacion == F_READ){
 			pthread_mutex_lock(&mutexEspacioUser);
-			memcpy(memoriaContigua + (segmento->base + (offset-1)), &registro, strlen(registro));
+			memcpy(memoriaContigua + segmento->base + offset, &registro, strlen(registro));
 			pthread_mutex_unlock(&mutexEspacioUser);
 			escribirMemoria( segmento, strlen(registro));
 
