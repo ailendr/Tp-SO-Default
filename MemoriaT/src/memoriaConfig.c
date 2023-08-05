@@ -2,13 +2,14 @@
 
 t_log* loggerMemoria;
 t_config* configMemoria;
+t_config* configIPs;
 
 char* puertoEscucha(){
 	return config_get_string_value(configMemoria, "PUERTO_ESCUCHA");
 }
 
 char* ipEscucha(){
-	return config_get_string_value(configMemoria, "IP_ESCUCHA");
+	return config_get_string_value(configIPs, "IP_MEMORIA");
 }
 
 int tam_memoria(){
