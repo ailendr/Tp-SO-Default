@@ -99,7 +99,7 @@ void procesoAEjecutar(t_contextoEjec *procesoAEjecutar) {
 
 
 void finalizarProceso(t_pcb *procesoAFinalizar, char* motivoDeFin) {
-	mostrarListaDeProcesos(); //Solo para debugguear
+	//mostrarListaDeProcesos(); //Solo para debugguear
 	log_info(loggerKernel, "Finaliza el proceso %d - Motivo:%s",procesoAFinalizar->contexto->pid, motivoDeFin);
 	//---Aviso a Consola que finalice---//
 	int terminar = -1;

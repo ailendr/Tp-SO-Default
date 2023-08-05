@@ -23,7 +23,7 @@ void largoPlazo() {
 		proceso = extraerDeNew(colaNew);
 		pthread_mutex_lock(&mutexListaDeProcesos);
         list_add_in_index(listaDeProcesos,proceso->contexto->pid,proceso);//Agregamos a la lista de procesos globales
-        mostrarListaDeProcesos();
+        //mostrarListaDeProcesos();
         pthread_mutex_unlock(&mutexListaDeProcesos);
         log_info(loggerKernel, "Solicitando Tabla de Segmentos a Memoria");
         t_instruccion* instruc = malloc(sizeof(t_instruccion));
