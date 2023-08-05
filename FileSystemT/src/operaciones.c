@@ -77,10 +77,10 @@ void posicionarPuntero (char* nombreArchivo, char* posicion){
 int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
 	t_fcb* fcb = cargarFCB(nombreArchivo);
 
-	int diferencia = cantBloques(tamanio)-cantBloques(fcb -> tamanioArchivo);
+	int diferencia = cantBloques(tamanio) - cantBloques(fcb -> tamanioArchivo);
 
 	if(cantBloques(tamanio) > cantBloques(fcb -> tamanioArchivo)){
-		agregarBloques(diferencia, fcb);
+		aumentar(diferencia, fcb);
 	}
 
 	if(cantBloques(tamanio) < cantBloques(fcb -> tamanioArchivo)){
@@ -93,6 +93,9 @@ int truncarArchivo (char* nombreArchivo, uint32_t tamanio){
     fcb -> tamanioArchivo = tamanio;
 
     almacenarFcb (fcb);
+    guardarBitMap();
+
+	imprimir_bitmap_20(bitMap);
 
     return 0;
 

@@ -62,18 +62,14 @@ void iniciarBitMap(){
 }
 
 void guardarBitMap(){
-	int bytes = superBloque->blockCount/8;
 	FILE* preGuardado = fopen(pathBitmap(), "wb+");
-	fwrite(bitMap->bitarray, 1, bytes, preGuardado);
+	fwrite(bitMap->bitarray, 1, bitMap->size, preGuardado);
 	fclose(preGuardado);
 }
 
 void bitmapRecuperado (){
-	int bytes = superBloque->blockCount/8;
-
 	FILE* preGuardado = fopen(pathBitmap(), "rb+");
-
-	fread(bitMap->bitarray, 1, bytes, preGuardado);
+	fread(bitMap->bitarray, 1, bitMap->size, preGuardado);
 	fclose(preGuardado);
 }
 

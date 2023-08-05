@@ -19,59 +19,60 @@ void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
 
 }
 
-void agregarBloques (int cantidadDeBloques, t_fcb* fcb){
-
-	int proxCargar;
-	bitmapRecuperado();
+void aumentar (int cantidadDeBloques, t_fcb* fcb){
 
 	if (fcb->punteroDirecto == -1 && cantidadDeBloques > 0){
 		cantidadDeBloques --;
-		proxCargar = proxBloqueVacio();
-		if (proxCargar == -1){
-			log_info(loggerFS, "	-> No se puede cargar bloques para el archivo %s", fcb -> nombreDeArchivo);
-			return;
-		}
-		bitarray_set_bit(bitMap, proxCargar);
-		fcb->punteroDirecto = proxCargar;
+		fcb->punteroDirecto = asignarBloque();
 		log_info(loggerFS, "	-> Se cargo un nuevo bloque con puntero directo para el archivo %s", fcb -> nombreDeArchivo);
-
+		log_info(loggerFS, "	-> BLOQUE DIRECTO %i", fcb -> punteroDirecto);
 	}
 
 	if (fcb->punteroIndirecto == -1 && cantidadDeBloques > 0){
 		cantidadDeBloques --;
-		proxCargar = proxBloqueVacio();
-		if (proxCargar == -1){
-			log_info(loggerFS, "	-> No se puede cargar bloques para el archivo %s", fcb -> nombreDeArchivo);
-			return;
-		}
-		bitarray_set_bit(bitMap, proxCargar);
-		fcb->punteroIndirecto = proxCargar;
-		log_info(loggerFS, "	-> Se cargo un nuevo bloque de punteros para el archivo %s", fcb -> nombreDeArchivo);
+		fcb->punteroIndirecto = asignarBloque();
+		log_info(loggerFS, "	-> Se cargo un nuevo bloque con puntero directo para el archivo %s", fcb -> nombreDeArchivo);
+		log_info(loggerFS, "	-> BLOQUE INDIRECTO %i", fcb -> punteroIndirecto);
 
 	}
 
-	for (int i = 0; i < cantidadDeBloques; i++){
-		proxCargar = proxBloqueVacio();
-		bitarray_set_bit(bitMap, proxCargar);
-		log_info(loggerFS, "	-> Se cargo un nuevo bloque de punteros para el archivo %s", fcb -> nombreDeArchivo);
-		//Guardar en el archivo de bloques
+	int objetivo = cantBloques(fcb -> tamanioArchivo) + cantidadDeBloques;
+	int asignados = cantBloques(fcb -> tamanioArchivo);
+
+	for(int i=0; i < objetivo; i++){
+		agregar_bloque(fcb, &asignados);
 	}
-
-	guardarBitMap(bitMap->bitarray);
-
-	bitarray_destroy(bitMap);
+	usleep(retardoNumerico()*1000);
+	log_info(loggerFS, "Acceso Bloque - Archivo: %s - Bloque Archivo:%s - Bloque File System %d",fcb->nombreDeArchivo, "puntero", fcb->punteroIndirecto);
 
 }
 
 int proxBloqueVacio(){
-	bitmapRecuperado ();
-	for (int i = 0; i < bitMap->size; i++){
+	for (int i = 0; i < bitMap->size*8; i++){
 		bool bit = bitarray_test_bit(bitMap, i);
 		log_info(loggerFS, "Accediendo al bit %i:         %s", i,string_itoa(bit));
 		if (bit == 0) return i;
 	}
 	log_warning(loggerFS, "NO HAY BLOQUES DISPONIBLES");
 	return -1;
+}
+
+uint32_t asignarBloque(){
+	uint32_t bloque_a_asignar;
+	bloque_a_asignar = proxBloqueVacio();
+	bitarray_set_bit(bitMap, bloque_a_asignar);
+	//printf("\nAsignado------\n");
+	log_info(loggerFS, "Acceso a Bitmap - Bloque: %d - Estado: %d", bloque_a_asignar, bitarray_test_bit(bitMap, bloque_a_asignar));
+	//printf("-------------------\n");
+	guardarBitMap();
+	return bloque_a_asignar;
+}
+
+void agregar_bloque(t_fcb* fcb, int* asignados){
+	uint32_t bloque = asignarBloque();
+	int posicion = fcb->punteroIndirecto * superBloque->blockSize + ((*asignados)-1)*sizeof(uint32_t);
+	escribirArchivoBloques((void*)&bloque, posicion, sizeof(uint32_t));
+	(*asignados)++;
 }
 
 void escribirBloque (void* contenido, uint32_t sizeContenido, uint32_t numeroBloque){

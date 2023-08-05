@@ -36,5 +36,5 @@ char* pathFCB(){
 }
 
 int retardoNumerico(){
-	return config_get_int_value(configFS, "RETARDO_NUMERICO");
+	return config_get_int_value(configFS, "RETARDO_ACCESO_BLOQUE");
 }
