@@ -12,6 +12,7 @@
 
 extern t_config* configConsola;
 extern t_log* loggerConsola;
+extern t_config* configIPs;
 
 char* IpKernel();
 char* PuertoKernel();
