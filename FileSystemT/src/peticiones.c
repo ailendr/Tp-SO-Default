@@ -106,11 +106,13 @@ void ejecutarPeticiones(){
 			int bytesRead = atoi(instruccion->param3);
 			char* bufferLectura = malloc(bytesRead);
 			//char mensaje_read[100]= "";
-		    char* mensaje = NULL;
+		    char* mensaje = malloc (bytesRead + 1);
 			leerArchivo(instruccion,(void*) bufferLectura, bytesRead);
 			//sprintf(mensaje, "MOV_OUT %s %s %d", direccion_fisica_read, aLeer, tamanio_read);
 		    memcpy(&mensaje, bufferLectura+0, bytesRead);
 			//Armado de instruccion FRead y envio a Memoria//
+		    mensaje[bytesRead]= '\0';
+		    log_info(loggerFS, "El valor a escribir en Memoria es : <%s>", mensaje);
 		    instruccion->param1 = mensaje;
 		    paquete = serializarInstruccion(instruccion);
 		    validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Read a Memoria");
@@ -128,7 +130,8 @@ void ejecutarPeticiones(){
 			int codigo = recibir_operacion(socketMemoria);
 			if(codigo != (-1) && codigo == MENSAJE){
 			char* bufferEscritura = recibir_mensaje(socketMemoria);
-			log_info(loggerFS, "Se recibió la informacion a Escribir desde Memoria; %s", bufferEscritura);
+			bufferEscritura[bytesWrite] = '\0';
+			log_info(loggerFS, "Se recibió la informacion a Escribir desde Memoria: <%s>", bufferEscritura);
 			escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
 			}
 			break;
