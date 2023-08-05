@@ -284,6 +284,9 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_READ:
 				log_info(loggerKernel, "Instruccion F READ");
 				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
+				int posArchi = buscarArchivoEnProceso(instruccion->param1, ultimoEjecutado);
+				t_archivoPorProceso* archivP = list_get(ultimoEjecutado->archAbiertos, posArchi);
+				log_info(loggerKernel,"PID: <%d> - Leer Archivo: <%s> - Puntero <%d> - Direccion de Memoria<%s> - Tamaño <%s>", instruccion->pid, instruccion->param1,archivP->puntero ,instruccion->param2, instruccion->param3);
                 validarRyW(instruccion->param2, ultimoEjecutado);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
                 t_parametroFS* paramR = malloc(sizeof(t_parametroFS));
@@ -297,7 +300,9 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_WRITE:
 				log_info(loggerKernel, "Instruccion F WRITE");
 				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
-				log_info(loggerKernel,"PID: <%d> - Leer Archivo: <%s> - Puntero <%s> - Direccion de Memoria<%s> - Tamaño <%s>", instruccion->pid, instruccion->param1, ,instruccion->param2, instruccion->param3);
+				int posArchiv =buscarArchivoEnProceso(instruccion->param1, ultimoEjecutado);
+				t_archivoPorProceso* archP = list_get(ultimoEjecutado->archAbiertos, posArchiv);
+				log_info(loggerKernel,"PID: <%d> - Escribir Archivo: <%s> - Puntero <%d> - Direccion de Memoria<%s> - Tamaño <%s>", instruccion->pid, instruccion->param1,archP->puntero ,instruccion->param2, instruccion->param3);
 				validarRyW(instruccion->param2, ultimoEjecutado);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
 				t_parametroFS* paramW = malloc(sizeof(t_parametroFS));

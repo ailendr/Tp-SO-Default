@@ -147,7 +147,7 @@ void logearListaDeSegmentos(char* mensaje){
 	log_info(loggerMemoria, "Lista de segmentos %s: ", mensaje);
 	for(int i =0; i<tamLista; i++){
 		t_segmento* segmento = list_get(listaDeSegmentos, i);
-		log_info(loggerMemoria, "PID: %d - Segmento: %d - Base: %d - Tamaño %d", segmento->PID,segmento->ID, segmento->base, segmento->tamanio);
+		log_info(loggerMemoria, "PID: <%d> - Segmento: <%d> - Base: <%d> - Tamaño <%d>", segmento->PID,segmento->ID, segmento->base, segmento->tamanio);
 		log_info(loggerMemoria, "Pos en la lista: %d", i);
 	}
 }
@@ -163,7 +163,7 @@ t_tabla* crearTablaDeSegmentos(uint32_t pid){
 	//log_info(loggerMemoria,"el pid recuperado es : %d",*identificador);
 	list_add(tablaDeSegmentos->segmentos, segmentoCero);
 	list_add_in_index(listaDeTablas,pid, tablaDeSegmentos);
-	log_info(loggerMemoria, "Creacion de proceso: %d", pid);
+	log_info(loggerMemoria, "Creacion de proceso: <%d>", pid);
 	return tablaDeSegmentos;
 }
 
@@ -185,7 +185,7 @@ void liberarTablaDeSegmentos(uint32_t pid){
 	}
 	list_destroy(tablaALiberar->segmentos);
 	list_remove(listaDeTablas,posDeTabla);//Destruirmos esa Tabla de Segmentos de la Lista de Tablas
-	log_info(loggerMemoria, "Eliminación de proceso: %d", pid);
+	log_info(loggerMemoria, "Eliminación de proceso: <%d>", pid);
 	}
 	else{
 		log_info(loggerMemoria, "No se encontro la tabla del proceso a elimina");}
@@ -260,10 +260,10 @@ void compactar() {
 	}
 	actualizarUltimoSegmentoLibre();
 	list_destroy(listaAux);
-	logearListaDeSegmentos("Despues de compactar");
+	logearListaDeSegmentos("Despues de Compactar");
 
 	//Solo loggeamos la tabla porque los segmentos ya estan actualizados desde la listaDeSegmentos: SACAR A FUTURO///
-	int tamListaTablas = list_size(listaDeTablas);
+	/*int tamListaTablas = list_size(listaDeTablas);
 	int j=0;
 	while(j<tamListaTablas){
 		t_tabla* tablaDeSegmentos = list_get(listaDeTablas, j);
@@ -271,7 +271,7 @@ void compactar() {
          loggearTablaDeSegmentos(tablaDeSegmentos, loggerMemoria);
 		}
 		j++;
-	}
+	}*/
 
 }
 
