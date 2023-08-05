@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
 	close (cliente);
+	config_destroy(configIPs);
 
 	printf ("\n Finalizo File System correctamente\n ");
 
