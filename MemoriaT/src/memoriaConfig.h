@@ -12,6 +12,7 @@
 #include <commons/string.h>
 extern t_log* loggerMemoria;
 extern t_config* configMemoria;
+extern t_config* configIPs;
 
 char* puertoEscucha();
 char* ipEscucha();
