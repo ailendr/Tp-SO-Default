@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
 	int servidorMemoria = 0;
 
 	configMemoria = config_create(pathConfig);
+	configIPs = config_create("../Pruebas/ConfigsDePrueba/ip.config");
 	if(verificarConfig (servidorMemoria, loggerMemoria, configMemoria) == 1 ) return EXIT_FAILURE;
 
 	char* puerto = puertoEscucha();
@@ -46,6 +47,7 @@ int main(int argc, char** argv) {
 	log_destroy(loggerMemoria);
 	config_destroy(configMemoria);
 	close (servidorMemoria);
+	config_destroy(configIPs);
 
 	printf ("Finalizo Memoria  correctamente\n ");
 */

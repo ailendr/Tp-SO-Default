@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
 	int server_fd = 0;
 
 	configKernel = config_create(pathConfig);
+	configIPs = config_create("../Pruebas/ConfigsDePrueba/ip.config");
 
 	if(verificarConfig (server_fd, loggerKernel, configKernel) == 1 ) return EXIT_FAILURE;
 
@@ -66,6 +67,7 @@ int main(int argc, char** argv) {
 
 	log_info(loggerKernel, "Finalizando Kernel...\n");
     terminarModulo(server_fd,loggerKernel, configKernel);
+	config_destroy(configIPs);
 	close (server_fd);
 	close (socketFs);
 	close (socketMemoria);

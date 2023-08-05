@@ -2,19 +2,20 @@
 
 t_log* loggerKernel;
 t_config* configKernel;
+t_config* configIPs;
 
 
 char* IpMemoria(){
-	return config_get_string_value(configKernel, "IP_MEMORIA");
+	return config_get_string_value(configIPs, "IP_MEMORIA");
 }
 char* IpFile(){
-	return config_get_string_value(configKernel, "IP_FILESYSTEM");
+	return config_get_string_value(configIPs, "IP_FILESYSTEM");
 }
 char* IpCPU(){
-	return config_get_string_value(configKernel, "IP_CPU");
+	return config_get_string_value(configIPs, "IP_CPU");
 }
 char* Ip(){
-	return config_get_string_value(configKernel, "IP_ESCUCHA");
+	return config_get_string_value(configIPs, "IP_KERNEL");
 }
 
 char* PuertoMemoria(){
