@@ -72,6 +72,7 @@ int main(int argc, char** argv) {
     terminarModulo(cliente,loggerCPU, configCPU);
     close(socketMemoria);
 	close (servidorCpu);
+	config_destroy(configIPs);
 
 	printf ("\n Finalizo CPU correctamente \n ");
 
