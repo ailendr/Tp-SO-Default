@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
 	char* pathInstrucciones = argv[2];
 
 	configConsola = config_create(pathConfig);
+	configIPs = config_create("../Pruebas/ConfigsDePrueba/ip.config");
 
 	if( verificarConfig (conexionConKernel, loggerConsola, configConsola) == 1 ) return EXIT_FAILURE;
 
@@ -67,6 +68,7 @@ int main(int argc, char** argv) {
 
 	if(finalizar == -1){
 		log_info(loggerConsola, "Finalizando Consola por aviso de Kernel");
+		config_destroy(configIPs);
 		terminarModulo(conexionConKernel, loggerConsola, configConsola);
 		return EXIT_FAILURE;
 	}
