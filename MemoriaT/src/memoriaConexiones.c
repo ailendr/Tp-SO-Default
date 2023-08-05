@@ -41,10 +41,9 @@ while(1){
 		validarSegmento(instruccion->pid, direcF, bytesATrasladar,socket); //Avisa a Cpu que es un segmento invalido
 		free(instruccion);
 		break;
-	/*case(-1):
-			log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
-	//ver como proseguir
-	break;*/
+	case(-1):
+			exit(1);
+	break;
 
 	default:
 		break;
@@ -89,10 +88,9 @@ void atenderPeticionesFs(int* socketFs){
 		free(instruccion);
 
 		break;
-	/*case(-1):
-			log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
-	//ver como proseguir
-		break;*/
+	  case(-1):
+			exit(1);
+		break;
 	default:
 		break;
 		}
@@ -203,10 +201,10 @@ void atenderPeticionesKernel(int* socketKernel){
 				free(instruccion);
 
 				break;
-			/*case(-1):
-				 log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
+			case(-1):
+				 //log_info(loggerMemoria, "Error al recibir el codigo de operacion. Hemos finalizado la Conexion "); //Esto es porque el recibir_op retorna un -1 si hubo error y nunca lo consideramos
 				 exit(1);
-				break;*/
+				break;
 			default:
 				break;
 		 	 }

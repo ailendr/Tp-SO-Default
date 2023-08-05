@@ -38,20 +38,22 @@ void iniciarBitMap(){
 	log_info(loggerFS, "Bajando Bitmap ....");
 	int bytes = superBloque->blockCount/8;
 	char* bitArray = malloc(bytes);
-	memset(bitArray, 0, bytes);
-	bitMap = bitarray_create_with_mode(bitArray, bytes, MSB_FIRST);
+
 	FILE* preGuardado = fopen(pathBitmap(), "rb+");
 
 	if (preGuardado == NULL){
 
 		log_info(loggerFS, "Creando el Bitmap ...");
+		memset(bitArray, 0, bytes);
+		bitMap = bitarray_create_with_mode(bitArray, bytes, MSB_FIRST);
 		guardarBitMap();
 		log_info(loggerFS, "Se creo correctamente");
 
 	} else {
 
 		log_info(loggerFS, "Recuperando los datos...");
-		fread(bitMap->bitarray, 1, bytes, preGuardado);
+		fread(bitArray, 1, bytes, preGuardado);
+		bitMap = bitarray_create_with_mode(bitArray, bytes, MSB_FIRST);
 		log_info(loggerFS, "Se recupero correctamente");
 		fclose(preGuardado); //Va aca porque si es nulo no tengo q cerrarlo
 

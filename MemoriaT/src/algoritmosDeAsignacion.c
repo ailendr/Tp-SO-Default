@@ -59,8 +59,8 @@ uint32_t createSegment(t_segmento* nuevoSegmento, uint32_t tamanio){
 			list_add(tablaDeSegmentos->segmentos, nuevoSegmento);
 
 			log_info(loggerMemoria, "PID: %d - Crear Segmento: %d - Base: %d - TAMAÑO: %d", nuevoSegmento->PID, nuevoSegmento->ID, nuevoSegmento->base, nuevoSegmento->tamanio);
-			logearListaDeSegmentos("Despues de mover los segmentos");
-			log_info(loggerMemoria, "Memoria disponible:%d", memoriaDisponible());
+			//logearListaDeSegmentos("Despues de mover los segmentos");
+			//log_info(loggerMemoria, "Memoria disponible:%d", memoriaDisponible());
 			return OK;
 		}
 		else {

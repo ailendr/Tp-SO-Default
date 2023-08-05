@@ -15,10 +15,6 @@ int cantBloques (uint32_t tamanio){
 	return cantidadDeBloques;
 }
 
-void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
-
-}
-
 void aumentar (int cantidadDeBloques, t_fcb* fcb){
 
 	if (fcb->punteroDirecto == -1 && cantidadDeBloques > 0){
@@ -119,3 +115,7 @@ void escribirArchivoBloques(void* aEscribir, int posicion, int cantidad){
 	fwrite(aEscribir, cantidad,1, archivo_bloques);
 	fclose(archivo_bloques);
 }
+void eliminarBloques (int cantidadDeBloques, t_fcb* fcb){
+
+}
+
