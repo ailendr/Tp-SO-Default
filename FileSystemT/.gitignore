@@ -3,6 +3,8 @@ bin/
 obj/
 *.log
 *.dat
+bitMap.dat
+bloque.dat
 
 # Eclipse files
 RemoteSystemsTempFiles/
