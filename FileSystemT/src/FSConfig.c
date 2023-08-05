@@ -2,13 +2,14 @@
 
 t_log* loggerFS;
 t_config* configFS;
+t_config* configIPs;
 
 char* IP_Memoria(){
-	return config_get_string_value(configFS, "IP_MEMORIA");
+	return config_get_string_value(configIPs, "IP_MEMORIA");
 }
 
 char* IP_Escucha(){
-	return config_get_string_value(configFS, "IP_ESCUCHA");
+	return config_get_string_value(configIPs, "IP_FILESYSTEM");
 }
 
 char* puertoMemoria(){

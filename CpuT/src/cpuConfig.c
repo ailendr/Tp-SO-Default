@@ -2,9 +2,10 @@
 
 t_config* configCPU;
 t_log* loggerCPU;
+t_config* configIPs;
 
 char* IP_Memoria(){
-	return config_get_string_value(configCPU, "IP_MEMORIA");
+	return config_get_string_value(configIPs, "IP_MEMORIA");
 }
 
 char* puertoMemoria(){
@@ -12,7 +13,7 @@ char* puertoMemoria(){
 }
 
 char* IP_Escucha(){
-	return config_get_string_value(configCPU, "IP_ESCUCHA");
+	return config_get_string_value(configIPs, "IP_CPU");
 }
 
 char* puertoEscucha(){

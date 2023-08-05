@@ -28,6 +28,7 @@ int iniciarCpu (char* pathConfig){
 		close(cliente);
 		return 1;
 	}
+	configIPs = config_create("../Pruebas/ConfigsDePrueba/ip.config");
 	printf ("\n El valor recuperado de la ip es %s con el puerto %s\n", IP_Escucha(), puertoEscucha());
 	log_info(loggerCPU, "Ok -> Config");
 

@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
 
     //configFS = config_create(argv[1]);
 	configFS = config_create(pathConfig);
+	configIPs = config_create("../Pruebas/ConfigsDePrueba/ip.config");
 
 	if(verificarConfig (servidorFS, loggerFS, configFS) == 1 ) return EXIT_FAILURE;
 
@@ -49,6 +50,7 @@ int main(int argc, char** argv) {
 	terminarModulo(servidorFS, loggerFS, configFS);
 	close (socketMemoria);
 	close (cliente);
+	config_destroy(configIPs);
 
 	printf ("\n Finalizo File System correctamente\n ");
 

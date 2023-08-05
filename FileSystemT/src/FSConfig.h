@@ -14,6 +14,7 @@
 
 extern t_log* loggerFS;
 extern t_config* configFS;
+extern t_config* configIPs;
 //Agrego los sickets
 extern int servidorFS;
 extern int socketMemoria;
