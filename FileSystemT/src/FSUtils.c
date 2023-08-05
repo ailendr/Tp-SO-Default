@@ -7,7 +7,6 @@
 
 #include "FSUtils.h"
 
-
 int iniciarMemoria (){
 	log_info(loggerFS, "Realizando Conexion con Memoria");
 

@@ -1,0 +1,3 @@
+F_OPEN pruebaDany
+F_TRUNCATE pruebaDany 64
+F_CLOSE pruebaDany

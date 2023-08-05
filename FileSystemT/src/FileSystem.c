@@ -43,7 +43,6 @@ int main(int argc, char** argv) {
 	log_info(loggerFS, "Finalizando File System...\n");
 
 	free (superBloque);
-	free (bitMap);
 	list_destroy(peticiones);
 	list_destroy(fcbs);
 

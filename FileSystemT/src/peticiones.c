@@ -11,6 +11,10 @@ int servidorFS;
 int socketMemoria;
 int cliente;
 
+int servidorFS;
+int socketMemoria;
+int cliente;
+
 void atenderPeticiones(){
    log_info(loggerFS, "Recibiendo Peticiones de Kernel ");
 	//void* buffer = NULL;
@@ -85,6 +89,7 @@ void ejecutarPeticiones(){
 	char* nombreArchivo;
 	int valorOp = 0;
 	t_paquete* paquete;
+	t_fcb* fcb;
 
 	instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
@@ -115,6 +120,7 @@ void ejecutarPeticiones(){
 		    }
 		    free(bufferLectura);
 			break;
+
 		case F_WRITE:
 			int bytesWrite = atoi(instruccion->param3);
 			paquete = serializarInstruccion(instruccion);
@@ -128,8 +134,9 @@ void ejecutarPeticiones(){
 			break;
 
 		case F_OPEN:
-			if (posicionFCB (nombreArchivo) != -1){
-				abrirArchivo(nombreArchivo);
+			fcb = cargarFCB (nombreArchivo);
+			if ( fcb != NULL ){
+				abrirArchivo(fcb);
 				valorOp = OK;
 			} else {
 				instruccion->param1 = "-1";
@@ -138,24 +145,20 @@ void ejecutarPeticiones(){
 			}
 			send(cliente,&valorOp,sizeof(int),0 );
 
-
 			break;
+
 		case F_CREATE:
 			crearArchivo(nombreArchivo);
 
 			break;
+
 		case F_TRUNCATE:
 			 int res = truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
 			 if (res == 0){ valorOp = OK; }
 			// else { valorOp = ERROR; }
 			 send(cliente, &valorOp, sizeof(int), 0);
-
-
 			break;
-		case F_CLOSE:
-			cerrarArchivo(nombreArchivo);
 
-			break;
 		case F_SEEK:
 			posicionarPuntero (nombreArchivo, instruccion->param2);
 
@@ -164,7 +167,5 @@ void ejecutarPeticiones(){
 
 	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
 	free(instruccion);
-
-	//if (nombre != F_CREATE) send(cliente, &valorOp, sizeof(int), 0); //NO VA PORQ PARA FSEEK,FCLOSE NO SE ESPERA UNA RESPUESTA
 
 }

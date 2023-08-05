@@ -349,8 +349,8 @@ t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
  void cerrarArchivoEnTGAA(t_archivo* archivo){
 	 //t_colaDeArchivo* cola = buscarColaDeArchivo(archivo->nombreArchivo);
 	// queue_destroy(cola->colaBlock);
-	 int posColaDeBlock = posColaDeArchivo(archivo->nombreArchivo);
-	 list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
+	 //int posColaDeBlock = posColaDeArchivo(archivo->nombreArchivo);
+	//list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
 	 archivo->contador=0;
 	 archivo->nombreArchivo=NULL;
 	 free(archivo);

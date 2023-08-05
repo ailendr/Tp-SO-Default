@@ -18,12 +18,12 @@
 //#include "FSUtils.h"
 #include "FSConfig.h"
 
-
-
+/*
 typedef enum{
 	BITMAP,
 	ARCHBLOQUES
 }estructura;
+*/
 
 typedef struct{
 	uint32_t numBloque;
@@ -57,6 +57,8 @@ void iniciarSuperBloque();
 void iniciarArchivoDeBloques();
 void iniciarBitMap();
 void guardarBitMap();
+void bitmapRecuperado ();
+void imprimir_bitmap_20();
 
 
 #endif /* SRC_FSESTRUCTURAS_H_ */

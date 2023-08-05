@@ -38,30 +38,38 @@ void iniciarBitMap(){
 	log_info(loggerFS, "Bajando Bitmap ....");
 	int bytes = superBloque->blockCount/8;
 	char* bitArray = malloc(bytes);
-	bitMap = bitarray_create_with_mode(bitArray, bytes, LSB_FIRST);
-
+	memset(bitArray, 0, bytes);
+	bitMap = bitarray_create_with_mode(bitArray, bytes, MSB_FIRST);
 	FILE* preGuardado = fopen(pathBitmap(), "rb+");
 
-	if (preGuardado != NULL){
+	if (preGuardado == NULL){
 
-		log_info(loggerFS, "Recuperando los datos");
-		fread(bitMap->bitarray, 1, bytes, preGuardado);
-		fclose(preGuardado);
+		log_info(loggerFS, "Creando el Bitmap ...");
+		guardarBitMap();
+		log_info(loggerFS, "Se creo correctamente");
 
 	} else {
-		log_info(loggerFS, "Creando el archivo");
-		guardarBitMap(string_repeat('0', superBloque->blockCount));
-		log_info(loggerFS, "%s", bitMap->bitarray);
+
+		log_info(loggerFS, "Recuperando los datos...");
+		bitmapRecuperado (); //Para saber que no tira error aca
+		log_info(loggerFS, "Se recupero correctamente");
+		fclose(preGuardado); //Va aca porque si es nulo no tengo q cerrarlo
+
 	}
-	log_info(loggerFS, "Ok -> Creacion BitMap");
+	imprimir_bitmap_20(bitMap);
+	log_info(loggerFS, "BitMap -> OK");
 
 }
 
-void guardarBitMap(char* bitArray){
+void guardarBitMap(){
 	FILE* preGuardado = fopen(pathBitmap(), "wb+");
-	int bytes = superBloque->blockCount/8;
-	strcpy(bitMap->bitarray, bitArray);
-	fwrite(bitMap->bitarray, 1, bytes, preGuardado);
+	fwrite(bitMap->bitarray, 1, bitMap->size, preGuardado);
+	fclose(preGuardado);
+}
+
+void bitmapRecuperado (){
+	FILE* preGuardado = fopen(pathBitmap(), "rb+");
+	fread(bitMap->bitarray, 1, bitMap->size, preGuardado);
 	fclose(preGuardado);
 }
 
@@ -73,21 +81,35 @@ void iniciarArchivoDeBloques(){
         // El archivo no existe, se crea y se trunca al tamaño deseado
 
     	archivo_bloques = fopen(pathBloques(), "wb+");
+
         if (archivo_bloques == NULL) {
         	log_info(loggerFS, "No se pudo crear Archivo de Bloques");
             return;
         }
+
         fseek(archivo_bloques, tamanio_archivo - 1, SEEK_SET);
         fputc('\0', archivo_bloques);
 
         log_info(loggerFS, "Archivo de Bloques Creado");
         log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
+
     } else {
 
     	log_info(loggerFS, "Archivo de Bloques leido");
     	log_info(loggerFS, "Tamaño: %d", tamanio_archivo);
 
     }
+
     fclose(archivo_bloques);
+}
+
+void imprimir_bitmap_20(){
+	printf("\n\nimprimiendo bitmap: \n[");
+	printf("bitmap->size: %ld\n", bitMap->size);
+	for (int i = 0; i < 20; i++) {
+	    bitarray_clean_bit(bitMap, i);
+	    printf("%d ", bitarray_test_bit(bitMap, i));
+	}
+	printf("]\n\n");
 }
 
