@@ -7,6 +7,7 @@
 
 extern t_log* loggerCPU;
 extern t_config* configCPU;
+extern t_config* configIPs;
 
 //IP
 char* IP_Memoria();
