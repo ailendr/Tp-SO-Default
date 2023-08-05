@@ -106,7 +106,7 @@ void imprimir_bitmap_20(){
 	printf("\n\nimprimiendo bitmap: \n[");
 	printf("bitmap->size: %ld\n", bitMap->size);
 	for (int i = 0; i < 20; i++) {
-	    bitarray_clean_bit(bitMap, i);
+	    //bitarray_clean_bit(bitMap, i);
 	    printf("%d ", bitarray_test_bit(bitMap, i));
 	}
 	printf("]\n\n");
