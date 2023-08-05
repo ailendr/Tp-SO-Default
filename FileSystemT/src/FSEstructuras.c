@@ -65,7 +65,7 @@ void iniciarBitMap(){
 
 void guardarBitMap(){
 	FILE* preGuardado = fopen(pathBitmap(), "wb+");
-	fwrite(bitMap->bitarray, bitMap->size, 1, preGuardado);
+	fwrite(bitMap->bitarray, 1, bitMap->size, preGuardado);
 	fclose(preGuardado);
 }
 
