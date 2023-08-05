@@ -13,6 +13,6 @@
 #include <pthread.h>
 
 void atenderPeticiones();
-void ejecutarPeticiones();
+void ejecutarPeticiones(t_instruccion* instruccion);
 
 #endif /* SRC_PETICIONES_H_ */

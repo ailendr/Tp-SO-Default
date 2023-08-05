@@ -51,7 +51,7 @@ void iniciarBitMap(){
 	} else {
 
 		log_info(loggerFS, "Recuperando los datos...");
-		bitmapRecuperado (); //Para saber que no tira error aca
+		fread(bitMap->bitarray, 1, bytes, preGuardado);
 		log_info(loggerFS, "Se recupero correctamente");
 		fclose(preGuardado); //Va aca porque si es nulo no tengo q cerrarlo
 
@@ -69,7 +69,6 @@ void guardarBitMap(){
 
 void bitmapRecuperado (){
 	FILE* preGuardado = fopen(pathBitmap(), "rb+");
-	fread(bitMap->bitarray, 1, bitMap->size, preGuardado);
 	fclose(preGuardado);
 }
 

@@ -31,8 +31,9 @@ void atenderPeticiones(){
 			log_info(loggerFS, "Kernel se desconecto, no se atienden mas peticiones");
 			newInstr->nombre = EXIT;
 			newInstr->pid = -1;
-			list_clean(peticiones);
-			list_add(peticiones, newInstr);
+			//list_clean(peticiones);
+			//list_add(peticiones, newInstr);
+			ejecutarPeticiones(newInstr);
 			break;
 		}
 
@@ -72,26 +73,27 @@ void atenderPeticiones(){
 			//newInstr
 			t_instruccion* nuevaInstruc = obtenerInstruccion(cliente, cantParam); //Esta funcion recibi un buffer , deserializa la instruccion y libera el buffer ;)
 			//deserializarInstruccionEstructura(buffer, cantParam, &desplazamiento);
-			list_add(peticiones, nuevaInstruc);
+			//list_add(peticiones, nuevaInstruc);
 			//free(buffer);
+			ejecutarPeticiones(nuevaInstruc);
 		}
 
-		ejecutarPeticiones();
+
 
 	}
 }
 
-void ejecutarPeticiones(){
+void ejecutarPeticiones(t_instruccion* instruccion){
  log_info(loggerFS, "Ejecutando Peticiones");
 
-	t_instruccion* instruccion = malloc (sizeof(t_instruccion));
+	//t_instruccion* instruccion = malloc (sizeof(t_instruccion));
 	int nombre;
 	char* nombreArchivo;
 	int valorOp = 0;
 	t_paquete* paquete;
 	t_fcb* fcb;
 
-	instruccion = list_get(list_take_and_remove(peticiones,1), 0);
+	//instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
 	nombre = instruccion->nombre;
 
@@ -103,6 +105,7 @@ void ejecutarPeticiones(){
 
 	switch(nombre){
 		case F_READ:
+			log_info(loggerFS, "Iniciando FREAD");
 			int bytesRead = atoi(instruccion->param3);
 			char* bufferLectura = malloc(bytesRead);
 			//char mensaje_read[100]= "";
@@ -124,6 +127,7 @@ void ejecutarPeticiones(){
 			break;
 
 		case F_WRITE:
+			log_info(loggerFS, "Iniciando FWRITE");
 			int bytesWrite = atoi(instruccion->param3);
 			paquete = serializarInstruccion(instruccion);
 			validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Write a Memoria");
@@ -137,6 +141,7 @@ void ejecutarPeticiones(){
 			break;
 
 		case F_OPEN:
+			log_info(loggerFS, "Iniciando FOPEN");
 			fcb = cargarFCB (nombreArchivo);
 			if ( fcb != NULL ){
 				abrirArchivo(fcb);
@@ -151,11 +156,13 @@ void ejecutarPeticiones(){
 			break;
 
 		case F_CREATE:
+			log_info(loggerFS, "Iniciando FCREATE");
 			crearArchivo(nombreArchivo);
 
 			break;
 
 		case F_TRUNCATE:
+			log_info(loggerFS, "Iniciando FTRUNCATE");
 			 int res = truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
 			 if (res == 0){ valorOp = OK; }
 			// else { valorOp = ERROR; }
@@ -163,6 +170,7 @@ void ejecutarPeticiones(){
 			break;
 
 		case F_SEEK:
+			log_info(loggerFS, "Iniciando FSEEK");
 			posicionarPuntero (nombreArchivo, instruccion->param2);
 
 			break;
