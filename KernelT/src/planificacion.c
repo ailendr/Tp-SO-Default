@@ -232,8 +232,6 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_CLOSE:
 				log_info(loggerKernel, "Instruccion F CLOSE");
 				instruccion=deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
-                t_paquete* paqueteFC=serializarInstruccion(instruccion);
-                validarEnvioDePaquete(paqueteFC, socketFs, loggerKernel, configKernel, "Instruccion F Close");
 				//Cierro el arch en la tabla del proceso
 				int posArchProceso =buscarArchivoEnProceso(instruccion->param1, ultimoEjecutado);
 				t_list* listaDeArchs = ultimoEjecutado->archAbiertos;
@@ -253,15 +251,20 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 
 
 				}else{
+					int posColaDeBlock = posColaDeArchivo(archivo->nombreArchivo);
+					if(posColaDeBlock!=-1){
+					list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
+					}
 					list_remove_and_destroy_element(tablaGlobalDeArchivos, pos, (void*)cerrarArchivoEnTGAA);
 					/*archivoProceso->nombreArchivo=NULL;
 					archivoProceso->puntero=0;
 					free(archivoProceso);*/
 				}
 				free(instruccion);
-				//procesoAEjecutar(ultimoEjecutado->contexto); NO ACLARA QUE TENGA QUE ENVIAR A CPU DE NUEVO->Kernel debe elegir otro proceso
-				//instruccionAEjecutar(ultimoEjecutado);
+				procesoAEjecutar(ultimoEjecutado->contexto);
+				instruccionAEjecutar(ultimoEjecutado);
 				break;
+
 			case F_SEEK:
 				log_info(loggerKernel, "Instruccion F SEEK");
 				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);

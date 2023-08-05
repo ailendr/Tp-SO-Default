@@ -157,13 +157,8 @@ void ejecutarPeticiones(){
 			 if (res == 0){ valorOp = OK; }
 			// else { valorOp = ERROR; }
 			 send(cliente, &valorOp, sizeof(int), 0);
-
-
 			break;
-		case F_CLOSE:
-			cerrarArchivo(nombreArchivo);
 
-			break;
 		case F_SEEK:
 			posicionarPuntero (nombreArchivo, instruccion->param2);
 
