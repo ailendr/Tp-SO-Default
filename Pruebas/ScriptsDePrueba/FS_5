@@ -1,0 +1,3 @@
+F_OPEN elPublicoEnloquece
+F_TRUNCATE elPublicoEnloquece 64
+F_CLOSE elPublicoEnloquece

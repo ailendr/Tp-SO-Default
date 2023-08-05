@@ -34,7 +34,6 @@ void logearListaDeSegmentos(char* mensaje);
 void implementarInstruccion(char* direcF, uint32_t pid,char* registro,int socket, op_code operacion, int bytes);
 void escribirMemoria(t_segmento* segmento, int tamInfo);
 void validarSegmento(uint32_t pid, char* direcF,int bytes, int socket);
-void escribir(t_segmento* segmento);
 
 
 

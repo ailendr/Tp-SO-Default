@@ -6,11 +6,17 @@
  */
 
 #include "peticiones.h"
+//Agrego los sockets : Los extern estan en config.c
+int servidorFS;
+int socketMemoria;
+int cliente;
 
-sem_t nuevoPedido;
+int servidorFS;
+int socketMemoria;
+int cliente;
 
 void atenderPeticiones(){
-   log_info(loggerFS, "Ejecuta Hilo Atender Peticiones numero : <%ld> ", pthread_self());
+   log_info(loggerFS, "Recibiendo Peticiones de Kernel ");
 	//void* buffer = NULL;
 	//int tamanio = 0;
 	int cantParam = 0;
@@ -25,9 +31,8 @@ void atenderPeticiones(){
 			log_info(loggerFS, "Kernel se desconecto, no se atienden mas peticiones");
 			newInstr->nombre = EXIT;
 			newInstr->pid = -1;
-			queue_clean(peticiones);
-			queue_push(peticiones, newInstr);
-		    sem_post(&nuevoPedido);
+			list_clean(peticiones);
+			list_add(peticiones, newInstr);
 			break;
 		}
 
@@ -42,6 +47,9 @@ void atenderPeticiones(){
 				cantParam = 3;
 				break;
 			case F_OPEN:
+				cantParam = 1;
+				break;
+			case F_CREATE:
 				cantParam = 1;
 				break;
 			case F_TRUNCATE:
@@ -64,72 +72,100 @@ void atenderPeticiones(){
 			//newInstr
 			t_instruccion* nuevaInstruc = obtenerInstruccion(cliente, cantParam); //Esta funcion recibi un buffer , deserializa la instruccion y libera el buffer ;)
 			//deserializarInstruccionEstructura(buffer, cantParam, &desplazamiento);
-			queue_push(peticiones, nuevaInstruc);
+			list_add(peticiones, nuevaInstruc);
 			//free(buffer);
-		    sem_post(&nuevoPedido);
 		}
+
+		ejecutarPeticiones();
+
 	}
 }
 
 void ejecutarPeticiones(){
- log_info(loggerFS, "Ejecuta Hilo Ejecutar Peticiones numero : <%ld> ", pthread_self());
+ log_info(loggerFS, "Ejecutando Peticiones");
 
-	t_instruccion* instruccion;
+	t_instruccion* instruccion = malloc (sizeof(t_instruccion));
 	int nombre;
 	char* nombreArchivo;
+	int valorOp = 0;
+	t_paquete* paquete;
+	t_fcb* fcb;
 
-	t_paquete* paqueteI;
+	instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
-	while(1){
+	nombre = instruccion->nombre;
 
-		sem_wait(&nuevoPedido);
-
-		instruccion = queue_peek(peticiones);
-		queue_pop(peticiones);
-
-		nombre = instruccion->nombre;
-
-		if (nombre == EXIT){
-			log_info(loggerFS, "Finalice todas las peticiones pendientes. Finalizamos modulo");
-			break;
-		}
-
-		nombreArchivo = instruccion -> param1;
-
-		switch(nombre){
-			case F_READ:
-				//TODO leerArchivo(instruccion);
-				break;
-			case F_WRITE:
-				//TODO escribirArchivo (instruccion);
-				break;
-			case F_OPEN:
-				if (posicionFCB (nombreArchivo) != -1){
-					abrirArchivo(nombreArchivo);
-				} else {
-					instruccion->param1 = "-1";
-				}
-				break;
-			/*
-			case F_CREATE:
-				//TODO Crear el f_create
-				crearArchivo(nombreArchivo);
-				break;
-			*/
-			case F_TRUNCATE:
-				//TODO truncarArchivo (nombreArchivo, instruccion -> param2);
-				break;
-			case F_CLOSE:
-				cerrarArchivo(nombreArchivo);
-				break;
-			case F_SEEK:
-				posicionarPuntero (nombreArchivo, instruccion->param2);
-				break;
-		}
-
-		paqueteI = serializarInstruccion(instruccion);
-		validarEnvioDePaquete(paqueteI, cliente, loggerFS, configFS, "Instruccion de File System");
-		//TODO Ver que kernel lo reciba y empezar a trabajar desde ahi
+	if (nombre == EXIT){
+		log_info(loggerFS, "Finalice todas las peticiones pendientes. Finalizamos modulo");
 	}
+
+	nombreArchivo = instruccion -> param1;
+
+	switch(nombre){
+		case F_READ:
+			int bytesRead = atoi(instruccion->param3);
+			char* bufferLectura = malloc(bytesRead);
+			//char mensaje_read[100]= "";
+		    char* mensaje = NULL;
+			leerArchivo(instruccion,(void*) bufferLectura, bytesRead);
+			//sprintf(mensaje, "MOV_OUT %s %s %d", direccion_fisica_read, aLeer, tamanio_read);
+		    memcpy(&mensaje, bufferLectura+0, bytesRead);
+			//Armado de instruccion FRead y envio a Memoria//
+		    instruccion->param1 = mensaje;
+		    paquete = serializarInstruccion(instruccion);
+		    validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Read a Memoria");
+		    recv(socketMemoria,&valorOp, sizeof(int), MSG_WAITALL); //espera confirmacion a memoria
+		    if(valorOp == OK){
+			send(cliente, &valorOp, sizeof(int), 0);
+		    }
+		    free(bufferLectura);
+			break;
+
+		case F_WRITE:
+			int bytesWrite = atoi(instruccion->param3);
+			paquete = serializarInstruccion(instruccion);
+			validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Write a Memoria");
+			int codigo = recibir_operacion(socketMemoria);
+			if(codigo != (-1) && codigo == MENSAJE){
+			char* bufferEscritura = recibir_mensaje(socketMemoria);
+			log_info(loggerFS, "Se recibió la informacion a Escribir desde Memoria; %s", bufferEscritura);
+			escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
+			}
+			break;
+
+		case F_OPEN:
+			fcb = cargarFCB (nombreArchivo);
+			if ( fcb != NULL ){
+				abrirArchivo(fcb);
+				valorOp = OK;
+			} else {
+				instruccion->param1 = "-1";
+				log_info(loggerFS, "ERROR: ARCHIVO NO EXISTENTE   Operacion: ABRIR (OPEN) -> Archivo: %s", nombreArchivo);
+				valorOp = ERROR;
+			}
+			send(cliente,&valorOp,sizeof(int),0 );
+
+			break;
+
+		case F_CREATE:
+			crearArchivo(nombreArchivo);
+
+			break;
+
+		case F_TRUNCATE:
+			 int res = truncarArchivo (nombreArchivo, atoi(instruccion -> param2));
+			 if (res == 0){ valorOp = OK; }
+			// else { valorOp = ERROR; }
+			 send(cliente, &valorOp, sizeof(int), 0);
+			break;
+
+		case F_SEEK:
+			posicionarPuntero (nombreArchivo, instruccion->param2);
+
+			break;
+	}
+
+	log_info(loggerFS, "Peticion Finalizada de PID: %i", instruccion -> pid);
+	free(instruccion);
 
 }

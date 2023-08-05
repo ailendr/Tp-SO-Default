@@ -9,12 +9,6 @@
 #define SRC_PLANIFICACION_H_
 #include "utilsPlanificacion.h"
 
-typedef struct{
-	uint32_t PID;
-	char* nombreArchivo;
-}t_archivos;
-
-extern t_list* archivos;
 
 extern struct timespec begin, end;
 
@@ -38,7 +32,7 @@ void recibirYAsignarTablaDeSegmentos(t_pcb* proceso);
 
 void implementacionWyS (char* nombreRecurso, int nombreInstruccion,  t_pcb* proceso);
 void validarCS(int socketMemoria, t_instruccion* instruccion, t_pcb* ultimoEjecutado);
-void implementacionF(t_instruccion* instruccion, t_pcb* ultimoEjecutado);
+void implementacionF(t_parametroFS* parametro);
 
 
 int archivoAbierto (char* nombre, int id);

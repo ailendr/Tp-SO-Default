@@ -14,6 +14,8 @@ t_queue *colaNew;
 t_list *colaReady;
 t_list* listaDeProcesos;//procesos admitidos en el sistema
 t_list* listaDeColasPorArchivo;
+t_list* tablaGlobalDeArchivos;
+//t_list* listaDeTablasAxP;
 uint32_t pid = 0;
 
 void crearEstados() {
@@ -199,11 +201,16 @@ t_list* crearListaDeInstancias(){
 	return listaDeInstancias;
 }
 
-void crearEstructurasDeRecursosyArchivos(){ //Son globales
+void crearEstructurasDeRecursos(){ //Son globales
 	listaDeBloqueo = crearListaDeBloqueo();
 	listaDeInstancias = crearListaDeInstancias();
-	listaDeColasPorArchivo = list_create(); //A medida que vamos creando un archivo -> creamos una colaDeArchivo , llenando el nombre e inicializando la cola y la agregamos
 }
+
+void crearEstructurasDeArchivos(){
+	listaDeColasPorArchivo = list_create(); //A medida que vamos creando un archivo -> creamos una colaDeArchivo , llenando el nombre e inicializando la cola y la agregamos
+    tablaGlobalDeArchivos = list_create();
+}
+
 
 int recursoDisponible(char* nombre){
 	char** recursos = Recursos();
@@ -247,10 +254,10 @@ void mostrarListaDeProcesos(){
 
 void mostrarColaReady(){
 	int tamanio = list_size(colaReady);
-	log_info(loggerKernel, "Cola Ready con algoritmo : <%s> ", Algoritmo());
+	log_info(loggerKernel, "Cola Ready con Algoritmo : <%s> ", Algoritmo());
 	for(int i=0; i<tamanio; i++){
 		t_pcb* proceso = list_get(colaReady,i);
-		log_info(loggerKernel, "Posicion %d de Ready con Proceso de id <%d>, ratio: %f", i, proceso->contexto->pid, proceso->RR);
+		log_info(loggerKernel, "Posicion <%d> de Ready con Proceso de id <%d> ", i, proceso->contexto->pid);
 	}
 }
 
@@ -271,4 +278,92 @@ float tiempoActualEnMiliseg(){
 	 return tiempo;
 }
 
+void crearColaBlockDeArchivo(char* archivo){ //Crea la cola de bloqueo del archivo y agrega a la lista de cola por Archivo
+	t_colaDeArchivo* cola = malloc(sizeof(t_colaDeArchivo));
+	cola->nombreArchivo = archivo;
+	cola->colaBlock = queue_create();
+	list_add(listaDeColasPorArchivo, cola);
+
+}
+void bloquearProcesoPorArchivo (char* archivo, t_pcb* proceso){
+	t_colaDeArchivo* cola = buscarColaDeArchivo(archivo);
+	if(cola != NULL){
+		queue_push(cola->colaBlock,proceso);
+		logCambioDeEstado(proceso, "EXEC", "BLOCK");
+	}
+}
+
+t_colaDeArchivo* buscarColaDeArchivo(char* archivo){
+ int posicion = posColaDeArchivo(archivo);
+ t_colaDeArchivo* cola = NULL;
+ 	 if(posicion != -1){
+	 	 cola = list_get(listaDeColasPorArchivo, posicion);
+ 	 }
+	 return cola;
+}
+
+
+
+ int posColaDeArchivo(char* archivo){
+ int tamanio = list_size(listaDeColasPorArchivo);
+ for(int i = 0; i<tamanio; i++){
+	  t_colaDeArchivo* cola = list_get(listaDeColasPorArchivo, i);
+	  if( strcmp(cola->nombreArchivo, archivo) == 0 ){
+		  return i;
+	  }
+  }
+  return -1;
+
+}
+
+ int buscarArchivoEnTGAA(char* nombreArchivo){
+	 int tamanio = list_size(tablaGlobalDeArchivos);
+	 for (int i = 0; i<tamanio; i++){
+		 t_archivo* archivo = list_get(tablaGlobalDeArchivos, i);
+		 if(strcmp(archivo->nombreArchivo,nombreArchivo) == 0){
+			 return i;
+		 }
+	 }
+	 return -1;
+ }
+
+ int buscarArchivoEnProceso(char* nombreArchivo, t_pcb* proceso){
+	 int tamanio = list_size(proceso->archAbiertos);
+	 for (int i = 0; i<tamanio; i++){
+		 t_archivo* archivo = list_get(proceso->archAbiertos, i);
+		 if(strcmp(archivo->nombreArchivo,nombreArchivo) == 0){
+			 return i;
+		 }
+	 }
+	 return -1;
+ }
+
+
+ void agregarEntradaATablaxProceso(char* nombreArchivo, t_pcb* proceso, int posPuntero){
+		 t_archivoPorProceso* archivo = malloc(sizeof(t_archivoPorProceso));
+		 archivo->nombreArchivo = nombreArchivo;
+		 archivo->puntero= posPuntero;
+		 list_add(proceso->archAbiertos, archivo);
+	 }
+
+ void cerrarArchivoEnTGAA(t_archivo* archivo){
+	 //t_colaDeArchivo* cola = buscarColaDeArchivo(archivo->nombreArchivo);
+	// queue_destroy(cola->colaBlock);
+	 //int posColaDeBlock = posColaDeArchivo(archivo->nombreArchivo);
+	//list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
+	 archivo->contador=0;
+	 archivo->nombreArchivo=NULL;
+	 free(archivo);
+ }
+
+void posicionarPuntero (char* nombreArchivo, t_pcb* proceso, char* posicionPtro){
+	int posPuntero = atoi(posicionPtro);
+	int pos = buscarArchivoEnProceso(nombreArchivo, proceso);
+	t_archivoPorProceso* archivo = list_get(proceso->archAbiertos, pos);
+	archivo->puntero = posPuntero;
+}
+
+void cerrarArchivoDeProceso(t_archivoPorProceso* archivo){
+	free(archivo);
+}
 
