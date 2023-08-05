@@ -31,7 +31,7 @@ void cerrarArchivo(char* nombreArchivo){
 void abrirArchivo(t_fcb* fcb ){
 	if (fcb -> abierto == 0){
 		fcb -> abierto = 1;
-		log_info(loggerFS, "Operacion: ABRIR (OPEN) -> Archivo: %s", fcb -> nombreDeArchivo);
+		log_info(loggerFS, "Operacion: ABRIR (OPEN) -> Archivo: %s", fcb->nombreDeArchivo);
 	} else {
 		log_info(loggerFS, "ERROR: EL ARCHIVO YA ESTA ABIERTO   Operacion: ABRIR (OPEN) -> Archivo: %s", fcb->nombreDeArchivo);
 	}
@@ -181,7 +181,7 @@ t_fcb* cargarFCB (char* nombre){
 		log_info(loggerFS, "	|-> Nombre Archivo: %s", fcb -> nombreDeArchivo);
 		log_info(loggerFS, "	|-> Tamanio: %i", fcb -> tamanioArchivo);
 
-		config_destroy(lector);
+		//config_destroy(lector);
 
 	}
 

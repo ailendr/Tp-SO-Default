@@ -535,7 +535,7 @@ void implementacionF(t_parametroFS* parametro){
 
 	int finOperacion = recibir_operacion(socketFs);
 	if(finOperacion == -1){
-		log_info(loggerKernel, "Error al recibir de FS el resultado de la operacion");
+		log_info(loggerKernel, "Error al recibir de FS el resultado de la operacion del PID : <%d>", proceso->contexto->pid);
 	}
 	else if( finOperacion == OK){
 		log_info(loggerKernel, "Finalizo la Operacion en File System");
