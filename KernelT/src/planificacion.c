@@ -201,8 +201,9 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 					paquete = serializarInstruccion(instruccion);
 					validarEnvioDePaquete(paquete, socketFs, loggerKernel, configKernel, "Instruccion F OPEN");
 					recepcion = recibir_operacion(socketFs);
+					t_instruccion* instrucFCreate;
 						if(recepcion == ERROR ){ // Solo si no existe envia un F Create
-							t_instruccion* instrucFCreate = malloc(sizeof(t_instruccion));
+							instrucFCreate = malloc(sizeof(t_instruccion));
 							instrucFCreate->nombre = F_CREATE;
 							instrucFCreate->pid = contextoActualizado->pid;
 							instrucFCreate->param1 = instruccion->param1;
@@ -211,11 +212,10 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 							//Si es la primera vez que crea un archivo-> Debe iniciar una cola de block para ese archivo
 							crearColaBlockDeArchivo(instruccion->param1);
 
-							free(instrucFCreate);
 						}
 						//Exista o no exista debe hacer esto//
 						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
-						t_archivo* archivo = malloc (sizeof(t_archivo*));
+						t_archivo* archivo = malloc (sizeof(t_archivo));
 						archivo->nombreArchivo = instruccion->param1;
 						archivo->contador = 0; //Es el contador de cuantos procesos esperan al archivo
 						list_add(tablaGlobalDeArchivos, archivo);
@@ -223,10 +223,11 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						agregarEntradaATablaxProceso(instruccion->param1, ultimoEjecutado, 0);
 
 						free(instruccion); //ver si luego no genera inconsistencias
+						free( instrucFCreate);
 						procesoAEjecutar(ultimoEjecutado->contexto);
 						instruccionAEjecutar(ultimoEjecutado);
+						}
 
-				}
 
 				break;
 			case F_CLOSE:

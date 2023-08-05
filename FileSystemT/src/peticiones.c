@@ -55,9 +55,7 @@ void atenderPeticiones(){
 			case F_TRUNCATE:
 				cantParam = 2;
 				break;
-			case F_CLOSE:
-				cantParam = 1;
-				break;
+
 			case F_SEEK:
 				cantParam = 2; 
 				break;
