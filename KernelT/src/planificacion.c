@@ -232,6 +232,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_CLOSE:
 				log_info(loggerKernel, "Instruccion F CLOSE");
 				instruccion=deserializarInstruccionEstructura(buffer, 1, &desplazamiento);
+				log_info(loggerKernel,"PID: <%d> - Cerrar Archivo: <%s>", instruccion->pid, instruccion->param1);
 				//Cierro el arch en la tabla del proceso
 				int posArchProceso =buscarArchivoEnProceso(instruccion->param1, ultimoEjecutado);
 				t_list* listaDeArchs = ultimoEjecutado->archAbiertos;
@@ -271,6 +272,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_SEEK:
 				log_info(loggerKernel, "Instruccion F SEEK");
 				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
+				log_info(loggerKernel,"PID: <%d> - Actualizar puntero Archivo: <%s> - Puntero <%s>", instruccion->pid, instruccion->param1, instruccion->param2);
 				posicionarPuntero(instruccion->param1,ultimoEjecutado, instruccion->param2);
 				t_paquete* paqueteFS = serializarInstruccion(instruccion);
 				validarEnvioDePaquete(paqueteFS, socketFs, loggerKernel, configKernel, "Instruccion F SEEK");
@@ -295,7 +297,8 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_WRITE:
 				log_info(loggerKernel, "Instruccion F WRITE");
 				instruccion = deserializarInstruccionEstructura(buffer, 3, &desplazamiento);
-                validarRyW(instruccion->param2, ultimoEjecutado);
+				log_info(loggerKernel,"PID: <%d> - Leer Archivo: <%s> - Puntero <%s> - Direccion de Memoria<%s> - Tamaño <%s>", instruccion->pid, instruccion->param1, ,instruccion->param2, instruccion->param3);
+				validarRyW(instruccion->param2, ultimoEjecutado);
                 //Serializa la instruccion ,la manda a FS y bloquea al proceso //
 				t_parametroFS* paramW = malloc(sizeof(t_parametroFS));
 				paramW->proceso = ultimoEjecutado;
@@ -307,6 +310,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 			case F_TRUNCATE:
 				log_info(loggerKernel, "Instruccion F TRUNCATE");
 				instruccion = deserializarInstruccionEstructura(buffer, 2, &desplazamiento);
+				log_info(loggerKernel,"PID: <%d> - Truncar Archivo: <%s> - Tamaño <%s>", instruccion->pid, instruccion->param1, instruccion->param2);
 				//Serializa la instruccion ,la manda a FS y bloquea al proceso //
 				t_parametroFS* paramT = malloc(sizeof(t_parametroFS));
 				paramT->proceso = ultimoEjecutado;
