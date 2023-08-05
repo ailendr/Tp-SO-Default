@@ -91,7 +91,6 @@ void ejecutarPeticiones(t_instruccion* instruccion){
 	char* nombreArchivo;
 	int valorOp = 0;
 	t_paquete* paquete;
-	t_fcb* fcb;
 
 	//instruccion = list_get(list_take_and_remove(peticiones,1), 0);
 
@@ -116,6 +115,11 @@ void ejecutarPeticiones(t_instruccion* instruccion){
 			//Armado de instruccion FRead y envio a Memoria//
 		    mensaje[bytesRead]= '\0';
 		    log_info(loggerFS, "El valor a escribir en Memoria es : <%s>", mensaje);
+			t_fcb*fcb = cargarFCB (nombreArchivo);
+			log_info(loggerFS, "Operacion: LEER (F READ) -> Archivo: %s", instruccion->param1);
+			log_info(loggerFS, "	|-> Puntero : %d", fcb->punteroPosicion);
+			log_info(loggerFS, "	|-> Direccion Memoria : %d", instruccion->param2);
+			log_info(loggerFS, "	|-> Tamanio Viejo: %d", instruccion->param3);
 		    instruccion->param1 = mensaje;
 		    paquete = serializarInstruccion(instruccion);
 		    validarEnvioDePaquete(paquete, socketMemoria, loggerFS, configFS, "Instruccion F Read a Memoria");
@@ -138,11 +142,16 @@ void ejecutarPeticiones(t_instruccion* instruccion){
 			log_info(loggerFS, "Se recibió la informacion a Escribir desde Memoria: <%s>", bufferEscritura);
 			escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
 			}
+			t_fcb*fcb = cargarFCB (nombreArchivo);
+			log_info(loggerFS, "Operacion: ESCRIBIR (F WRITE) -> Archivo: %s", instruccion->param1);
+			log_info(loggerFS, "	|-> Puntero : %d", fcb->punteroPosicion);
+			log_info(loggerFS, "	|-> Direccion Memoria : %d", instruccion->param2);
+			log_info(loggerFS, "	|-> Tamanio Viejo: %d", instruccion->param3);
 			break;
 
 		case F_OPEN:
 			log_info(loggerFS, "Iniciando FOPEN");
-			fcb = cargarFCB (nombreArchivo);
+			t_fcb*fcb = cargarFCB (nombreArchivo);
 			if ( fcb != NULL ){
 				abrirArchivo(fcb);
 				valorOp = OK;
