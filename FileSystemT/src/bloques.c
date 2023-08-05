@@ -104,7 +104,7 @@ void liberarBloque(uint32_t numeroBloque){
 void leerArchivoBloques(void* aLeer, int posicion, int cantidad){
 	FILE* archivo_bloques = fopen(pathBloques(), "r+b");
 	fseek(archivo_bloques, posicion, SEEK_SET);
-	fread(aLeer, cantidad,1, archivo_bloques);
+	fread(aLeer, sizeof(char), cantidad+1, archivo_bloques);
 	fclose(archivo_bloques);
 }
 

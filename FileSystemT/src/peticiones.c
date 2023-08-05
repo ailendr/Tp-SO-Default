@@ -111,7 +111,7 @@ void ejecutarPeticiones(t_instruccion* instruccion){
 		    char* mensaje = malloc (bytesRead + 1);
 			leerArchivo(instruccion,(void*) bufferLectura, bytesRead);
 			//sprintf(mensaje, "MOV_OUT %s %s %d", direccion_fisica_read, aLeer, tamanio_read);
-		    memcpy(&mensaje, bufferLectura+0, bytesRead);
+		    memcpy(mensaje, bufferLectura+0, bytesRead);
 			//Armado de instruccion FRead y envio a Memoria//
 		    mensaje[bytesRead]= '\0';
 		    log_info(loggerFS, "El valor a escribir en Memoria es : <%s>", mensaje);
@@ -142,17 +142,17 @@ void ejecutarPeticiones(t_instruccion* instruccion){
 			log_info(loggerFS, "Se recibió la informacion a Escribir desde Memoria: <%s>", bufferEscritura);
 			escribirArchivo (instruccion, (void*)bufferEscritura, bytesWrite);
 			}
-			t_fcb*fcb = cargarFCB (nombreArchivo);
+			t_fcb* fcb2 = cargarFCB (nombreArchivo);
 			log_info(loggerFS, "Operacion: ESCRIBIR (F WRITE) -> Archivo: %s", instruccion->param1);
-			log_info(loggerFS, "	|-> Puntero : %d", fcb->punteroPosicion);
+			log_info(loggerFS, "	|-> Puntero : %d", fcb2->punteroPosicion);
 			log_info(loggerFS, "	|-> Direccion Memoria : %d", instruccion->param2);
 			log_info(loggerFS, "	|-> Tamanio Viejo: %d", instruccion->param3);
 			break;
 
 		case F_OPEN:
 			log_info(loggerFS, "Iniciando FOPEN");
-			t_fcb*fcb = cargarFCB (nombreArchivo);
-			if ( fcb != NULL ){
+			t_fcb* fcb1 = cargarFCB (nombreArchivo);
+			if ( fcb1 != NULL ){
 				abrirArchivo(fcb);
 				valorOp = OK;
 			} else {
