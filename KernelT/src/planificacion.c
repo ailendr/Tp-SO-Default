@@ -215,7 +215,7 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 						}
 						//Exista o no exista debe hacer esto//
 						//Agrego una entrada a la Tabla Global De Archivos Abiertos//
-						t_archivo* archivo = malloc (sizeof(t_archivo*));
+						t_archivo* archivo = malloc (sizeof(t_archivo));
 						archivo->nombreArchivo = instruccion->param1;
 						archivo->contador = 0; //Es el contador de cuantos procesos esperan al archivo
 						list_add(tablaGlobalDeArchivos, archivo);
@@ -253,7 +253,10 @@ void instruccionAEjecutar(t_pcb* ultimoEjecutado) {
 				}else{
 					int posColaDeBlock = posColaDeArchivo(archivo->nombreArchivo);
 					if(posColaDeBlock!=-1){
-					list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
+					//list_remove_and_destroy_element(listaDeColasPorArchivo, posColaDeBlock , (void*) queue_destroy);
+					t_colaDeArchivo* cola = list_get(listaDeColasPorArchivo, posColaDeBlock);
+					queue_destroy(cola->colaBlock);
+					free(cola);
 					}
 					list_remove_and_destroy_element(tablaGlobalDeArchivos, pos, (void*)cerrarArchivoEnTGAA);
 					/*archivoProceso->nombreArchivo=NULL;
@@ -525,7 +528,7 @@ void implementacionF(t_parametroFS* parametro){
 	operacionFS = 1;
 	t_paquete* paqueteF = serializarInstruccion(instruccion);
 	validarEnvioDePaquete(paqueteF, socketFs, loggerKernel, configKernel, "Instruccion a File System");
-	proceso->estadoPcb= BLOCK;
+	proceso->estadoPcb = BLOCK;
 	log_info(loggerKernel, "PID: <%d> - Bloqueado por operar sobre el archivo: <%s>", proceso->contexto->pid, instruccion->param1);
 	logCambioDeEstado(proceso, "EXEC", "BLOCK");
 	finTiempoEnCPU(proceso);
@@ -544,9 +547,9 @@ void implementacionF(t_parametroFS* parametro){
 
 		operacionFS = 0;
 
-		free(parametro->instruccion);
-		free(parametro->proceso);
-		free(parametro);
+		//free(parametro->instruccion);
+		//free(parametro->proceso);
+		//free(parametro);
 	}
 }
 
